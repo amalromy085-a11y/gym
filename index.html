@@ -206,7 +206,7 @@ tbody tr:last-child td{border-bottom:none}
 .chat-input-area{padding:12px;border-top:1px solid var(--border);display:flex;gap:8px}
 .chat-input{flex:1;padding:10px 14px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;min-height:40px;max-height:100px}
 .chat-input:focus{border-color:var(--accent)}
-.chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:10px}
+.chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:height:100%;color:var(--muted);gap:10px}
 .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px}
 .slot-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;transition:border-color .2s}
 .slot-card.full{border-color:var(--red);opacity:.7}
@@ -230,22 +230,30 @@ tbody tr:last-child td{border-bottom:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 .detail-section{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
 .detail-section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-/* STAR RATING */
 .stars{display:flex;gap:3px;align-items:center}
 .star{font-size:20px;cursor:pointer;transition:transform .1s;user-select:none}
 .star:hover{transform:scale(1.15)}
 .star-display{font-size:14px}
-/* CERT CARD */
 .cert-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .cert-icon{font-size:28px;flex-shrink:0}
 .cert-body{flex:1;min-width:0}
 .cert-name{font-weight:700;font-size:14px;margin-bottom:3px}
 .cert-meta{font-size:12px;color:var(--muted)}
-/* STAFF CARDS */
 .staff-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .2s}
 .staff-card:hover{border-color:var(--accent)}
 .staff-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:18px}
 .staff-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;flex-shrink:0}
+
+/* ── AUTOCOMPLETE ── */
+.ac-wrap{position:relative}
+.ac-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--card);border:1px solid var(--border2);border-radius:8px;z-index:2000;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.4);display:none}
+.ac-dropdown.open{display:block}
+.ac-item{padding:9px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid rgba(128,128,128,.06);display:flex;align-items:center;gap:8px;transition:background .1s}
+.ac-item:hover,.ac-item.selected{background:var(--accent-dim);color:var(--accent)}
+.ac-item:last-child{border-bottom:none}
+.ac-item-sub{font-size:11px;color:var(--muted);margin-left:auto}
+.ac-no-results{padding:10px 14px;font-size:13px;color:var(--muted);text-align:center}
+
 @media(max-width:768px){
   .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main{margin-left:0}.mob-menu{display:flex}
   .fr{grid-template-columns:1fr}.two-col{grid-template-columns:1fr}.three-col{grid-template-columns:1fr}
@@ -262,7 +270,6 @@ tbody tr:last-child td{border-bottom:none}
 </div>
 <div id="toasts"></div>
 
-<!-- LOGIN -->
 <div id="login-page" style="display:flex">
   <div class="lc">
     <div class="lc-logo">
@@ -281,7 +288,6 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <div id="mob-ov" onclick="closeSB()"></div>
   <div class="layout">
@@ -310,7 +316,6 @@ tbody tr:last-child td{border-bottom:none}
   </div>
 </div>
 
-<!-- MODALS -->
 <div class="mo" id="m1"><div class="mb" id="m1b"><div class="mo-hd"><div class="mo-title" id="m1t"></div><button class="mo-x" onclick="closeM1()">✕</button></div><div id="m1c"></div></div></div>
 <div class="mo" id="m2"><div class="mb mb-lg" id="m2b"><div class="mo-hd"><div class="mo-title" id="m2t"></div><button class="mo-x" onclick="closeM2()">✕</button></div><div id="m2c"></div></div></div>
 <div class="mo" id="m3"><div class="mb mb-xl" id="m3b"><div class="mo-hd"><div class="mo-title" id="m3t"></div><button class="mo-x" onclick="closeM3()">✕</button></div><div id="m3c"></div></div></div>
@@ -319,8 +324,148 @@ tbody tr:last-child td{border-bottom:none}
 'use strict';
 const PLANS=['Silver','Gold','Platinum','Platinum Plus','Corporate Fitness'];
 const SESSION_TYPES=['Batch Session','One on One','Corporate Fitness','Strength Training','Cardio','HIIT','Yoga','CrossFit','Pilates','Zumba','Rehabilitation','General Fitness'];
+const COUNTRIES=['Afghanistan','Albania','Algeria','Argentina','Australia','Austria','Bahrain','Bangladesh','Belgium','Brazil','Canada','Chile','China','Colombia','Croatia','Czech Republic','Denmark','Egypt','Ethiopia','Finland','France','Germany','Ghana','Greece','Hungary','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Japan','Jordan','Kenya','Kuwait','Lebanon','Malaysia','Mexico','Morocco','Netherlands','New Zealand','Nigeria','Norway','Oman','Pakistan','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Saudi Arabia','Singapore','South Africa','South Korea','Spain','Sri Lanka','Sweden','Switzerland','Thailand','Turkey','UAE','Uganda','Ukraine','United Kingdom','United States','Vietnam','Zimbabwe'];
 let CU=null,CR=null,CH={};
 let _chatUnsub=null;
+
+// ── AUTOCOMPLETE ENGINE ───────────────────────────────────────
+/**
+ * createAutocomplete(inputEl, items, opts)
+ * items: [{id, label, sub}]  or  fn => returns Promise<items>
+ * opts.onSelect(item)
+ * opts.minChars (default 1)
+ */
+function createAutocomplete(inputEl, items, opts={}) {
+  if(!inputEl) return;
+  const wrap = inputEl.parentElement;
+  if(!wrap.classList.contains('ac-wrap')) {
+    const w = document.createElement('div');
+    w.className = 'ac-wrap';
+    inputEl.parentNode.insertBefore(w, inputEl);
+    w.appendChild(inputEl);
+  }
+  const acWrap = inputEl.parentElement;
+  let dd = acWrap.querySelector('.ac-dropdown');
+  if(!dd){ dd = document.createElement('div'); dd.className='ac-dropdown'; acWrap.appendChild(dd); }
+  let allItems = typeof items === 'function' ? [] : items;
+  let selIdx = -1;
+  const minChars = opts.minChars ?? 1;
+
+  async function refresh(){
+    if(typeof items === 'function') allItems = await items();
+  }
+
+  function show(filtered){
+    selIdx = -1;
+    if(!filtered.length){
+      dd.innerHTML=`<div class="ac-no-results">No results found</div>`;
+    } else {
+      dd.innerHTML = filtered.map((it,i)=>
+        `<div class="ac-item" data-idx="${i}" data-id="${it.id||''}" data-label="${(it.label||'').replace(/"/g,'&quot;')}">
+          <span>${it.label||''}</span>
+          ${it.sub?`<span class="ac-item-sub">${it.sub}</span>`:''}
+        </div>`
+      ).join('');
+      dd.querySelectorAll('.ac-item').forEach(el=>{
+        el.addEventListener('mousedown', e=>{
+          e.preventDefault();
+          const idx=parseInt(el.dataset.idx);
+          selectItem(filtered[idx]);
+        });
+      });
+    }
+    dd.classList.add('open');
+  }
+  function hide(){ dd.classList.remove('open'); selIdx=-1; }
+  function selectItem(it){
+    inputEl.value = it.label||'';
+    inputEl.dataset.selectedId = it.id||'';
+    hide();
+    if(opts.onSelect) opts.onSelect(it);
+  }
+
+  inputEl.addEventListener('focus', async()=>{
+    await refresh();
+    const v = inputEl.value.trim().toLowerCase();
+    if(v.length >= minChars || minChars===0){
+      const f = allItems.filter(it=>(it.label||'').toLowerCase().includes(v));
+      show(f);
+    }
+  });
+
+  inputEl.addEventListener('input', async()=>{
+    await refresh();
+    const v = inputEl.value.trim().toLowerCase();
+    if(v.length < minChars){ hide(); return; }
+    const f = allItems.filter(it=>(it.label||'').toLowerCase().includes(v)||(it.sub||'').toLowerCase().includes(v));
+    show(f);
+  });
+
+  inputEl.addEventListener('keydown', e=>{
+    const items2 = dd.querySelectorAll('.ac-item');
+    if(!dd.classList.contains('open')) return;
+    if(e.key==='ArrowDown'){ e.preventDefault(); selIdx=Math.min(selIdx+1,items2.length-1); items2.forEach((el,i)=>el.classList.toggle('selected',i===selIdx)); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); selIdx=Math.max(selIdx-1,0); items2.forEach((el,i)=>el.classList.toggle('selected',i===selIdx)); }
+    else if(e.key==='Enter' && selIdx>=0){ e.preventDefault(); items2[selIdx].dispatchEvent(new Event('mousedown')); }
+    else if(e.key==='Escape'){ hide(); }
+  });
+
+  document.addEventListener('click', e=>{ if(!acWrap.contains(e.target)) hide(); }, true);
+  return { refresh, hide };
+}
+
+// Helper: attach AC to a plain text input that mirrors a hidden field
+function attachClientAC(inputId, hiddenId, clientList, onSelectCb){
+  const inp = document.getElementById(inputId);
+  if(!inp) return;
+  const items = clientList.map(c=>({id:c.id, label:c.name||'', sub:c.phone||''}));
+  createAutocomplete(inp, items, {
+    minChars:0,
+    onSelect(it){
+      const hid = document.getElementById(hiddenId);
+      if(hid) hid.value = it.id;
+      if(onSelectCb) onSelectCb(it);
+    }
+  });
+}
+
+function attachUserAC(inputId, hiddenId, userList, onSelectCb){
+  const inp = document.getElementById(inputId);
+  if(!inp) return;
+  const items = userList.map(u=>({id:u.id, label:u.name||u.email||'', sub:u.role||''}));
+  createAutocomplete(inp, items, {
+    minChars:0,
+    onSelect(it){
+      const hid = document.getElementById(hiddenId);
+      if(hid) hid.value = it.id;
+      if(onSelectCb) onSelectCb(it);
+    }
+  });
+}
+
+// Generic autocomplete text input builder (replaces <select> for clients/users in forms)
+function acClientField(id, hiddenId, placeholder, preVal='', preId=''){
+  return `<div style="position:relative">
+    <input class="fi ac-client-inp" id="${id}" placeholder="${placeholder}" value="${preVal}" autocomplete="off" data-selected-id="${preId}">
+    <input type="hidden" id="${hiddenId}" value="${preId}">
+  </div>`;
+}
+function acUserField(id, hiddenId, placeholder, preVal='', preId=''){
+  return `<div style="position:relative">
+    <input class="fi ac-user-inp" id="${id}" placeholder="${placeholder}" value="${preVal}" autocomplete="off" data-selected-id="${preId}">
+    <input type="hidden" id="${hiddenId}" value="${preId}">
+  </div>`;
+}
+function acCountryField(id, preVal=''){
+  const items = COUNTRIES.map(c=>({id:c, label:c}));
+  return `<div style="position:relative"><input class="fi" id="${id}" placeholder="Type country…" value="${preVal}" autocomplete="off"></div>`;
+}
+function initCountryAC(id){
+  const inp = document.getElementById(id);
+  if(!inp) return;
+  const items = COUNTRIES.map(c=>({id:c, label:c}));
+  createAutocomplete(inp, items, {minChars:0});
+}
 
 // ── THEME ─────────────────────────────────────────────────────
 function initTheme(){
@@ -452,6 +597,8 @@ function navItems(){
       {id:'analytics',l:'Analytics',i:'📈',s:'REPORTS'},
       {id:'chatmonitor',l:'Chat Monitor',i:'💬',s:'MONITOR'},
       {id:'followups',l:'Follow-ups',i:'📞',s:'CRM'},
+      {id:'coordinatorattendance',l:'Coord. Attendance',i:'🗓',s:'ATTENDANCE'},
+      {id:'trainerattendance',l:'Trainer Attendance',i:'✅',s:'ATTENDANCE'},
       {id:'chat',l:'Messages',i:'✉️',s:'COMMUNICATION'},
     ],
     coordinatorhead:[
@@ -459,7 +606,8 @@ function navItems(){
       {id:'clients',l:'Clients',i:'🏃',s:'MANAGEMENT'},
       {id:'coordinators',l:'Coordinators',i:'🧑‍💼',s:'MANAGEMENT'},
       {id:'trainers',l:'Trainers',i:'🧑‍🏫',s:'MANAGEMENT'},
-      {id:'trainerattendance',l:'Trainer Attendance',i:'✅',s:'MANAGEMENT'},
+      {id:'coordinatorattendance',l:'Coord. Attendance',i:'🗓',s:'ATTENDANCE'},
+      {id:'trainerattendance',l:'Trainer Attendance',i:'✅',s:'ATTENDANCE'},
       {id:'trainerratings',l:'Trainer Ratings',i:'⭐',s:'MANAGEMENT'},
       {id:'sessions',l:'Sessions',i:'📅',s:'MANAGEMENT'},
       {id:'slots',l:'Time Slots',i:'🕐',s:'MANAGEMENT'},
@@ -503,7 +651,7 @@ function renderSBNav(){
   });
   if(lastSec)html+='</div>';$('sb-nav').innerHTML=html;
 }
-const panelTitles={dash:'DASHBOARD',clients:'CLIENTS',users:'USER MANAGEMENT',trainers:'TRAINERS',sessions:'SESSIONS',attendance:'ATTENDANCE',payments:'PAYMENTS',analytics:'ANALYTICS',followups:'FOLLOW-UPS',feedback:'FEEDBACK',chat:'MESSAGES',chatmonitor:'CHAT MONITOR',slots:'TIME SLOTS',batches:'CORPORATE FITNESS PROGRAM',coordinators:'COORDINATORS',trainerattendance:'TRAINER ATTENDANCE',trainerratings:'TRAINER RATINGS',certificates:'MY CERTIFICATES'};
+const panelTitles={dash:'DASHBOARD',clients:'CLIENTS',users:'USER MANAGEMENT',trainers:'TRAINERS',sessions:'SESSIONS',attendance:'ATTENDANCE',payments:'PAYMENTS',analytics:'ANALYTICS',followups:'FOLLOW-UPS',feedback:'FEEDBACK',chat:'MESSAGES',chatmonitor:'CHAT MONITOR',slots:'TIME SLOTS',batches:'CORPORATE FITNESS PROGRAM',coordinators:'COORDINATORS',trainerattendance:'TRAINER ATTENDANCE',trainerratings:'TRAINER RATINGS',certificates:'MY CERTIFICATES',coordinatorattendance:'COORDINATOR ATTENDANCE'};
 function navTo(id){
   destroyCharts();
   if(_chatUnsub&&id!=='chat'){_chatUnsub();_chatUnsub=null}
@@ -511,7 +659,7 @@ function navTo(id){
   const ni=$(`ni-${id}`);if(ni)ni.classList.add('active');
   $('tb-title').textContent=panelTitles[id]||id.toUpperCase();
   closeSB();
-  const panels={dash,clients,users,trainers,sessions,attendance,payments,analytics,followups,feedback,chat,chatmonitor,slots,batches,coordinators,trainerattendance,trainerratings,certificates};
+  const panels={dash,clients,users,trainers,sessions,attendance,payments,analytics,followups,feedback,chat,chatmonitor,slots,batches,coordinators,trainerattendance,trainerratings,certificates,coordinatorattendance};
   const pfn=panels[id];
   if(pfn)pfn();
   else $('page').innerHTML=`<div class="card"><p style="color:var(--muted)">Panel coming soon…</p></div>`;
@@ -609,7 +757,7 @@ async function dash(){
     const[mySessions,myClients,myCerts,myRatings]=await Promise.all([
       fsGetAll('sessions',fn().where('trainerId','==',myUid)),
       fsGetAll('clients',fn().where('trainerId','==',myUid),fn().where('active','==',true)),
-      fsGetAll('trainerratings',fn().where('trainerId','==',myUid)),
+      fsGetAll('certificates',fn().where('trainerId','==',myUid)),
       fsGetAll('trainerratings',fn().where('trainerId','==',myUid))
     ]);
     const today=new Date().toDateString();
@@ -667,7 +815,7 @@ async function dash(){
   }
 }
 
-// ── CERTIFICATES (Trainer) ────────────────────────────────────
+// ── CERTIFICATES ──────────────────────────────────────────────
 async function certificates(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const myUid=auth().currentUser.uid;
@@ -686,7 +834,6 @@ async function certificates(){
       :certs.map(c=>renderCertCard(c)).join('')}
     </div>`;
 }
-
 function renderCertCard(c){
   const icons={ACSM:'🏅',NASM:'🥇',ACE:'🎖',ISSA:'🏆',NSCA:'🥊',CPT:'📜',Nutrition:'🥗',Yoga:'🧘',CrossFit:'⚡',default:'🎓'};
   const icon=Object.keys(icons).find(k=>c.name&&c.name.toUpperCase().includes(k.toUpperCase()))?icons[Object.keys(icons).find(k=>c.name&&c.name.toUpperCase().includes(k.toUpperCase()))]:icons.default;
@@ -706,25 +853,19 @@ function renderCertCard(c){
     </div>
   </div>`;
 }
-
-function openAddCert(){
-  openM1('ADD CERTIFICATE',certForm());
-}
-async function openEditCert(id){
-  const c=await fsGet('certificates',id);if(!c){toast('Not found','error');return}
-  openM1('EDIT CERTIFICATE',certForm(c));
-}
+function openAddCert(){openM1('ADD CERTIFICATE',certForm())}
+async function openEditCert(id){const c=await fsGet('certificates',id);if(!c){toast('Not found','error');return}openM1('EDIT CERTIFICATE',certForm(c))}
 function certForm(c={}){
   return`
     <div class="fg"><label class="fl">Certificate Name *</label><input class="fi" id="cf2-name" value="${c.name||''}" placeholder="e.g. Certified Personal Trainer (CPT)"></div>
     <div class="fg"><label class="fl">Issuing Organization *</label><input class="fi" id="cf2-issuer" value="${c.issuer||''}" placeholder="e.g. NASM, ACE, ISSA, ACSM"></div>
     <div class="fr">
       <div class="fg"><label class="fl">Issue Year</label><input class="fi" id="cf2-year" type="number" value="${c.issueYear||''}" placeholder="e.g. 2021" min="1990" max="2099"></div>
-      <div class="fg"><label class="fl">Expiry Year</label><input class="fi" id="cf2-expiry" type="number" value="${c.expiryYear||''}" placeholder="e.g. 2024 (leave blank if no expiry)" min="1990" max="2099"></div>
+      <div class="fg"><label class="fl">Expiry Year</label><input class="fi" id="cf2-expiry" type="number" value="${c.expiryYear||''}" placeholder="e.g. 2024" min="1990" max="2099"></div>
     </div>
     <div class="fg"><label class="fl">Credential ID</label><input class="fi" id="cf2-cid" value="${c.credentialId||''}" placeholder="Optional credential/license ID"></div>
-    <div class="fg"><label class="fl">Certificate URL</label><input class="fi" id="cf2-url" type="url" value="${c.url||''}" placeholder="https://… (link to verify certificate)"></div>
-    <div class="fg"><label class="fl">Description</label><textarea class="fta" id="cf2-desc" placeholder="Brief description of skills covered…">${c.description||''}</textarea></div>
+    <div class="fg"><label class="fl">Certificate URL</label><input class="fi" id="cf2-url" type="url" value="${c.url||''}" placeholder="https://…"></div>
+    <div class="fg"><label class="fl">Description</label><textarea class="fta" id="cf2-desc" placeholder="Brief description…">${c.description||''}</textarea></div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveCert('${c.id||''}')">Save</button></div>`;
 }
 async function saveCert(existingId=''){
@@ -740,7 +881,7 @@ async function saveCert(existingId=''){
 }
 async function delCert(id){if(!confirm('Delete this certificate?'))return;try{await fsDel('certificates',id);toast('Deleted','success');certificates()}catch(e){toast('Error: '+e.message,'error')}}
 
-// ── TRAINER RATINGS (Coordinator/Head) ───────────────────────
+// ── TRAINER RATINGS ───────────────────────────────────────────
 async function trainerratings(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const[trainers,ratings,sessions]=await Promise.all([
@@ -748,9 +889,7 @@ async function trainerratings(){
     fsGetAll('trainerratings'),
     fsGetAll('sessions')
   ]);
-
   const myUid=auth().currentUser.uid;
-
   $('page').innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
       <div>
@@ -791,7 +930,7 @@ async function trainerratings(){
     <div class="card">
       <div class="card-hd"><div class="card-title">Recent Ratings (All)</div></div>
       ${ratings.length===0?emptyState('⭐','No ratings yet','Rate trainer sessions above.','','')
-      :`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Trainer</th><th>Session</th><th>Rating</th><th>Comment</th><th>Rated By</th></tr></thead>
+      :`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Trainer</th><th>Session</th><th>Rating</th><th>Comment</th><th>Rated By</th><th>Actions</th></tr></thead>
         <tbody>${[...ratings].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,30).map(r=>{
           const stars='★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0));
           const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';
@@ -802,9 +941,85 @@ async function trainerratings(){
             <td><span style="color:${col};font-size:16px;font-weight:700">${stars}</span> <span style="font-family:'JetBrains Mono';font-size:12px">${r.rating}/5</span></td>
             <td style="font-size:12px;max-width:200px">${r.comment||'—'}</td>
             <td style="font-size:12px">${r.ratedByName||'—'}</td>
+            <td><div class="td-actions">
+              <button class="btn btn-g btn-sm" onclick="openEditRating('${r.id}')">✏️ Edit</button>
+              <button class="btn btn-d btn-sm" onclick="delRating('${r.id}')">Delete</button>
+            </div></td>
           </tr>`;}).join('')}
         </tbody></table></div>`}
     </div>`;
+}
+
+// ── EDIT RATING ───────────────────────────────────────────────
+async function openEditRating(ratingId){
+  const r=await fsGet('trainerratings',ratingId);
+  if(!r){toast('Rating not found','error');return}
+  const trainers=await fsGetAll('users',fn().where('role','==','trainer'));
+  openM1('EDIT RATING',`
+    <div class="fg"><label class="fl">Trainer</label>
+      <select class="fs" id="er-trainer">
+        <option value="">— Select —</option>
+        ${trainers.map(t=>`<option value="${t.id}" ${t.id===r.trainerId?'selected':''}>${t.name||t.email}</option>`).join('')}
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Session Type</label>
+      <select class="fs" id="er-type">${SESSION_TYPES.map(t=>`<option ${r.sessionType===t?'selected':''}>${t}</option>`).join('')}</select>
+    </div>
+    <div class="fg"><label class="fl">Session Date</label>
+      <input class="fi" id="er-date" type="date" value="${r.sessionDate||''}">
+    </div>
+    <div class="fg">
+      <label class="fl">Rating *</label>
+      <div style="margin-bottom:8px">
+        <div class="stars" id="er-stars">
+          ${[1,2,3,4,5].map(n=>`<span class="star" onclick="setEditRating(${n})" onmouseover="hoverEditRating(${n})" onmouseout="unhoverEditRating()" data-val="${n}" style="color:${n<=(r.rating||0)?'#ffbb00':'var(--muted)'}">${n<=(r.rating||0)?'★':'☆'}</span>`).join('')}
+        </div>
+        <div id="er-rating-lbl" style="font-size:12px;color:var(--muted);margin-top:5px">${['','😞 Poor','😐 Fair','🙂 Good','😊 Great','🌟 Excellent'][r.rating||0]||''}</div>
+      </div>
+      <input type="hidden" id="er-rating" value="${r.rating||0}">
+    </div>
+    <div class="fg"><label class="fl">Comment</label>
+      <textarea class="fta" id="er-comment">${r.comment||''}</textarea>
+    </div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
+      <button class="btn btn-p" onclick="saveEditRating('${ratingId}')">Update Rating</button>
+    </div>`);
+  window._erSelectedRating=r.rating||0;
+}
+function setEditRating(n){
+  $('er-rating').value=n;window._erSelectedRating=n;
+  updateEditStarDisplay(n);
+  const labels=['','😞 Poor','😐 Fair','🙂 Good','😊 Great','🌟 Excellent'];
+  $('er-rating-lbl').textContent=labels[n]||'';
+}
+function hoverEditRating(n){updateEditStarDisplay(n,true)}
+function unhoverEditRating(){updateEditStarDisplay(window._erSelectedRating||0)}
+function updateEditStarDisplay(n,hover=false){
+  const stars=$('er-stars');if(!stars)return;
+  stars.querySelectorAll('.star').forEach((s,i)=>{
+    s.textContent=i<n?'★':'☆';
+    s.style.color=i<n?(hover?'#ffdd44':'#ffbb00'):'var(--muted)';
+  });
+}
+async function saveEditRating(ratingId){
+  const trainerId=$('er-trainer').value;
+  const rating=Number($('er-rating').value||0);
+  if(!trainerId||!rating){toast('Select trainer and rating','error');return}
+  const trainerSel=$('er-trainer');
+  const trainerName=trainerId?trainerSel.options[trainerSel.selectedIndex].text:'';
+  try{
+    await fsUpdate('trainerratings',ratingId,{
+      trainerId,trainerName,
+      rating,comment:$('er-comment').value.trim(),
+      sessionType:$('er-type').value,sessionDate:$('er-date').value
+    });
+    closeM1();toast('Rating updated!','success');trainerratings();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+async function delRating(id){
+  if(!confirm('Delete this rating?'))return;
+  try{await fsDel('trainerratings',id);toast('Rating deleted','success');trainerratings()}catch(e){toast('Error','error')}
 }
 
 async function openRateTrainer(preTrainerId='',preTrainerName=''){
@@ -840,61 +1055,33 @@ async function openRateTrainer(preTrainerId='',preTrainerName=''){
       <input type="hidden" id="rt-rating" value="0">
     </div>
     <div class="fg"><label class="fl">Comment</label>
-      <textarea class="fta" id="rt-comment" placeholder="Notes on performance, punctuality, client engagement…"></textarea>
+      <textarea class="fta" id="rt-comment" placeholder="Notes on performance…"></textarea>
     </div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTrainerRating()">Submit Rating</button></div>`);
   window._rtSessions=sessions;
   if(preTrainerId){$('rt-trainer').value=preTrainerId;updateRatingSessionList()}
 }
-
 function updateRatingSessionList(){
   const tid=$('rt-trainer').value;
   const sel=$('rt-session');if(!sel)return;
   const filtered=(window._rtSessions||[]).filter(s=>s.trainerId===tid);
   sel.innerHTML=`<option value="">— Select completed session —</option>`+filtered.slice(0,50).map(s=>`<option value="${s.id}" data-date="${s.date||''}" data-type="${s.type||''}">${s.clientName||'—'} • ${s.date||'—'} ${to12h(s.time)} (${s.type||'—'})</option>`).join('');
-  sel.onchange=()=>{
-    const opt=sel.options[sel.selectedIndex];
-    if(opt&&opt.dataset.date){$('rt-date').value=opt.dataset.date}
-    if(opt&&opt.dataset.type&&$('rt-type')){$('rt-type').value=opt.dataset.type}
-  };
+  sel.onchange=()=>{const opt=sel.options[sel.selectedIndex];if(opt&&opt.dataset.date){$('rt-date').value=opt.dataset.date}if(opt&&opt.dataset.type&&$('rt-type')){$('rt-type').value=opt.dataset.type}};
 }
-
-function setRating(n){
-  $('rt-rating').value=n;
-  window._selectedRating=n;
-  updateStarDisplay(n);
-  const labels=['','😞 Poor','😐 Fair','🙂 Good','😊 Great','🌟 Excellent'];
-  $('rt-rating-lbl').textContent=labels[n]||'';
-}
+function setRating(n){$('rt-rating').value=n;window._selectedRating=n;updateStarDisplay(n);const labels=['','😞 Poor','😐 Fair','🙂 Good','😊 Great','🌟 Excellent'];$('rt-rating-lbl').textContent=labels[n]||''}
 function hoverRating(n){updateStarDisplay(n,true)}
 function unhoverRating(){updateStarDisplay(window._selectedRating||0)}
-function updateStarDisplay(n,hover=false){
-  const stars=$('rt-stars');if(!stars)return;
-  stars.querySelectorAll('.star').forEach((s,i)=>{
-    s.textContent=i<n?'★':'☆';
-    s.style.color=i<n?(hover?'#ffdd44':'#ffbb00'):'var(--muted)';
-  });
-}
-
+function updateStarDisplay(n,hover=false){const stars=$('rt-stars');if(!stars)return;stars.querySelectorAll('.star').forEach((s,i)=>{s.textContent=i<n?'★':'☆';s.style.color=i<n?(hover?'#ffdd44':'#ffbb00'):'var(--muted)'})}
 async function saveTrainerRating(){
-  const trainerId=$('rt-trainer').value;
-  const rating=Number($('rt-rating').value||0);
-  const trainerSel=$('rt-trainer');
-  const trainerName=trainerId?trainerSel.options[trainerSel.selectedIndex].text:'';
+  const trainerId=$('rt-trainer').value;const rating=Number($('rt-rating').value||0);
+  const trainerSel=$('rt-trainer');const trainerName=trainerId?trainerSel.options[trainerSel.selectedIndex].text:'';
   if(!trainerId||!rating){toast('Select trainer and rating','error');return}
-  const sessionSel=$('rt-session');
-  const sessionId=sessionSel?sessionSel.value:'';
+  const sessionSel=$('rt-session');const sessionId=sessionSel?sessionSel.value:'';
   try{
-    await fsAdd('trainerratings',{
-      trainerId,trainerName,
-      rating,comment:$('rt-comment').value.trim(),
-      sessionId,sessionType:$('rt-type').value,sessionDate:$('rt-date').value,
-      ratedById:auth().currentUser.uid,ratedByName:CU.name||'',ratedByRole:CR
-    });
+    await fsAdd('trainerratings',{trainerId,trainerName,rating,comment:$('rt-comment').value.trim(),sessionId,sessionType:$('rt-type').value,sessionDate:$('rt-date').value,ratedById:auth().currentUser.uid,ratedByName:CU.name||'',ratedByRole:CR});
     closeM1();toast('Rating submitted!','success');trainerratings();
   }catch(e){toast('Error: '+e.message,'error')}
 }
-
 async function viewTrainerRatings(trainerId,trainerName){
   const ratings=await fsGetAll('trainerratings',fn().where('trainerId','==',trainerId));
   ratings.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
@@ -914,13 +1101,14 @@ async function viewTrainerRatings(trainerId,trainerName){
     </div>
     ${certs.length>0?`<div class="detail-section"><div class="detail-section-title">🎓 Certificates (${certs.length})</div><div style="display:flex;flex-wrap:wrap;gap:8px">${certs.map(c=>`<span class="badge b-a" style="font-size:12px">🎓 ${c.name} <span style="opacity:.6">(${c.issuer})</span></span>`).join('')}</div></div>`:''}
     ${ratings.length===0?emptyState('⭐','No ratings yet','','','')
-    :`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Rating</th><th>Session</th><th>Comment</th><th>By</th></tr></thead>
+    :`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Rating</th><th>Session</th><th>Comment</th><th>By</th><th>Actions</th></tr></thead>
       <tbody>${ratings.map(r=>{const rc=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';return`<tr>
         <td style="font-size:12px">${r.sessionDate||'—'}</td>
         <td><span style="color:${rc};font-size:16px">${'★'.repeat(r.rating||0)}${'☆'.repeat(5-(r.rating||0))}</span> <span style="font-size:11px">${r.rating}/5</span></td>
         <td style="font-size:12px">${r.sessionType||'—'}</td>
         <td style="font-size:12px">${r.comment||'—'}</td>
         <td style="font-size:12px">${r.ratedByName||'—'}</td>
+        <td><button class="btn btn-g btn-sm" onclick="closeM2();openEditRating('${r.id}')">✏️ Edit</button></td>
       </tr>`}).join('')}</tbody></table></div>`}
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Close</button></div>`);
 }
@@ -941,16 +1129,17 @@ async function clients(){
 }
 function renderClientsTable(data){
   if(!data.length)return emptyState('🏃','No clients yet',CR==='trainer'?'No clients assigned to you yet.':'Add your first client.',CR!=='trainer'&&CR!=='client'?'+ Add Client':'',CR!=='trainer'&&CR!=='client'?'openAddClient()':'');
-  return`<table><thead><tr><th>Name</th><th>Phone</th><th>Plan</th><th>Trainer</th><th>Coordinator</th><th>Goal</th><th>Status</th><th>Start</th><th>Actions</th></tr></thead>
+  return`<table><thead><tr><th>Name</th><th>Phone</th><th>Age</th><th>Country</th><th>Plan</th><th>Trainer</th><th>Coordinator</th><th>Goal</th><th>Status</th><th>Actions</th></tr></thead>
     <tbody>${data.map(c=>`<tr>
       <td><strong>${c.name||'—'}</strong></td>
       <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${c.phone||'—'}</td>
+      <td style="font-size:12px">${c.age||'—'}</td>
+      <td style="font-size:12px">${c.country||'—'}</td>
       <td>${planBadge(c.plan)}</td>
       <td style="font-size:12px">${c.trainerName||'—'}</td>
       <td style="font-size:12px">${c.coordinatorName?`<span class="badge b-b">🧑‍💼 ${c.coordinatorName}</span>`:'<span style="color:var(--muted2)">—</span>'}</td>
       <td style="font-size:12px">${c.goal||'—'}</td>
       <td>${c.active?`<span class="badge b-g">Active</span>`:`<span class="badge b-r">Inactive</span>`}</td>
-      <td style="font-size:12px">${c.startDate||'—'}</td>
       <td><div class="td-actions">
         <button class="btn btn-g btn-sm" onclick="viewClient('${c.id}')">View</button>
         ${CR!=='trainer'&&CR!=='client'?`<button class="btn btn-g btn-sm" onclick="openEditClient('${c.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delClient('${c.id}')">Delete</button>`:''}
@@ -958,24 +1147,58 @@ function renderClientsTable(data){
     </tr>`).join('')}</tbody></table>`;
 }
 function filterClients(){const v=$('cl-search').value.toLowerCase();const filtered=(window._clientsData||[]).filter(c=>(c.name||'').toLowerCase().includes(v)||(c.phone||'').includes(v));$('cl-table').innerHTML=renderClientsTable(filtered)}
-async function openAddClient(){const html=await clientForm();openM2('ADD CLIENT',html)}
-async function openEditClient(id){const c=await fsGet('clients',id);if(!c){toast('Client not found','error');return}const html=await clientForm(c);openM2('EDIT CLIENT',html)}
-async function loadTrainerOptions(selectedId=''){const trainers=await fsGetAll('users',fn().where('role','==','trainer')).catch(()=>[]);return trainers.map(t=>`<option value="${t.id}" ${t.id===selectedId?'selected':''}>${t.name||t.email} (${t.gender||'Any'})</option>`).join('')}
-async function loadCoordinatorOptions(selectedId=''){const coordinators=await fsGetAll('users',fn().where('role','==','coordinator')).catch(()=>[]);return coordinators.map(c=>`<option value="${c.id}" ${c.id===selectedId?'selected':''}>${c.name||c.email}</option>`).join('')}
+async function openAddClient(){const html=await clientForm();openM2('ADD CLIENT',html);initClientFormAC()}
+async function openEditClient(id){const c=await fsGet('clients',id);if(!c){toast('Client not found','error');return}const html=await clientForm(c);openM2('EDIT CLIENT',html);initClientFormAC(c)}
+async function loadTrainerOptions(selectedId=''){const trainers=await fsGetAll('users',fn().where('role','==','trainer')).catch(()=>[]);return trainers}
+async function loadCoordinatorOptions(selectedId=''){const coordinators=await fsGetAll('users',fn().where('role','==','coordinator')).catch(()=>[]);return coordinators}
+
+function initClientFormAC(c={}){
+  // Country autocomplete
+  initCountryAC('cf-country');
+  // Trainer autocomplete
+  const trainerInp=document.getElementById('cf-trainer-inp');
+  if(trainerInp){
+    fsGetAll('users',fn().where('role','==','trainer')).then(trainers=>{
+      const items=trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''}));
+      const inst=createAutocomplete(trainerInp,items,{minChars:0,onSelect(it){
+        const hid=document.getElementById('cf-trainer-id');if(hid)hid.value=it.id;
+      }});
+    });
+  }
+  // Coordinator autocomplete
+  const coordInp=document.getElementById('cf-coord-inp');
+  if(coordInp){
+    fsGetAll('users',fn().where('role','==','coordinator')).then(coords=>{
+      const items=coords.map(c=>({id:c.id,label:c.name||c.email,sub:'Coordinator'}));
+      createAutocomplete(coordInp,items,{minChars:0,onSelect(it){
+        const hid=document.getElementById('cf-coord-id');if(hid)hid.value=it.id;
+      }});
+    });
+  }
+}
+
 async function clientForm(c={}){
-  const trainerOpts=await loadTrainerOptions(c.trainerId||'');
-  const coordOpts=await loadCoordinatorOptions(c.coordinatorId||'');
   return`<div class="fr">
     <div><label class="fl">Full Name *</label><input class="fi" id="cf-name" value="${c.name||''}" placeholder="Client full name"></div>
     <div><label class="fl">Phone *</label><input class="fi" id="cf-phone" value="${c.phone||''}" placeholder="10-digit number"></div>
   </div>
   <div class="fr">
     <div><label class="fl">Email</label><input class="fi" id="cf-email" type="email" value="${c.email||''}" placeholder="email@example.com"></div>
-    <div><label class="fl">Plan *</label><select class="fs" id="cf-plan"><option value="">— Select —</option>${PLANS.map(p=>`<option ${c.plan===p?'selected':''}>${p}</option>`).join('')}</select></div>
+    <div><label class="fl">Age</label><input class="fi" id="cf-age" type="number" value="${c.age||''}" placeholder="e.g. 28" min="5" max="120"></div>
   </div>
   <div class="fr">
-    <div><label class="fl">Assign Trainer</label><select class="fs" id="cf-trainer"><option value="">— Select trainer —</option>${trainerOpts}</select></div>
-    <div><label class="fl">Assign Coordinator</label><select class="fs" id="cf-coordinator"><option value="">— No coordinator —</option>${coordOpts}</select></div>
+    <div><label class="fl">Plan *</label><select class="fs" id="cf-plan"><option value="">— Select —</option>${PLANS.map(p=>`<option ${c.plan===p?'selected':''}>${p}</option>`).join('')}</select></div>
+    <div><label class="fl">Country</label>${acCountryField('cf-country',c.country||'')}</div>
+  </div>
+  <div class="fr">
+    <div><label class="fl">Assign Trainer</label>
+      <input class="fi" id="cf-trainer-inp" placeholder="Type trainer name…" value="${c.trainerName||''}" autocomplete="off">
+      <input type="hidden" id="cf-trainer-id" value="${c.trainerId||''}">
+    </div>
+    <div><label class="fl">Assign Coordinator</label>
+      <input class="fi" id="cf-coord-inp" placeholder="Type coordinator name…" value="${c.coordinatorName||''}" autocomplete="off">
+      <input type="hidden" id="cf-coord-id" value="${c.coordinatorId||''}">
+    </div>
   </div>
   <div class="fr">
     <div><label class="fl">Gender</label><select class="fs" id="cf-gender"><option value="">— Select —</option>${['Male','Female','Other'].map(g=>`<option ${c.gender===g?'selected':''}>${g}</option>`).join('')}</select></div>
@@ -1006,18 +1229,20 @@ async function clientForm(c={}){
   <div class="fr" style="margin-bottom:14px"><div><label class="fl">Status</label><select class="fs" id="cf-active"><option value="true" ${c.active!==false?'selected':''}>Active</option><option value="false" ${c.active===false?'selected':''}>Inactive</option></select></div></div>
   <div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveClient('${c.id||''}')">Save Client</button></div>`;
 }
+
 async function saveClient(existingId=''){
   const name=$('cf-name').value.trim(),phone=$('cf-phone').value.trim();
   if(!name||!phone){toast('Name and phone are required','error');return}
-  const trainerSel=$('cf-trainer');const trainerId=trainerSel.value;
-  const trainerText=trainerSel.options[trainerSel.selectedIndex]?.text||'';
-  const trainerName=trainerId?trainerText.replace(/\s*\([^)]*\)\s*$/,'').trim():'';
-  const coordSel=$('cf-coordinator');
-  const coordinatorId=coordSel?coordSel.value:'';
-  const coordinatorName=coordSel&&coordSel.selectedIndex>0?coordSel.options[coordSel.selectedIndex].text.trim():'';
-  const data={name,phone,email:$('cf-email').value.trim(),plan:$('cf-plan').value,trainerId,trainerName,coordinatorId,coordinatorName,gender:$('cf-gender').value,trainerGenderPref:$('cf-tgender').value,goal:$('cf-goal').value,weight:$('cf-weight').value,height:$('cf-height').value,startDate:$('cf-start').value,endDate:$('cf-end').value,medical:$('cf-med').value,dietNotes:$('cf-diet').value,active:$('cf-active').value==='true',sessionsPerWeek:$('cf-spw').value,emergencyContactName:$('cf-emname').value.trim(),emergencyContactPhone:$('cf-emphone').value.trim(),city:$('cf-city').value.trim(),company:$('cf-company').value.trim(),addedBy:auth().currentUser.uid};
+  const trainerId=document.getElementById('cf-trainer-id')?.value||document.getElementById('cf-trainer-inp')?.dataset.selectedId||'';
+  const trainerName=$('cf-trainer-inp')?.value.replace(/\s*\([^)]*\)\s*$/,'').trim()||'';
+  const coordinatorId=document.getElementById('cf-coord-id')?.value||'';
+  const coordinatorName=$('cf-coord-inp')?.value.trim()||'';
+  const country=$('cf-country')?.value.trim()||'';
+  const age=$('cf-age')?.value||'';
+  const data={name,phone,email:$('cf-email').value.trim(),plan:$('cf-plan').value,trainerId,trainerName,coordinatorId,coordinatorName,gender:$('cf-gender').value,trainerGenderPref:$('cf-tgender').value,goal:$('cf-goal').value,weight:$('cf-weight').value,height:$('cf-height').value,startDate:$('cf-start').value,endDate:$('cf-end').value,medical:$('cf-med').value,dietNotes:$('cf-diet').value,active:$('cf-active').value==='true',sessionsPerWeek:$('cf-spw').value,emergencyContactName:$('cf-emname').value.trim(),emergencyContactPhone:$('cf-emphone').value.trim(),city:$('cf-city').value.trim(),company:$('cf-company').value.trim(),country,age:age?Number(age):null,addedBy:auth().currentUser.uid};
   try{if(existingId){await fsUpdate('clients',existingId,data);toast('Client updated!','success')}else{await fsAdd('clients',data);toast('Client added!','success')}closeM2();clients()}catch(e){toast('Error: '+e.message,'error')}
 }
+
 async function viewClient(id){
   const c=await fsGet('clients',id);if(!c){toast('Not found','error');return}
   const[sessions,attendance,payments,trainerRatings,certs]=await Promise.all([
@@ -1041,6 +1266,8 @@ async function viewClient(id){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
         <div><span style="color:var(--muted)">Phone:</span> ${c.phone||'—'}</div>
         <div><span style="color:var(--muted)">Email:</span> ${c.email||'—'}</div>
+        <div><span style="color:var(--muted)">Age:</span> ${c.age?c.age+' years':'—'}</div>
+        <div><span style="color:var(--muted)">Country:</span> ${c.country||'—'}</div>
         <div><span style="color:var(--muted)">Gender:</span> ${c.gender||'—'}</div>
         <div><span style="color:var(--muted)">City:</span> ${c.city||'—'}</div>
         <div><span style="color:var(--muted)">Weight:</span> ${c.weight?c.weight+' kg':'—'}</div>
@@ -1057,7 +1284,7 @@ async function viewClient(id){
         <div><span style="color:var(--muted)">End:</span> ${c.endDate||'—'}</div>
       </div>
     </div>
-    ${certs.length>0?`<div class="detail-section"><div class="detail-section-title">Trainer Certificates (${certs.length})</div><div style="display:flex;flex-wrap:wrap;gap:6px">${certs.map(c=>`<span class="badge b-a">🎓 ${c.name}</span>`).join('')}</div></div>`:''}
+    ${certs.length>0?`<div class="detail-section"><div class="detail-section-title">Trainer Certificates (${certs.length})</div><div style="display:flex;flex-wrap:wrap;gap:6px">${certs.map(cc=>`<span class="badge b-a">🎓 ${cc.name}</span>`).join('')}</div></div>`:''}
     ${c.medical?`<div class="detail-section"><div class="detail-section-title">Medical Notes</div><p style="font-size:13px">${c.medical}</p></div>`:''}
     ${c.dietNotes?`<div class="detail-section"><div class="detail-section-title">Diet Notes</div><p style="font-size:13px">${c.dietNotes}</p></div>`:''}
     <div style="display:flex;gap:10px;font-size:12px;color:var(--muted);margin-bottom:14px">
@@ -1184,7 +1411,6 @@ async function trainers(){
           </tr>`;}).join('')}</tbody></table>`}
     </div></div>`;
 }
-
 async function viewTrainerProfile(trainerId,trainerName){
   const[tUser,tRatings,tCerts,tClients]=await Promise.all([
     fsGet('users',trainerId),
@@ -1212,21 +1438,8 @@ async function viewTrainerProfile(trainerId,trainerName){
       <div class="sc sc-a" style="margin:0;padding:12px"><div class="sc-lbl">Certificates</div><div style="font-size:28px;font-weight:700">${tCerts.length}</div></div>
       <div class="sc sc-y" style="margin:0;padding:12px"><div class="sc-lbl">Total Ratings</div><div style="font-size:28px;font-weight:700">${tRatings.length}</div></div>
     </div>
-    ${tCerts.length>0?`
-    <div class="detail-section">
-      <div class="detail-section-title">🎓 Certificates (${tCerts.length})</div>
-      ${tCerts.map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:20px">🎓</span>
-        <div><div style="font-weight:600;font-size:13px">${c.name}</div>
-        <div style="font-size:12px;color:var(--muted)">${c.issuer}${c.issueYear?` • ${c.issueYear}`:''}${c.expiryYear?` – ${c.expiryYear}`:''}</div>
-        ${c.url?`<a href="${c.url}" target="_blank" style="color:var(--accent);font-size:11px">🔗 Verify</a>`:''}</div>
-      </div>`).join('')}
-    </div>`:''}
-    ${tRatings.length>0?`
-    <div class="detail-section">
-      <div class="detail-section-title">⭐ Recent Ratings</div>
-      ${tRatings.slice(0,5).map(r=>{const rc=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';return`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between"><span style="color:${rc};font-size:16px">${'★'.repeat(r.rating||0)}${'☆'.repeat(5-(r.rating||0))}</span><span style="font-size:11px;color:var(--muted)">${r.sessionDate||''} by ${r.ratedByName||'—'}</span></div>${r.comment?`<div style="font-size:12px;margin-top:4px">${r.comment}</div>`:''}</div>`;}).join('')}
-    </div>`:''}
+    ${tCerts.length>0?`<div class="detail-section"><div class="detail-section-title">🎓 Certificates (${tCerts.length})</div>${tCerts.map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:20px">🎓</span><div><div style="font-weight:600;font-size:13px">${c.name}</div><div style="font-size:12px;color:var(--muted)">${c.issuer}${c.issueYear?` • ${c.issueYear}`:''}${c.expiryYear?` – ${c.expiryYear}`:''}</div>${c.url?`<a href="${c.url}" target="_blank" style="color:var(--accent);font-size:11px">🔗 Verify</a>`:''}</div></div>`).join('')}</div>`:''}
+    ${tRatings.length>0?`<div class="detail-section"><div class="detail-section-title">⭐ Recent Ratings</div>${tRatings.slice(0,5).map(r=>{const rc=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';return`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between"><span style="color:${rc};font-size:16px">${'★'.repeat(r.rating||0)}${'☆'.repeat(5-(r.rating||0))}</span><span style="font-size:11px;color:var(--muted)">${r.sessionDate||''} by ${r.ratedByName||'—'}</span></div>${r.comment?`<div style="font-size:12px;margin-top:4px">${r.comment}</div>`:''}</div>`;}).join('')}</div>`:''}
     <div class="mo-foot">${CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-p" onclick="closeM2();openRateTrainer('${trainerId}','${trainerName.replace(/'/g,"\\'")}')">+ Rate Session</button>`:''}<button class="btn btn-g" onclick="closeM2()">Close</button></div>`);
 }
 
@@ -1241,7 +1454,6 @@ async function coordinators(){
     fsGetAll('clients',fn().where('active','==',true))
   ]);
   const allStaff=[...headData.map(u=>({...u,_label:'Coordinator Head'})),...coordData.map(u=>({...u,_label:'Coordinator'}))];
-
   $('page').innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
       <div style="display:flex;gap:10px">
@@ -1252,39 +1464,23 @@ async function coordinators(){
     </div>
     <div class="staff-grid">
       ${allStaff.map(u=>{
-        const rc=roleColor(u.role);
-        const myFU=followups.filter(f=>f.assignedTo===u.id||f.assignedToId===u.id);
-        const pendingFU=myFU.filter(f=>!f.done&&f.status!=='completed').length;
-        const doneFU=myFU.filter(f=>f.done||f.status==='completed').length;
-        const myRatings=ratings.filter(r=>r.ratedById===u.id);
-        const myClients=clients.filter(c=>c.coordinatorId===u.id);
+        const rc=roleColor(u.role);const myFU=followups.filter(f=>f.assignedTo===u.id||f.assignedToId===u.id);
+        const pendingFU=myFU.filter(f=>!f.done&&f.status!=='completed').length;const doneFU=myFU.filter(f=>f.done||f.status==='completed').length;
+        const myRatings=ratings.filter(r=>r.ratedById===u.id);const myClients=clients.filter(c=>c.coordinatorId===u.id);
         const ini=(u.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
         return`<div class="staff-card">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
             <div class="staff-avatar" style="background:${rc}20;color:${rc}">${ini}</div>
-            <div>
-              <div style="font-weight:700;font-size:14px">${u.name||'—'}</div>
+            <div><div style="font-weight:700;font-size:14px">${u.name||'—'}</div>
               <span class="badge ${u.role==='coordinatorhead'?'b-o':'b-b'}" style="font-size:10px">${u._label}</span>
               ${u.active!==false?'':' <span class="badge b-r" style="font-size:10px">Inactive</span>'}
             </div>
           </div>
           <div style="font-size:12px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center">
-              <div style="font-size:18px;font-weight:700;color:var(--text)">${myClients.length}</div>
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px">Clients</div>
-            </div>
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center">
-              <div style="font-size:18px;font-weight:700;color:${pendingFU>0?'var(--red)':'var(--green)'}">${pendingFU}</div>
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px">Pending FU</div>
-            </div>
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center">
-              <div style="font-size:18px;font-weight:700;color:var(--green)">${doneFU}</div>
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px">Done FU</div>
-            </div>
-            <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center">
-              <div style="font-size:18px;font-weight:700;color:var(--yellow)">${myRatings.length}</div>
-              <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px">Ratings Given</div>
-            </div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--text)">${myClients.length}</div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px">Clients</div></div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:${pendingFU>0?'var(--red)':'var(--green)'}">${pendingFU}</div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px">Pending FU</div></div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--green)">${doneFU}</div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px">Done FU</div></div>
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--yellow)">${myRatings.length}</div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px">Ratings Given</div></div>
           </div>
           ${u.phone?`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">📱 ${u.phone}</div>`:''}
           ${u.email?`<div style="font-size:12px;color:var(--muted);margin-bottom:10px">✉️ ${u.email}</div>`:''}
@@ -1297,11 +1493,13 @@ async function coordinators(){
     </div>
     ${allStaff.length===0?emptyState('🧑‍💼','No coordinator staff','Add coordinators and heads via User Management.','+ Add Staff','openAddUser()'):''}`;
 }
-
 async function assignFollowupToCoord(coordId,coordName){
   const cls=await fsGetAll('clients',fn().where('active','==',true));
   openM1(`ASSIGN TASK TO ${coordName.toUpperCase()}`,`
-    <div class="fg"><label class="fl">Client *</label><select class="fs" id="aft-client"><option value="">— Select —</option>${cls.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+    <div class="fg"><label class="fl">Client *</label>
+      <input class="fi" id="aft-client-inp" placeholder="Type client name…" autocomplete="off">
+      <input type="hidden" id="aft-client-id">
+    </div>
     <div class="fr">
       <div class="fg"><label class="fl">Type *</label><select class="fs" id="aft-type"><option value="">— Select —</option>${['Motivation','Renewal','Progress Check','Diet Review','Payment Reminder','General Check-in'].map(t=>`<option>${t}</option>`).join('')}</select></div>
       <div class="fg"><label class="fl">Priority</label><select class="fs" id="aft-priority"><option>High</option><option>Medium</option><option>Low</option></select></div>
@@ -1309,9 +1507,11 @@ async function assignFollowupToCoord(coordId,coordName){
     <div class="fg"><label class="fl">Remarks</label><textarea class="fta" id="aft-remark" placeholder="Task details…"></textarea></div>
     <div class="fg"><label class="fl">Due Date</label><input class="fi" id="aft-due" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveAssignedFollowup('${coordId}','${coordName}')">Assign</button></div>`);
+  attachClientAC('aft-client-inp','aft-client-id',cls);
 }
 async function saveAssignedFollowup(coordId,coordName){
-  const clientSel=$('aft-client');const clientId=clientSel.value,clientName=clientSel.options[clientSel.selectedIndex]?.text||'';
+  const clientId=$('aft-client-id').value||$('aft-client-inp')?.dataset.selectedId||'';
+  const clientName=$('aft-client-inp')?.value||'';
   const type=$('aft-type').value;
   if(!clientId||!type){toast('Client and type required','error');return}
   try{
@@ -1320,11 +1520,118 @@ async function saveAssignedFollowup(coordId,coordName){
   }catch(e){toast('Error: '+e.message,'error')}
 }
 
+// ── COORDINATOR ATTENDANCE ────────────────────────────────────
+async function coordinatorattendance(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  const data=await fsGetAll('coordinatorattendance');
+  data.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.time||'').localeCompare(a.time||''));
+  const present=data.filter(a=>a.status==='present').length;
+  const absent=data.filter(a=>a.status==='absent').length;
+  const late=data.filter(a=>a.status==='late').length;
+  $('page').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div></div>
+      <button class="btn btn-p" onclick="openMarkCoordAttend()">+ Mark Coordinator Attendance</button>
+    </div>
+    <div class="stats-grid" style="margin-bottom:18px">
+      <div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Present</div><div class="sc-val">${present}</div></div>
+      <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Absent</div><div class="sc-val">${absent}</div></div>
+      <div class="sc sc-y"><div class="sc-ico">⏰</div><div class="sc-lbl">Late</div><div class="sc-val">${late}</div></div>
+      <div class="sc sc-a"><div class="sc-ico">📊</div><div class="sc-lbl">Rate</div><div class="sc-val">${data.length?Math.round(present/data.length*100):0}%</div></div>
+    </div>
+    <div class="card" style="padding:0"><div class="tbl-wrap">
+      ${data.length===0?emptyState('🗓','No records','Mark coordinator attendance to track it here.','+ Mark Attendance','openMarkCoordAttend()')
+      :`<table><thead><tr><th>Date</th><th>Time</th><th>Coordinator</th><th>Role</th><th>Status</th><th>Note</th><th>Marked By</th><th>Actions</th></tr></thead>
+        <tbody>${data.map(a=>`<tr>
+          <td style="font-size:12px">${a.date||'—'}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(a.time)||'—'}</td>
+          <td><strong>${a.coordName||'—'}</strong></td>
+          <td style="font-size:12px"><span class="badge ${a.coordRole==='coordinatorhead'?'b-o':'b-b'}">${a.coordRole==='coordinatorhead'?'Head':'Coordinator'}</span></td>
+          <td>${statusBadge(a.status)}</td>
+          <td style="font-size:12px">${a.note||'—'}</td>
+          <td style="font-size:12px">${a.markedByName||'—'}</td>
+          <td><div class="td-actions">
+            <button class="btn btn-g btn-sm" onclick="openEditCoordAttend('${a.id}')">Edit</button>
+            <button class="btn btn-d btn-sm" onclick="delCoordAttend('${a.id}')">Delete</button>
+          </div></td>
+        </tr>`).join('')}</tbody></table>`}
+    </div></div>`;
+}
+async function openMarkCoordAttend(){
+  const [coords,heads]=await Promise.all([
+    fsGetAll('users',fn().where('role','==','coordinator')),
+    fsGetAll('users',fn().where('role','==','coordinatorhead'))
+  ]);
+  const allCoords=[...heads.map(u=>({...u,_label:'Coordinator Head'})),...coords.map(u=>({...u,_label:'Coordinator'}))];
+  openM1('MARK COORDINATOR ATTENDANCE',`
+    <div class="fg"><label class="fl">Coordinator *</label>
+      <select class="fs" id="ca-coord">
+        <option value="">— Select —</option>
+        ${allCoords.map(u=>`<option value="${u.id}" data-role="${u.role}" data-name="${u.name||u.email}">${u.name||u.email} (${u._label})</option>`).join('')}
+      </select>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Date *</label><input class="fi" id="ca-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="fg"><label class="fl">Time</label><input class="fi" id="ca-time" type="time" value="${new Date().toTimeString().slice(0,5)}"></div>
+    </div>
+    <div class="fg"><label class="fl">Status *</label>
+      <select class="fs" id="ca-status">
+        <option value="present">✅ Present</option>
+        <option value="absent">❌ Absent</option>
+        <option value="late">⏰ Late</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Note (optional)</label><input class="fi" id="ca-note" placeholder="Any remarks…"></div>
+    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveCoordAttend('')">Save</button></div>`);
+}
+async function openEditCoordAttend(id){
+  const a=await fsGet('coordinatorattendance',id);if(!a){toast('Not found','error');return}
+  const [coords,heads]=await Promise.all([
+    fsGetAll('users',fn().where('role','==','coordinator')),
+    fsGetAll('users',fn().where('role','==','coordinatorhead'))
+  ]);
+  const allCoords=[...heads.map(u=>({...u,_label:'Coordinator Head'})),...coords.map(u=>({...u,_label:'Coordinator'}))];
+  openM1('EDIT COORDINATOR ATTENDANCE',`
+    <div class="fg"><label class="fl">Coordinator *</label>
+      <select class="fs" id="ca-coord">
+        <option value="">— Select —</option>
+        ${allCoords.map(u=>`<option value="${u.id}" data-role="${u.role}" data-name="${u.name||u.email}" ${u.id===a.coordId?'selected':''}>${u.name||u.email} (${u._label})</option>`).join('')}
+      </select>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Date *</label><input class="fi" id="ca-date" type="date" value="${a.date||''}"></div>
+      <div class="fg"><label class="fl">Time</label><input class="fi" id="ca-time" type="time" value="${a.time||''}"></div>
+    </div>
+    <div class="fg"><label class="fl">Status *</label>
+      <select class="fs" id="ca-status">
+        <option value="present" ${a.status==='present'?'selected':''}>✅ Present</option>
+        <option value="absent" ${a.status==='absent'?'selected':''}>❌ Absent</option>
+        <option value="late" ${a.status==='late'?'selected':''}>⏰ Late</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Note</label><input class="fi" id="ca-note" value="${a.note||''}"></div>
+    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveCoordAttend('${id}')">Update</button></div>`);
+}
+async function saveCoordAttend(existingId=''){
+  const sel=$('ca-coord');const coordId=sel.value;
+  const opt=sel.options[sel.selectedIndex];
+  const coordName=opt?.dataset.name||'';const coordRole=opt?.dataset.role||'';
+  const date=$('ca-date').value,status=$('ca-status').value,time=$('ca-time').value;
+  if(!coordId||!date){toast('Select coordinator and date','error');return}
+  const data={coordId,coordName,coordRole,date,time,status,note:$('ca-note').value,markedBy:auth().currentUser.uid,markedByName:CU.name||''};
+  try{
+    if(existingId){await fsUpdate('coordinatorattendance',existingId,data);toast('Updated!','success')}
+    else{await fsAdd('coordinatorattendance',data);toast('Marked!','success')}
+    closeM1();coordinatorattendance();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+async function delCoordAttend(id){if(!confirm('Delete?'))return;try{await fsDel('coordinatorattendance',id);toast('Deleted','success');coordinatorattendance()}catch(e){toast('Error','error')}}
+
 // ── TRAINER ATTENDANCE ────────────────────────────────────────
 async function trainerattendance(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const data=await fsGetAll('trainerattendance');
-  data.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  data.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.time||'').localeCompare(a.time||''));
   const present=data.filter(a=>a.status==='present').length,absent=data.filter(a=>a.status==='absent').length,late=data.filter(a=>a.status==='late').length;
   $('page').innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -1338,33 +1645,77 @@ async function trainerattendance(){
     </div>
     <div class="card" style="padding:0"><div class="tbl-wrap">
       ${data.length===0?emptyState('✅','No records','Mark trainer attendance to track it here.','+ Mark Attendance','openMarkTrainerAttend()')
-      :`<table><thead><tr><th>Date</th><th>Trainer</th><th>Status</th><th>Note</th><th>Marked By</th><th>Actions</th></tr></thead>
+      :`<table><thead><tr><th>Date</th><th>Time</th><th>Trainer</th><th>Status</th><th>Note</th><th>Marked By</th><th>Actions</th></tr></thead>
         <tbody>${data.map(a=>`<tr>
           <td style="font-size:12px">${a.date||'—'}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(a.time)||'—'}</td>
           <td><strong>${a.trainerName||'—'}</strong></td>
           <td>${statusBadge(a.status)}</td>
           <td style="font-size:12px">${a.note||'—'}</td>
           <td style="font-size:12px">${a.markedByName||'—'}</td>
-          <td><div class="td-actions"><button class="btn btn-d btn-sm" onclick="delTrainerAttend('${a.id}')">Delete</button></div></td>
+          <td><div class="td-actions">
+            <button class="btn btn-g btn-sm" onclick="openEditTrainerAttend('${a.id}')">Edit</button>
+            <button class="btn btn-d btn-sm" onclick="delTrainerAttend('${a.id}')">Delete</button>
+          </div></td>
         </tr>`).join('')}</tbody></table>`}
     </div></div>`;
 }
 async function openMarkTrainerAttend(){
   const trainers=await fsGetAll('users',fn().where('role','==','trainer'));
   openM1('MARK TRAINER ATTENDANCE',`
-    <div class="fg"><label class="fl">Trainer *</label><select class="fs" id="ta-trainer"><option value="">— Select —</option>${trainers.map(t=>`<option value="${t.id}">${t.name||t.email}</option>`).join('')}</select></div>
+    <div class="fg"><label class="fl">Trainer *</label>
+      <input class="fi" id="ta-trainer-inp" placeholder="Type trainer name…" autocomplete="off">
+      <input type="hidden" id="ta-trainer-id">
+    </div>
     <div class="fr">
       <div class="fg"><label class="fl">Date *</label><input class="fi" id="ta-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
-      <div class="fg"><label class="fl">Status *</label><select class="fs" id="ta-status"><option value="present">✅ Present</option><option value="absent">❌ Absent</option><option value="late">⏰ Late</option></select></div>
+      <div class="fg"><label class="fl">Time</label><input class="fi" id="ta-time" type="time" value="${new Date().toTimeString().slice(0,5)}"></div>
+    </div>
+    <div class="fg"><label class="fl">Status *</label>
+      <select class="fs" id="ta-status">
+        <option value="present">✅ Present</option>
+        <option value="absent">❌ Absent</option>
+        <option value="late">⏰ Late</option>
+      </select>
     </div>
     <div class="fg"><label class="fl">Note (optional)</label><input class="fi" id="ta-note" placeholder="Any remarks…"></div>
-    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTrainerAttend()">Save</button></div>`);
+    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTrainerAttend('')">Save</button></div>`);
+  attachUserAC('ta-trainer-inp','ta-trainer-id',trainers);
 }
-async function saveTrainerAttend(){
-  const trainerSel=$('ta-trainer');const trainerId=trainerSel.value,trainerName=trainerSel.options[trainerSel.selectedIndex]?.text||'';
-  const date=$('ta-date').value,status=$('ta-status').value;
-  if(!trainerId||!date){toast('Select trainer and date','error');return}
-  try{await fsAdd('trainerattendance',{trainerId,trainerName,date,status,note:$('ta-note').value,markedBy:auth().currentUser.uid,markedByName:CU.name||''});closeM1();toast('Marked!','success');trainerattendance()}catch(e){toast('Error: '+e.message,'error')}
+async function openEditTrainerAttend(id){
+  const a=await fsGet('trainerattendance',id);if(!a){toast('Not found','error');return}
+  const trainers=await fsGetAll('users',fn().where('role','==','trainer'));
+  openM1('EDIT TRAINER ATTENDANCE',`
+    <div class="fg"><label class="fl">Trainer *</label>
+      <input class="fi" id="ta-trainer-inp" placeholder="Type trainer name…" value="${a.trainerName||''}" autocomplete="off">
+      <input type="hidden" id="ta-trainer-id" value="${a.trainerId||''}">
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Date *</label><input class="fi" id="ta-date" type="date" value="${a.date||''}"></div>
+      <div class="fg"><label class="fl">Time</label><input class="fi" id="ta-time" type="time" value="${a.time||''}"></div>
+    </div>
+    <div class="fg"><label class="fl">Status *</label>
+      <select class="fs" id="ta-status">
+        <option value="present" ${a.status==='present'?'selected':''}>✅ Present</option>
+        <option value="absent" ${a.status==='absent'?'selected':''}>❌ Absent</option>
+        <option value="late" ${a.status==='late'?'selected':''}>⏰ Late</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Note</label><input class="fi" id="ta-note" value="${a.note||''}"></div>
+    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTrainerAttend('${id}')">Update</button></div>`);
+  attachUserAC('ta-trainer-inp','ta-trainer-id',trainers);
+}
+async function saveTrainerAttend(existingId=''){
+  const trainerId=$('ta-trainer-id').value||$('ta-trainer-inp')?.dataset.selectedId||'';
+  const trainerName=$('ta-trainer-inp')?.value||'';
+  const date=$('ta-date').value,status=$('ta-status').value,time=$('ta-time').value;
+  if(!trainerName||!date){toast('Select trainer and date','error');return}
+  const data={trainerId,trainerName,date,time,status,note:$('ta-note').value,markedBy:auth().currentUser.uid,markedByName:CU.name||''};
+  try{
+    if(existingId){await fsUpdate('trainerattendance',existingId,data);toast('Updated!','success')}
+    else{await fsAdd('trainerattendance',data);toast('Marked!','success')}
+    closeM1();trainerattendance();
+  }catch(e){toast('Error: '+e.message,'error')}
 }
 async function delTrainerAttend(id){if(!confirm('Delete?'))return;try{await fsDel('trainerattendance',id);toast('Deleted','success');trainerattendance()}catch(e){toast('Error: '+e.message,'error')}}
 
@@ -1414,14 +1765,42 @@ function renderSessionsTable(data,tab){
     </tr>`).join('')}</tbody></table>`;
 }
 async function markSessionStatus(id,status){try{await fsUpdate('sessions',id,{status});toast(`Session: ${status}`,'success')}catch(e){toast('Error: '+e.message,'error')}}
-function openAddSession(){loadSessionForm().then(html=>openM2('SCHEDULE SESSION',html))}
-async function openEditSession(id){const s=await fsGet('sessions',id);if(!s){toast('Not found','error');return}loadSessionForm(s).then(html=>openM2('EDIT SESSION',html))}
+function openAddSession(){loadSessionForm().then(html=>{openM2('SCHEDULE SESSION',html);initSessionFormAC()})}
+async function openEditSession(id){const s=await fsGet('sessions',id);if(!s){toast('Not found','error');return}loadSessionForm(s).then(html=>{openM2('EDIT SESSION',html);initSessionFormAC(s)})}
+
+async function initSessionFormAC(s={}){
+  const[clients,trainers]=await Promise.all([
+    fsGetAll('clients',fn().where('active','==',true)),
+    fsGetAll('users',fn().where('role','==','trainer'))
+  ]);
+  // Client autocomplete
+  const clientInp=document.getElementById('sf-client-inp');
+  if(clientInp){
+    const items=clients.map(c=>({id:c.id,label:c.name||'',sub:c.phone||''}));
+    createAutocomplete(clientInp,items,{minChars:0,onSelect(it){
+      const hid=document.getElementById('sf-client-id');if(hid)hid.value=it.id;
+    }});
+  }
+  // Trainer autocomplete
+  const trainerInp=document.getElementById('sf-trainer-inp');
+  if(trainerInp){
+    const items=trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''}));
+    createAutocomplete(trainerInp,items,{minChars:0,onSelect(it){
+      const hid=document.getElementById('sf-trainer-id');if(hid)hid.value=it.id;
+    }});
+  }
+}
+
 async function loadSessionForm(s={}){
-  const clients=await fsGetAll('clients',fn().where('active','==',true));
-  const trainers=await fsGetAll('users',fn().where('role','==','trainer'));
   return`<div class="fr">
-    <div><label class="fl">Client *</label><select class="fs" id="sf-client"><option value="">— Select client —</option>${clients.map(c=>`<option value="${c.id}" ${c.id===s.clientId?'selected':''}>${c.name}</option>`).join('')}</select></div>
-    <div><label class="fl">Trainer *</label><select class="fs" id="sf-trainer"><option value="">— Select trainer —</option>${trainers.map(t=>`<option value="${t.id}" ${t.id===s.trainerId?'selected':''}>${t.name||t.email} (${t.gender||'Any'})</option>`).join('')}</select></div>
+    <div><label class="fl">Client *</label>
+      <input class="fi" id="sf-client-inp" placeholder="Type client name…" value="${s.clientName||''}" autocomplete="off">
+      <input type="hidden" id="sf-client-id" value="${s.clientId||''}">
+    </div>
+    <div><label class="fl">Trainer *</label>
+      <input class="fi" id="sf-trainer-inp" placeholder="Type trainer name…" value="${s.trainerName||''}" autocomplete="off">
+      <input type="hidden" id="sf-trainer-id" value="${s.trainerId||''}">
+    </div>
   </div>
   <div class="fr">
     <div><label class="fl">Date *</label><input class="fi" id="sf-date" type="date" value="${s.date||''}"></div>
@@ -1436,12 +1815,12 @@ async function loadSessionForm(s={}){
   <div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveSession('${s.id||''}')">Save Session</button></div>`;
 }
 async function saveSession(existingId=''){
-  const clientSel=$('sf-client'),trainerSel=$('sf-trainer');
-  const clientId=clientSel.value,clientName=clientSel.options[clientSel.selectedIndex]?.text||'';
-  const trainerId=trainerSel.value;
-  const trainerName=trainerId?trainerSel.options[trainerSel.selectedIndex]?.text.replace(/\s*\([^)]*\)\s*$/,'').trim():'';
+  const clientId=$('sf-client-id').value||$('sf-client-inp')?.dataset.selectedId||'';
+  const clientName=$('sf-client-inp')?.value||'';
+  const trainerId=$('sf-trainer-id').value||$('sf-trainer-inp')?.dataset.selectedId||'';
+  const trainerName=($('sf-trainer-inp')?.value||'').replace(/\s*\([^)]*\)\s*$/,'').trim();
   const date=$('sf-date').value,time=$('sf-time').value;
-  if(!clientId||!trainerId||!date||!time){toast('Client, trainer, date and time required','error');return}
+  if(!clientName||!trainerName||!date||!time){toast('Client, trainer, date and time required','error');return}
   const data={clientId,clientName,trainerId,trainerName,date,time,type:$('sf-type').value,status:$('sf-status').value||'not-started',meetLink:$('sf-link').value.trim(),notes:$('sf-notes').value};
   try{
     if(existingId){await fsUpdate('sessions',existingId,data);toast('Updated!','success')}
@@ -1485,7 +1864,10 @@ async function attendance(){
 async function openMarkAttendance(){
   const cls=await fsGetAll('clients',fn().where('active','==',true));
   openM1('MARK ATTENDANCE',`
-    <div class="fg"><label class="fl">Client *</label><select class="fs" id="at-client"><option value="">— Select —</option>${cls.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+    <div class="fg"><label class="fl">Client *</label>
+      <input class="fi" id="at-client-inp" placeholder="Type client name…" autocomplete="off">
+      <input type="hidden" id="at-client-id">
+    </div>
     <div class="fr">
       <div class="fg"><label class="fl">Date *</label><input class="fi" id="at-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
       <div class="fg"><label class="fl">Status *</label><select class="fs" id="at-status"><option value="present">✅ Present</option><option value="absent">❌ Absent</option><option value="late">⏰ Late</option></select></div>
@@ -1493,24 +1875,31 @@ async function openMarkAttendance(){
     <div class="fg"><label class="fl">Session Type</label><select class="fs" id="at-type"><option value="">— Select —</option>${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div>
     <div class="fg"><label class="fl">Reason</label><input class="fi" id="at-reason" placeholder="Optional reason"></div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveAttendance('')">Save</button></div>`);
+  attachClientAC('at-client-inp','at-client-id',cls);
 }
 async function openEditAttend(id){
   const a=await fsGet('attendance',id);if(!a){toast('Not found','error');return}
   const cls=await fsGetAll('clients',fn().where('active','==',true));
+  const preClient=cls.find(c=>c.id===a.clientId);
   openM1('EDIT ATTENDANCE',`
-    <div class="fg"><label class="fl">Client *</label><select class="fs" id="at-client"><option value="">— Select —</option>${cls.map(c=>`<option value="${c.id}" ${c.id===a.clientId?'selected':''}>${c.name}</option>`).join('')}</select></div>
+    <div class="fg"><label class="fl">Client *</label>
+      <input class="fi" id="at-client-inp" placeholder="Type client name…" value="${a.clientName||''}" autocomplete="off">
+      <input type="hidden" id="at-client-id" value="${a.clientId||''}">
+    </div>
     <div class="fr">
       <div class="fg"><label class="fl">Date *</label><input class="fi" id="at-date" type="date" value="${a.date||''}"></div>
       <div class="fg"><label class="fl">Status *</label><select class="fs" id="at-status"><option value="present" ${a.status==='present'?'selected':''}>✅ Present</option><option value="absent" ${a.status==='absent'?'selected':''}>❌ Absent</option><option value="late" ${a.status==='late'?'selected':''}>⏰ Late</option></select></div>
     </div>
     <div class="fg"><label class="fl">Reason</label><input class="fi" id="at-reason" value="${a.reason||''}"></div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveAttendance('${id}')">Update</button></div>`);
+  attachClientAC('at-client-inp','at-client-id',cls);
 }
 async function saveAttendance(existingId=''){
-  const clientSel=$('at-client');const clientId=clientSel.value,clientName=clientSel.options[clientSel.selectedIndex]?.text||'';
+  const clientId=$('at-client-id').value||$('at-client-inp')?.dataset.selectedId||'';
+  const clientName=$('at-client-inp')?.value||'';
   const date=$('at-date').value,status=$('at-status').value;
-  if(!clientId||!date||!status){toast('Fill required fields','error');return}
-  const clientDoc=await fsGet('clients',clientId);
+  if(!clientName||!date||!status){toast('Fill required fields','error');return}
+  const clientDoc=clientId?await fsGet('clients',clientId):null;
   const data={clientId,clientName,trainerId:clientDoc?.trainerId||'',trainerName:clientDoc?.trainerName||'',date,status,sessionType:document.getElementById('at-type')?.value||'',reason:$('at-reason').value,markedBy:auth().currentUser.uid};
   try{if(existingId){await fsUpdate('attendance',existingId,data);toast('Updated!','success')}else{await fsAdd('attendance',data);toast('Marked!','success')}closeM1();attendance()}catch(e){toast('Error: '+e.message,'error')}
 }
@@ -1550,7 +1939,10 @@ async function payments(){
 async function openAddPayment(){
   const cls=await fsGetAll('clients',fn().where('active','==',true));
   openM1('RECORD PAYMENT',`
-    <div class="fg"><label class="fl">Client *</label><select class="fs" id="pf-client"><option value="">— Select —</option>${cls.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+    <div class="fg"><label class="fl">Client *</label>
+      <input class="fi" id="pf-client-inp" placeholder="Type client name…" autocomplete="off">
+      <input type="hidden" id="pf-client-id">
+    </div>
     <div class="fr">
       <div class="fg"><label class="fl">Plan *</label><select class="fs" id="pf-plan">${PLANS.map(p=>`<option>${p}</option>`).join('')}</select></div>
       <div class="fg"><label class="fl">Amount (₹) *</label><input class="fi" id="pf-amount" type="number" placeholder="e.g. 8000"></div>
@@ -1565,12 +1957,16 @@ async function openAddPayment(){
     </div>
     <div class="fg"><label class="fl">Notes</label><input class="fi" id="pf-notes" placeholder="Transaction ID or remarks…"></div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="savePayment('')">Save</button></div>`);
+  attachClientAC('pf-client-inp','pf-client-id',cls);
 }
 async function editPayment(id){
   const p=await fsGet('payments',id);if(!p){toast('Not found','error');return}
   const cls=await fsGetAll('clients',fn().where('active','==',true));
   openM1('EDIT PAYMENT',`
-    <div class="fg"><label class="fl">Client *</label><select class="fs" id="pf-client"><option value="">— Select —</option>${cls.map(c=>`<option value="${c.id}" ${c.id===p.clientId?'selected':''}>${c.name}</option>`).join('')}</select></div>
+    <div class="fg"><label class="fl">Client *</label>
+      <input class="fi" id="pf-client-inp" placeholder="Type client name…" value="${p.clientName||''}" autocomplete="off">
+      <input type="hidden" id="pf-client-id" value="${p.clientId||''}">
+    </div>
     <div class="fr">
       <div class="fg"><label class="fl">Plan</label><select class="fs" id="pf-plan">${PLANS.map(pl=>`<option ${p.plan===pl?'selected':''}>${pl}</option>`).join('')}</select></div>
       <div class="fg"><label class="fl">Amount (₹)</label><input class="fi" id="pf-amount" type="number" value="${p.amount||''}"></div>
@@ -1584,11 +1980,13 @@ async function editPayment(id){
       <div class="fg"><label class="fl">Status</label><select class="fs" id="pf-status"><option value="paid" ${p.status==='paid'?'selected':''}>Paid</option><option value="pending" ${p.status==='pending'?'selected':''}>Pending</option><option value="overdue" ${p.status==='overdue'?'selected':''}>Overdue</option></select></div>
     </div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="savePayment('${id}')">Update</button></div>`);
+  attachClientAC('pf-client-inp','pf-client-id',cls);
 }
 async function savePayment(existingId=''){
-  const clientSel=$('pf-client');const clientId=clientSel.value,clientName=clientSel.options[clientSel.selectedIndex]?.text||'';
+  const clientId=$('pf-client-id').value||$('pf-client-inp')?.dataset.selectedId||'';
+  const clientName=$('pf-client-inp')?.value||'';
   const amount=$('pf-amount').value;
-  if(!clientId||!amount){toast('Client and amount required','error');return}
+  if(!clientName||!amount){toast('Client and amount required','error');return}
   const data={clientId,clientName,plan:$('pf-plan').value,amount:Number(amount),date:$('pf-date').value,dueDate:$('pf-due').value,mode:$('pf-mode').value,status:$('pf-status').value,notes:document.getElementById('pf-notes')?.value||'',recordedBy:auth().currentUser.uid};
   try{
     if(existingId){await fsUpdate('payments',existingId,data);toast('Updated!','success')}
@@ -1668,9 +2066,16 @@ async function followups(){
 async function openAddFollowup(){
   const cls=await fsGetAll('clients',fn().where('active','==',true));
   let coordOpts='<option value="">— Assign to (optional) —</option>';
-  if(CR==='admin'||CR==='coordinatorhead'){const coords=await fsGetAll('users',fn().where('role','==','coordinator'));coordOpts+=coords.map(c=>`<option value="${c.id}" data-name="${c.name||c.email}">${c.name||c.email}</option>`).join('')}
+  let coordList=[];
+  if(CR==='admin'||CR==='coordinatorhead'){
+    coordList=await fsGetAll('users',fn().where('role','==','coordinator'));
+    coordOpts+=coordList.map(c=>`<option value="${c.id}" data-name="${c.name||c.email}">${c.name||c.email}</option>`).join('');
+  }
   openM1('ADD FOLLOW-UP',`
-    <div class="fg"><label class="fl">Client *</label><select class="fs" id="ff-client"><option value="">— Select —</option>${cls.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+    <div class="fg"><label class="fl">Client *</label>
+      <input class="fi" id="ff-client-inp" placeholder="Type client name…" autocomplete="off">
+      <input type="hidden" id="ff-client-id">
+    </div>
     <div class="fr">
       <div class="fg"><label class="fl">Type *</label><select class="fs" id="ff-type"><option value="">— Select —</option>${['Motivation','Renewal','Progress Check','Diet Review','Payment Reminder','General Check-in'].map(t=>`<option>${t}</option>`).join('')}</select></div>
       <div class="fg"><label class="fl">Priority</label><select class="fs" id="ff-priority"><option>High</option><option>Medium</option><option>Low</option></select></div>
@@ -1679,11 +2084,13 @@ async function openAddFollowup(){
     <div class="fg"><label class="fl">Remarks</label><textarea class="fta" id="ff-remark"></textarea></div>
     <div class="fg"><label class="fl">Due Date</label><input class="fi" id="ff-due" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveFollowup()">Save</button></div>`);
+  attachClientAC('ff-client-inp','ff-client-id',cls);
 }
 async function saveFollowup(){
-  const clientSel=$('ff-client');const clientId=clientSel.value,clientName=clientSel.options[clientSel.selectedIndex]?.text||'';
+  const clientId=$('ff-client-id').value||$('ff-client-inp')?.dataset.selectedId||'';
+  const clientName=$('ff-client-inp')?.value||'';
   const type=$('ff-type').value;
-  if(!clientId||!type){toast('Client and type required','error');return}
+  if(!clientName||!type){toast('Client and type required','error');return}
   const assignSel=document.getElementById('ff-assign');
   const assignedTo=assignSel?assignSel.value:'';
   const assignedToName=assignSel&&assignSel.selectedIndex>0?assignSel.options[assignSel.selectedIndex].dataset.name||assignSel.options[assignSel.selectedIndex].text:'';
@@ -1721,7 +2128,10 @@ async function openAddFeedback(){
   if(CR==='trainer')myClients=await fsGetAll('clients',fn().where('trainerId','==',auth().currentUser.uid),fn().where('active','==',true));
   else myClients=await fsGetAll('clients',fn().where('active','==',true));
   openM1('ADD FEEDBACK',`
-    <div class="fg"><label class="fl">Client *</label><select class="fs" id="fbf-client"><option value="">— Select —</option>${myClients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+    <div class="fg"><label class="fl">Client *</label>
+      <input class="fi" id="fbf-client-inp" placeholder="Type client name…" autocomplete="off">
+      <input type="hidden" id="fbf-client-id">
+    </div>
     <div class="fg"><label class="fl">Session Date</label><input class="fi" id="fbf-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
     <div class="fr">
       <div class="fg"><label class="fl">Performance</label><select class="fs" id="fbf-perf"><option>Excellent</option><option>Good</option><option>Fair</option><option>Poor</option></select></div>
@@ -1729,10 +2139,12 @@ async function openAddFeedback(){
     </div>
     <div class="fg"><label class="fl">Notes</label><textarea class="fta" id="fbf-notes"></textarea></div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveFeedback()">Save</button></div>`);
+  attachClientAC('fbf-client-inp','fbf-client-id',myClients);
 }
 async function saveFeedback(){
-  const clientSel=$('fbf-client');const clientId=clientSel.value,clientName=clientSel.options[clientSel.selectedIndex]?.text||'';
-  if(!clientId){toast('Select a client','error');return}
+  const clientId=$('fbf-client-id').value||$('fbf-client-inp')?.dataset.selectedId||'';
+  const clientName=$('fbf-client-inp')?.value||'';
+  if(!clientName){toast('Select a client','error');return}
   try{await fsAdd('feedback',{clientId,clientName,trainerId:auth().currentUser.uid,trainerName:CU.name||'',date:$('fbf-date').value,performance:$('fbf-perf').value,diet:$('fbf-diet').value,notes:$('fbf-notes').value});closeM1();toast('Saved!','success');feedback()}catch(e){toast('Error: '+e.message,'error')}
 }
 async function delFeedback(id){if(!confirm('Delete?'))return;try{await fsDel('feedback',id);toast('Deleted','success');feedback()}catch(e){toast('Error','error')}}
@@ -1742,23 +2154,11 @@ async function chat(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   if(_chatUnsub){_chatUnsub();_chatUnsub=null}
   let contacts=[];const myUid=auth().currentUser.uid;
-  if(CR==='trainer'){
-    const[myClients,coords,heads,admins]=await Promise.all([fsGetAll('clients',fn().where('trainerId','==',myUid),fn().where('active','==',true)),fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','coordinatorhead')),fsGetAll('users',fn().where('role','==','admin'))]);
-    contacts=[...myClients.map(c=>({...c,_chatRole:'client',_chatLabel:'Client'})),...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'})),...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))];
-  }else if(CR==='client'){
-    const myDocs=await fsGetAll('clients',fn().where('email','==',CU.email));
-    const myDoc=myDocs[0];
-    if(myDoc?.trainerId){const trainer=await fsGet('users',myDoc.trainerId);if(trainer)contacts=[{...trainer,_chatRole:'trainer',_chatLabel:'Your Trainer'}]}
-  }else if(CR==='coordinator'){
-    const[trainers,heads,admins]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('users',fn().where('role','==','coordinatorhead')),fsGetAll('users',fn().where('role','==','admin'))]);
-    contacts=[...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'})),...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))];
-  }else if(CR==='coordinatorhead'){
-    const[coords,trainers,admins]=await Promise.all([fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('users',fn().where('role','==','admin'))]);
-    contacts=[...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))];
-  }else if(CR==='admin'){
-    const[trainers,coords,heads]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','coordinatorhead'))]);
-    contacts=[...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'}))];
-  }
+  if(CR==='trainer'){const[myClients,coords,heads,admins]=await Promise.all([fsGetAll('clients',fn().where('trainerId','==',myUid),fn().where('active','==',true)),fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','coordinatorhead')),fsGetAll('users',fn().where('role','==','admin'))]);contacts=[...myClients.map(c=>({...c,_chatRole:'client',_chatLabel:'Client'})),...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'})),...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))]}
+  else if(CR==='client'){const myDocs=await fsGetAll('clients',fn().where('email','==',CU.email));const myDoc=myDocs[0];if(myDoc?.trainerId){const trainer=await fsGet('users',myDoc.trainerId);if(trainer)contacts=[{...trainer,_chatRole:'trainer',_chatLabel:'Your Trainer'}]}}
+  else if(CR==='coordinator'){const[trainers,heads,admins]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('users',fn().where('role','==','coordinatorhead')),fsGetAll('users',fn().where('role','==','admin'))]);contacts=[...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'})),...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))]}
+  else if(CR==='coordinatorhead'){const[coords,trainers,admins]=await Promise.all([fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('users',fn().where('role','==','admin'))]);contacts=[...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))]}
+  else if(CR==='admin'){const[trainers,coords,heads]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','coordinatorhead'))]);contacts=[...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'}))]}
   contacts=contacts.filter(c=>c.id!==myUid);
   $('page').innerHTML=`
     <div class="chat-layout" id="chat-layout">
@@ -1767,7 +2167,7 @@ async function chat(){
         <div class="chat-list" id="chat-contact-list"></div>
       </div>
       <div class="chat-main" id="chat-main">
-        <div class="chat-empty"><div style="font-size:40px">💬</div><div style="font-size:13px;color:var(--muted)">Select a contact to start chatting</div></div>
+        <div class="chat-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%"><div style="font-size:40px">💬</div><div style="font-size:13px;color:var(--muted)">Select a contact to start chatting</div></div>
       </div>
     </div>`;
   window._chatContacts=contacts;window._chatMyUid=myUid;
@@ -1777,8 +2177,7 @@ function roleColorForChat(role){const map={admin:'var(--purple)',coordinatorhead
 function renderChatContacts(contacts){
   const list=$('chat-contact-list');if(!list)return;
   if(!contacts.length){list.innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No contacts.</div>`;return}
-  list.innerHTML=contacts.map(c=>{
-    const rl=c._chatLabel||c.role||'';const rc=roleColorForChat(c._chatRole||c.role);
+  list.innerHTML=contacts.map(c=>{const rl=c._chatLabel||c.role||'';const rc=roleColorForChat(c._chatRole||c.role);
     return`<div class="chat-item" id="ci-${c.id}" onclick="openChatWith('${c.id}','${(c.name||c.email||'').replace(/'/g,"\\'")}','${rl}','${c._chatRole||c.role}')">
       <div style="width:36px;height:36px;border-radius:50%;background:${rc.bg};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;color:${rc.fg}">${(c.name||c.email||'?')[0].toUpperCase()}</div>
       <div style="min-width:0;flex:1"><div class="chat-item-name">${c.name||c.email}</div><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${rc.fg};margin-top:2px">${rl}</div></div>
@@ -1811,12 +2210,7 @@ async function openChatWith(contactId,contactName,contactRole,rawRole){
       const msgs=$('chat-msgs');if(!msgs)return;
       msgs.innerHTML='';
       if(snapshot.empty){msgs.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Start the conversation! 👋</div>`;return}
-      snapshot.forEach(doc=>{
-        const m={id:doc.id,...doc.data()};const isMe=m.senderId===myUid;const ts=m.timestamp?fmtFullTime(m.timestamp):'';
-        const div=document.createElement('div');div.className=`msg ${isMe?'msg-out':'msg-in'}`;
-        div.innerHTML=`${m.message}<div class="msg-meta">${ts}${isMe?` · ${m.read?'✓✓':'✓'}`:''}</div>`;
-        msgs.appendChild(div);
-      });
+      snapshot.forEach(doc=>{const m={id:doc.id,...doc.data()};const isMe=m.senderId===myUid;const ts=m.timestamp?fmtFullTime(m.timestamp):'';const div=document.createElement('div');div.className=`msg ${isMe?'msg-out':'msg-in'}`;div.innerHTML=`${m.message}<div class="msg-meta">${ts}${isMe?` · ${m.read?'✓✓':'✓'}`:''}</div>`;msgs.appendChild(div)});
       msgs.scrollTop=msgs.scrollHeight;markMsgsRead(chatId,myUid);
     });
   }catch(e){const msgs=$('chat-msgs');if(msgs)msgs.innerHTML=`<div style="padding:20px;color:var(--red);font-size:13px">⚠️ ${e.message}</div>`}
@@ -1850,13 +2244,7 @@ async function chatmonitor(){
     </div>`;
   window._monitorChats=chats;window._monitorUsers=users;
 }
-function filterMonitorChats(){
-  if(!window._monitorChats)return;const v=($('cm-search').value||'').toLowerCase();
-  function getUserName(uid){const u=(window._monitorUsers||[]).find(x=>x.id===uid);return u?u.name||u.email:uid}
-  const filtered=window._monitorChats.filter(c=>{const parts=(c.participants||[]).map(getUserName).join(' ').toLowerCase();return parts.includes(v)||(c.lastMessage||'').toLowerCase().includes(v)});
-  const container=$('chat-monitor-list');if(!container)return;
-  container.innerHTML=filtered.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">${filtered.map(c=>{const parts=(c.participants||[]).map(getUserName).join(' ↔ ');return`<div class="card" style="cursor:pointer" onclick="adminViewChat('${c.id}')"><div style="font-weight:600;font-size:13px;margin-bottom:6px">${parts}</div><div style="font-size:12px;color:var(--muted)">${c.lastMessage||'No messages'}</div></div>`;}).join('')}</div>`:emptyState('🔍','No results','','','');
-}
+function filterMonitorChats(){if(!window._monitorChats)return;const v=($('cm-search').value||'').toLowerCase();function getUserName(uid){const u=(window._monitorUsers||[]).find(x=>x.id===uid);return u?u.name||u.email:uid}const filtered=window._monitorChats.filter(c=>{const parts=(c.participants||[]).map(getUserName).join(' ').toLowerCase();return parts.includes(v)||(c.lastMessage||'').toLowerCase().includes(v)});const container=$('chat-monitor-list');if(!container)return;container.innerHTML=filtered.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">${filtered.map(c=>{const parts=(c.participants||[]).map(getUserName).join(' ↔ ');return`<div class="card" style="cursor:pointer" onclick="adminViewChat('${c.id}')"><div style="font-weight:600;font-size:13px;margin-bottom:6px">${parts}</div><div style="font-size:12px;color:var(--muted)">${c.lastMessage||'No messages'}</div></div>`;}).join('')}</div>`:emptyState('🔍','No results','','','');}
 async function adminViewChat(chatId){
   const users=window._monitorUsers||await fsGetAll('users');
   function getUserName(uid){const u=users.find(x=>x.id===uid);return u?`${u.name||u.email} (${u.role})`:uid}
@@ -1867,18 +2255,10 @@ async function adminViewChat(chatId){
     </div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeM3()">Close</button></div>`);
   try{
-    const msgsRef=fn().collection(db(),`chats/${chatId}/messages`);
-    const q=fn().query(msgsRef,fn().orderBy('timestamp','asc'));
-    const snap=await fn().getDocs(q);
-    const container=$('admin-chat-msgs');if(!container)return;
-    container.innerHTML='';
+    const msgsRef=fn().collection(db(),`chats/${chatId}/messages`);const q=fn().query(msgsRef,fn().orderBy('timestamp','asc'));const snap=await fn().getDocs(q);
+    const container=$('admin-chat-msgs');if(!container)return;container.innerHTML='';
     if(snap.empty){container.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px">No messages.</div>`;return}
-    snap.forEach(doc=>{
-      const m={id:doc.id,...doc.data()};const ts=m.timestamp?fmtFullTime(m.timestamp):'';
-      const div=document.createElement('div');div.style.cssText='padding:10px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);font-size:13px';
-      div.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:4px"><strong style="color:var(--accent)">${getUserName(m.senderId)}</strong><span style="font-size:10px;color:var(--muted)">${ts}</span></div>${m.message}`;
-      container.appendChild(div);
-    });
+    snap.forEach(doc=>{const m={id:doc.id,...doc.data()};const ts=m.timestamp?fmtFullTime(m.timestamp):'';const div=document.createElement('div');div.style.cssText='padding:10px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);font-size:13px';div.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:4px"><strong style="color:var(--accent)">${getUserName(m.senderId)}</strong><span style="font-size:10px;color:var(--muted)">${ts}</span></div>${m.message}`;container.appendChild(div)});
     container.scrollTop=container.scrollHeight;
   }catch(e){const c=$('admin-chat-msgs');if(c)c.innerHTML=`<div style="color:var(--red);font-size:13px">⚠️ ${e.message}</div>`}
 }
