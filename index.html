@@ -250,10 +250,6 @@ tbody tr:last-child td{border-bottom:none}
 .ac-item:last-child{border-bottom:none}
 .ac-item-sub{font-size:11px;color:var(--muted);margin-left:auto}
 .ac-no-results{padding:10px 14px;font-size:13px;color:var(--muted);text-align:center}
-/* Time chart styles */
-.tc-row{display:grid;grid-template-columns:160px 120px 90px 90px 120px 100px 80px 120px;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);align-items:center;font-size:12px}
-.tc-row:hover{background:rgba(128,128,128,.04)}
-.tc-head{background:rgba(128,128,128,.06);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-radius:8px 8px 0 0}
 .renewal-alert{background:var(--red-dim);border:1px solid rgba(255,68,68,.3);border-radius:10px;padding:14px 18px;margin-bottom:14px}
 .renewal-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,68,68,.15);font-size:13px}
 .renewal-item:last-child{border-bottom:none}
@@ -262,7 +258,6 @@ tbody tr:last-child td{border-bottom:none}
   .fr{grid-template-columns:1fr}.two-col{grid-template-columns:1fr}.three-col{grid-template-columns:1fr}
   .stats-grid{grid-template-columns:1fr 1fr}.lc{padding:28px 18px}.page{padding:14px}
   .chat-layout{grid-template-columns:1fr;height:auto}.chat-sidebar{height:300px}
-  .tc-row{grid-template-columns:1fr 1fr;gap:4px}
 }
 </style>
 </head>
@@ -523,66 +518,32 @@ async function dash(){
     const todayS=sessions.filter(s=>s.date&&new Date(s.date).toDateString()===today);
     const onair=todayS.filter(s=>s.status==='onair').length,missed=todayS.filter(s=>s.status==='missed').length;
     let revenue=0,pending=0;payments.forEach(p=>{if(p.status==='paid')revenue+=Number(p.amount)||0;else pending+=Number(p.amount)||0});
-
-    // --- Renewal alerts for admin/head ---
     const renewalAlerts=clients.filter(c=>{if(!c.startDate)return false;const start=new Date(c.startDate);const daysSince=Math.floor((new Date()-start)/(1000*60*60*24));return daysSince>=22;});
-
     let renewalHtml='';
     if(renewalAlerts.length>0){
       renewalHtml=`<div class="renewal-alert" style="margin-bottom:18px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div style="font-weight:700;color:var(--red);font-size:14px">🔔 Renewal Alerts (${renewalAlerts.length} clients)</div>
         </div>
-        ${renewalAlerts.map(c=>{
-          const start=new Date(c.startDate);
-          const daysSince=Math.floor((new Date()-start)/(1000*60*60*24));
-          return`<div class="renewal-item">
-            <div><strong>${c.name}</strong> <span style="color:var(--muted);font-size:12px">• ${c.plan||'—'} • ${c.trainerName||'—'}</span></div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span class="badge b-r">Day ${daysSince}</span>
-              <button class="btn btn-d btn-sm" onclick="closeM1();navTo('clients')">View</button>
-            </div>
-          </div>`;}).join('')}
+        ${renewalAlerts.map(c=>{const start=new Date(c.startDate);const daysSince=Math.floor((new Date()-start)/(1000*60*60*24));return`<div class="renewal-item"><div><strong>${c.name}</strong> <span style="color:var(--muted);font-size:12px">• ${c.plan||'—'} • ${c.trainerName||'—'}</span></div><div style="display:flex;align-items:center;gap:8px"><span class="badge b-r">Day ${daysSince}</span><button class="btn btn-d btn-sm" onclick="navTo('clients')">View</button></div></div>`;}).join('')}
       </div>`;
     }
-
     let staffSectionHtml='';
     if(CR==='admin'){
       const allCoordStaff=[...coordUsers,...headUsers];
       if(allCoordStaff.length>0){
         const followups=await fsGetAll('followups');
         const ratings=await fsGetAll('trainerratings');
-        staffSectionHtml=`
-        <div class="card" style="margin-bottom:18px">
-          <div class="card-hd"><div class="card-title">👥 Coordinator Staff Overview</div><button class="btn btn-g btn-sm" onclick="navTo('coordinators')">View All →</button></div>
-          <div class="staff-grid">
-            ${allCoordStaff.map(u=>{
-              const rc=roleColor(u.role);const myFU=followups.filter(f=>f.assignedTo===u.id);const pendingFU=myFU.filter(f=>!f.done).length;const myRatings=ratings.filter(r=>r.ratedById===u.id);const avgR=myRatings.length?avgRating(myRatings):0;const ini=(u.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-              return`<div class="staff-card">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-                  <div class="staff-avatar" style="background:${rc}20;color:${rc}">${ini}</div>
-                  <div><div style="font-weight:700;font-size:14px">${u.name||'—'}</div><span class="badge ${u.role==='coordinatorhead'?'b-o':'b-b'}" style="font-size:10px">${u.role==='coordinatorhead'?'Coord. Head':'Coordinator'}</span></div>
-                </div>
-                <div style="font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px">
-                  <div>📞 Follow-ups: <strong>${myFU.length}</strong> (${pendingFU} pending)</div>
-                  <div>⭐ Ratings given: <strong>${myRatings.length}</strong></div>
-                  ${u.phone?`<div>📱 ${u.phone}</div>`:''}
-                  <div>Status: ${u.active!==false?'<span class="badge b-g" style="font-size:10px">Active</span>':'<span class="badge b-r" style="font-size:10px">Inactive</span>'}</div>
-                </div>
-              </div>`;}).join('')}
-          </div>
-        </div>`;
+        staffSectionHtml=`<div class="card" style="margin-bottom:18px"><div class="card-hd"><div class="card-title">👥 Coordinator Staff Overview</div><button class="btn btn-g btn-sm" onclick="navTo('coordinators')">View All →</button></div><div class="staff-grid">${allCoordStaff.map(u=>{const rc=roleColor(u.role);const myFU=followups.filter(f=>f.assignedTo===u.id);const pendingFU=myFU.filter(f=>!f.done).length;const myRatings=ratings.filter(r=>r.ratedById===u.id);const avgR=myRatings.length?avgRating(myRatings):0;const ini=(u.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);return`<div class="staff-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="staff-avatar" style="background:${rc}20;color:${rc}">${ini}</div><div><div style="font-weight:700;font-size:14px">${u.name||'—'}</div><span class="badge ${u.role==='coordinatorhead'?'b-o':'b-b'}" style="font-size:10px">${u.role==='coordinatorhead'?'Coord. Head':'Coordinator'}</span></div></div><div style="font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px"><div>📞 Follow-ups: <strong>${myFU.length}</strong> (${pendingFU} pending)</div><div>⭐ Ratings given: <strong>${myRatings.length}</strong></div>${u.phone?`<div>📱 ${u.phone}</div>`:''}<div>Status: ${u.active!==false?'<span class="badge b-g" style="font-size:10px">Active</span>':'<span class="badge b-r" style="font-size:10px">Inactive</span>'}</div></div></div>`;}).join('')}</div></div>`;
       }
     }
-
     $('page').innerHTML=`
       ${renewalHtml}
       <div class="stats-grid">
         <div class="sc sc-a"><div class="sc-ico">🏃</div><div class="sc-lbl">Active Clients</div><div class="sc-val">${clients.length}</div><div class="sc-sub">Total registered</div></div>
         <div class="sc sc-g"><div class="sc-ico">🟢</div><div class="sc-lbl">Today Sessions</div><div class="sc-val">${todayS.length}</div><div class="sc-sub">${onair} on air now</div></div>
         <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Missed Today</div><div class="sc-val">${missed}</div><div class="sc-sub">Sessions missed</div></div>
-        ${CR==='admin'?`<div class="sc sc-y"><div class="sc-ico">💰</div><div class="sc-lbl">Revenue (Total)</div><div class="sc-val">₹${(revenue/1000).toFixed(1)}K</div><div class="sc-sub">₹${pending} pending</div></div>
-        <div class="sc sc-b"><div class="sc-ico">🧑‍💼</div><div class="sc-lbl">Coordinators</div><div class="sc-val">${coordUsers.length+headUsers.length}</div><div class="sc-sub">${headUsers.length} head, ${coordUsers.length} coord.</div></div>`:''}
+        ${CR==='admin'?`<div class="sc sc-y"><div class="sc-ico">💰</div><div class="sc-lbl">Revenue (Total)</div><div class="sc-val">₹${(revenue/1000).toFixed(1)}K</div><div class="sc-sub">₹${pending} pending</div></div><div class="sc sc-b"><div class="sc-ico">🧑‍💼</div><div class="sc-lbl">Coordinators</div><div class="sc-val">${coordUsers.length+headUsers.length}</div><div class="sc-sub">${headUsers.length} head, ${coordUsers.length} coord.</div></div>`:''}
       </div>
       ${staffSectionHtml}
       <div class="two-col">
@@ -599,7 +560,6 @@ async function dash(){
         </div>
         <div id="dash-sessions">${todayS.length===0?emptyState('📅','No sessions today','Schedule sessions to see them here','',''):'<div style="color:var(--muted);padding:20px">Loading…</div>'}</div>
       </div>`;
-
     setTimeout(()=>{
       const statusCounts={onair:0,completed:0,missed:0,'not-started':0};
       const thisMonth=new Date().getMonth();
@@ -608,29 +568,17 @@ async function dash(){
       if(ctx1)CH.s1=new Chart(ctx1,{type:'doughnut',data:{labels:['On Air','Completed','Missed','Pending'],datasets:[{data:[statusCounts.onair,statusCounts.completed,statusCounts.missed,statusCounts['not-started']],backgroundColor:['#00e676','#d4ff00','#ff4444','#888'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'var(--muted)',font:{size:12}}}}}});
       if(CR==='admin'){const planRev={};PLANS.forEach(p=>planRev[p]=0);payments.filter(p=>p.status==='paid').forEach(p=>{if(planRev[p.plan]!==undefined)planRev[p.plan]+=Number(p.amount)||0});const ctx2=document.getElementById('ch-plan');if(ctx2)CH.s2=new Chart(ctx2,{type:'doughnut',data:{labels:PLANS,datasets:[{data:PLANS.map(p=>planRev[p]),backgroundColor:['#aaa','#ffbb00','#aa66ff','#00e676','#4d9fff'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'var(--muted)',font:{size:12}}}}}});}
     },100);
-
     if(todayS.length>0){
-      const rows=todayS.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)">
-        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:80px">${to12h(s.time)}</div>
-        <div style="flex:1"><div style="font-weight:600;font-size:13px">${s.clientName||'—'}</div><div style="font-size:12px;color:var(--muted)">${s.trainerName||'—'} • ${s.type||'Session'}</div></div>
-        ${statusBadge(s.status)}
-        ${CR!=='client'?`<div style="display:flex;gap:5px">${s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair')">Start</button>`:''}${s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">Done</button>`:''}</div>`:''}
-      </div>`).join('');
+      const rows=todayS.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:80px">${to12h(s.time)}</div><div style="flex:1"><div style="font-weight:600;font-size:13px">${s.clientName||'—'}</div><div style="font-size:12px;color:var(--muted)">${s.trainerName||'—'} • ${s.type||'Session'}</div></div>${statusBadge(s.status)}${CR!=='client'?`<div style="display:flex;gap:5px">${s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair')">Start</button>`:''} ${s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">Done</button>`:''}</div>`:''}</div>`).join('');
       $('dash-sessions').innerHTML=`<div style="padding:0 2px">${rows}</div>`;
     }
   } else if(CR==='coordinator'){
-    // ── COORDINATOR DASHBOARD — shows follow-ups assigned to them ──
     const myUid=auth().currentUser.uid;
-    const[clients,sessions,myFollowups]=await Promise.all([
-      fsGetAll('clients',fn().where('active','==',true)),
-      fsGetAll('sessions'),
-      fsGetAll('followups',fn().where('assignedTo','==',myUid))
-    ]);
+    const[clients,sessions,myFollowups]=await Promise.all([fsGetAll('clients',fn().where('active','==',true)),fsGetAll('sessions'),fsGetAll('followups',fn().where('assignedTo','==',myUid))]);
     const today=new Date().toDateString();
     const todayS=sessions.filter(s=>s.date&&new Date(s.date).toDateString()===today);
     const pendingFU=myFollowups.filter(f=>!f.done&&f.status!=='completed');
     const doneFU=myFollowups.filter(f=>f.done||f.status==='completed');
-
     $('page').innerHTML=`
       <div class="stats-grid">
         <div class="sc sc-a"><div class="sc-ico">🏃</div><div class="sc-lbl">Active Clients</div><div class="sc-val">${clients.length}</div></div>
@@ -638,35 +586,13 @@ async function dash(){
         <div class="sc sc-r"><div class="sc-ico">📞</div><div class="sc-lbl">Pending Follow-ups</div><div class="sc-val">${pendingFU.length}</div></div>
         <div class="sc sc-y"><div class="sc-ico">✅</div><div class="sc-lbl">Done Follow-ups</div><div class="sc-val">${doneFU.length}</div></div>
       </div>
-      <div class="card">
-        <div class="card-hd">
-          <div class="card-title">📞 My Pending Follow-ups (${pendingFU.length})</div>
-          <button class="btn btn-p btn-sm" onclick="navTo('followups')">View All →</button>
-        </div>
+      <div class="card"><div class="card-hd"><div class="card-title">📞 My Pending Follow-ups (${pendingFU.length})</div><button class="btn btn-p btn-sm" onclick="navTo('followups')">View All →</button></div>
         ${pendingFU.length===0?emptyState('📞','No pending follow-ups','All caught up! Great work.','','')
-        :`<div>${pendingFU.slice(0,10).map(f=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-            <div style="flex:1">
-              <div style="font-weight:600;font-size:13px">${f.clientName||'—'}</div>
-              <div style="font-size:12px;color:var(--muted)">${f.type||'—'} • Due: ${f.dueDate||'—'}</div>
-              ${f.remark?`<div style="font-size:11px;color:var(--muted2);margin-top:2px">${f.remark}</div>`:''}
-            </div>
-            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
-              ${f.priority==='High'?`<span class="badge b-r">🔴 High</span>`:f.priority==='Medium'?`<span class="badge b-y">🟡 Med</span>`:`<span class="badge b-gray">⚪ Low</span>`}
-              <div style="display:flex;gap:4px">
-                <button class="btn btn-gr btn-sm" onclick="markFollowupDone('${f.id}');dash()">Done ✓</button>
-                <button class="btn btn-g btn-sm" onclick="markFollowupInProgress('${f.id}');dash()">In Prog</button>
-              </div>
-            </div>
-          </div>`).join('')}</div>`}
+        :`<div>${pendingFU.slice(0,10).map(f=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="flex:1"><div style="font-weight:600;font-size:13px">${f.clientName||'—'}</div><div style="font-size:12px;color:var(--muted)">${f.type||'—'} • Due: ${f.dueDate||'—'}</div>${f.remark?`<div style="font-size:11px;color:var(--muted2);margin-top:2px">${f.remark}</div>`:''}</div><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">${f.priority==='High'?`<span class="badge b-r">🔴 High</span>`:f.priority==='Medium'?`<span class="badge b-y">🟡 Med</span>`:`<span class="badge b-gray">⚪ Low</span>`}<div style="display:flex;gap:4px"><button class="btn btn-gr btn-sm" onclick="markFollowupDone('${f.id}');dash()">Done ✓</button><button class="btn btn-g btn-sm" onclick="markFollowupInProgress('${f.id}');dash()">In Prog</button></div></div></div>`).join('')}</div>`}
       </div>
-      <div class="card">
-        <div class="card-hd"><div class="card-title">Today's Sessions</div><button class="btn btn-p btn-sm" onclick="navTo('sessions')">View All →</button></div>
+      <div class="card"><div class="card-hd"><div class="card-title">Today's Sessions</div><button class="btn btn-p btn-sm" onclick="navTo('sessions')">View All →</button></div>
         ${todayS.length===0?emptyState('📅','No sessions today','','','')
-        :`<div>${todayS.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:80px">${to12h(s.time)}</div>
-            <div style="flex:1"><div style="font-weight:600;font-size:13px">${s.clientName||'—'}</div><div style="font-size:12px;color:var(--muted)">${s.trainerName||'—'} • ${s.type||'Session'}</div></div>
-            ${statusBadge(s.status)}
-          </div>`).join('')}</div>`}
+        :`<div>${todayS.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:80px">${to12h(s.time)}</div><div style="flex:1"><div style="font-weight:600;font-size:13px">${s.clientName||'—'}</div><div style="font-size:12px;color:var(--muted)">${s.trainerName||'—'} • ${s.type||'Session'}</div></div>${statusBadge(s.status)}</div>`).join('')}</div>`}
       </div>`;
   } else if(CR==='trainer'){
     const myUid=auth().currentUser.uid;
@@ -682,16 +608,7 @@ async function dash(){
       </div>
       <div class="card"><div class="card-hd"><div class="card-title">Today's Schedule</div></div>
         ${todayS.length===0?emptyState('📅','No sessions today','Your sessions for today will appear here','','')
-        :`<div>${todayS.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:80px">${to12h(s.time)}</div>
-            <div style="flex:1"><div style="font-weight:600;font-size:13px">${s.clientName||'—'}</div><div style="font-size:12px;color:var(--muted)">${s.type||'Session'}</div></div>
-            ${statusBadge(s.status)}
-            <div style="display:flex;gap:5px">
-              ${s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair');dash()">▶ Start</button>`:''}
-              ${s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed');dash()">✓ Done</button>`:''}
-              ${s.status==='onair'||s.status==='not-started'?`<button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed');dash()">✕ Miss</button>`:''}
-            </div>
-          </div>`).join('')}</div>`}
+        :`<div>${todayS.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:80px">${to12h(s.time)}</div><div style="flex:1"><div style="font-weight:600;font-size:13px">${s.clientName||'—'}</div><div style="font-size:12px;color:var(--muted)">${s.type||'Session'}</div></div>${statusBadge(s.status)}<div style="display:flex;gap:5px">${s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair');dash()">▶ Start</button>`:''} ${s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed');dash()">✓ Done</button>`:''} ${s.status==='onair'||s.status==='not-started'?`<button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed');dash()">✕ Miss</button>`:''}</div></div>`).join('')}</div>`}
       </div>`;
   } else if(CR==='client'){
     const myUid=auth().currentUser.uid;
@@ -706,29 +623,159 @@ async function dash(){
       </div>
       <div class="card"><div class="card-hd"><div class="card-title">Today's Sessions</div></div>
         ${todayS.length===0?emptyState('📅','No sessions today','Your trainer will schedule sessions for you','','')
-        :`<div>${todayS.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
-            <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:80px">${to12h(s.time)}</div>
-            <div style="flex:1"><div style="font-weight:600">${s.type||'Session'}</div><div style="font-size:12px;color:var(--muted)">Trainer: ${s.trainerName||'—'}</div></div>
-            ${statusBadge(s.status)}
-            ${s.meetLink?`<a href="${s.meetLink}" target="_blank" class="btn btn-p btn-sm">Join 🔗</a>`:''}
-          </div>`).join('')}</div>`}
+        :`<div>${todayS.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:80px">${to12h(s.time)}</div><div style="flex:1"><div style="font-weight:600">${s.type||'Session'}</div><div style="font-size:12px;color:var(--muted)">Trainer: ${s.trainerName||'—'}</div></div>${statusBadge(s.status)}${s.meetLink?`<a href="${s.meetLink}" target="_blank" class="btn btn-p btn-sm">Join 🔗</a>`:''}</div>`).join('')}</div>`}
       </div>`;
   }
 }
 
 // ── TIME CHART ────────────────────────────────────────────────
-<div style="min-width:120px"><div class="td-actions">
-      <button class="btn btn-g btn-sm" onclick="openEditTcEntry('${c.id}')">Edit</button>
-      <button class="btn btn-g btn-sm" onclick="openTcStatus('${c.id}','${(c.name||'').replace(/'/g,"\\'")}')">Status</button>
-      <button class="btn btn-d btn-sm" onclick="delTcEntry('${c.id}')">Remove</button>
-    </div></div>
+async function timechart(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  const[entries,clients,trainers]=await Promise.all([
+    fsGetAll('timechart'),
+    fsGetAll('clients',fn().where('active','==',true)),
+    fsGetAll('users',fn().where('role','==','trainer'))
+  ]);
+  entries.sort((a,b)=>(a.sessionTime||'').localeCompare(b.sessionTime||''));
+
+  $('page').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:13px;color:var(--muted)">Client training schedule overview</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        ${CR==='admin'?`<button class="btn btn-g btn-sm" onclick="exportMonthlyReport()">📥 Export</button>`:''}
+        <button class="btn btn-p" onclick="openAddTcEntry()">+ Add Entry</button>
+      </div>
+    </div>
+    <div class="card" style="padding:0">
+      <div class="tbl-wrap">
+        ${entries.length===0
+          ? emptyState('📋','No time chart entries','Add client schedule entries to track their training times.','+ Add Entry','openAddTcEntry()')
+          : `<table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Trainer</th>
+                  <th>Session Time</th>
+                  <th>Session Type</th>
+                  <th>Start Date</th>
+                  <th>Status</th>
+                  <th>Remarks</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${entries.map(c=>`
+                  <tr>
+                    <td><strong>${c.clientName||'—'}</strong>${c.clientPhone?`<div style="font-size:11px;color:var(--muted)">${c.clientPhone}</div>`:''}</td>
+                    <td style="font-size:12px">${c.trainerName||'—'}</td>
+                    <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(c.sessionTime)||c.sessionTime||'—'}</span></td>
+                    <td style="font-size:12px">${c.sessionType||'—'}</td>
+                    <td style="font-size:12px">${c.startDate||'—'}</td>
+                    <td>${c.status==='active'?`<span class="badge b-g">Active</span>`:c.status==='paused'?`<span class="badge b-y">Paused</span>`:c.status==='completed'?`<span class="badge b-gray">Completed</span>`:`<span class="badge b-g">Active</span>`}</td>
+                    <td style="font-size:12px;max-width:160px">${c.remarks||'—'}</td>
+                    <td>
+                      <div class="td-actions">
+                        <button class="btn btn-g btn-sm" onclick="openEditTcEntry('${c.id}')">Edit</button>
+                        <button class="btn btn-g btn-sm" onclick="openTcStatus('${c.id}','${(c.clientName||'').replace(/'/g,"\\'")}')">Status</button>
+                        <button class="btn btn-d btn-sm" onclick="delTcEntry('${c.id}')">Remove</button>
+                      </div>
+                    </td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>`}
+      </div>
+    </div>`;
+}
+
+function tcEntryForm(e={}){
+  return`
+    <div class="fr">
+      <div class="fg"><label class="fl">Client *</label><input class="fi" id="tc-client-inp" placeholder="Type client name…" value="${e.clientName||''}" autocomplete="off"><input type="hidden" id="tc-client-id" value="${e.clientId||''}"></div>
+      <div class="fg"><label class="fl">Trainer</label><input class="fi" id="tc-trainer-inp" placeholder="Type trainer name…" value="${e.trainerName||''}" autocomplete="off"><input type="hidden" id="tc-trainer-id" value="${e.trainerId||''}"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Session Time *</label><input class="fi" id="tc-time" type="time" value="${e.sessionTime||''}"></div>
+      <div class="fg"><label class="fl">Session Type</label><select class="fs" id="tc-type">${SESSION_TYPES.map(t=>`<option ${e.sessionType===t?'selected':''}>${t}</option>`).join('')}</select></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Start Date</label><input class="fi" id="tc-start" type="date" value="${e.startDate||''}"></div>
+      <div class="fg"><label class="fl">Status</label><select class="fs" id="tc-status"><option value="active" ${(e.status||'active')==='active'?'selected':''}>Active</option><option value="paused" ${e.status==='paused'?'selected':''}>Paused</option><option value="completed" ${e.status==='completed'?'selected':''}>Completed</option></select></div>
+    </div>
+    <div class="fg"><label class="fl">Remarks</label><textarea class="fta" id="tc-remarks">${e.remarks||''}</textarea></div>
+    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTcEntry('${e.id||''}')">Save</button></div>`;
+}
+
+async function initTcFormAC(){
+  const[clients,trainers]=await Promise.all([
+    fsGetAll('clients',fn().where('active','==',true)),
+    fsGetAll('users',fn().where('role','==','trainer'))
+  ]);
+  const clientInp=document.getElementById('tc-client-inp');
+  if(clientInp){const items=clients.map(c=>({id:c.id,label:c.name||'',sub:c.phone||''}));createAutocomplete(clientInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('tc-client-id');if(hid)hid.value=it.id;const ph=clients.find(c=>c.id===it.id);if(ph)document.getElementById('tc-client-id').dataset.phone=ph.phone||'';}})}
+  const trainerInp=document.getElementById('tc-trainer-inp');
+  if(trainerInp){const items=trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''}));createAutocomplete(trainerInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('tc-trainer-id');if(hid)hid.value=it.id;}})}
+}
+
+async function openAddTcEntry(){
+  openM1('ADD TIME CHART ENTRY',tcEntryForm());
+  await initTcFormAC();
+}
+
+async function openEditTcEntry(id){
+  const e=await fsGet('timechart',id);
+  if(!e){toast('Entry not found','error');return}
+  openM1('EDIT TIME CHART ENTRY',tcEntryForm(e));
+  await initTcFormAC();
+}
+
+async function saveTcEntry(existingId=''){
+  const clientId=$('tc-client-id').value||$('tc-client-inp')?.dataset.selectedId||'';
+  const clientName=$('tc-client-inp')?.value||'';
+  const trainerId=$('tc-trainer-id').value||$('tc-trainer-inp')?.dataset.selectedId||'';
+  const trainerName=($('tc-trainer-inp')?.value||'').replace(/\s*\([^)]*\)\s*$/,'').trim();
+  const sessionTime=$('tc-time').value;
+  if(!clientName||!sessionTime){toast('Client and session time required','error');return}
+  const data={clientId,clientName,trainerId,trainerName,sessionTime,sessionType:$('tc-type').value,startDate:$('tc-start').value,status:$('tc-status').value||'active',remarks:$('tc-remarks').value};
+  try{
+    if(existingId){await fsUpdate('timechart',existingId,data);toast('Updated!','success')}
+    else{await fsAdd('timechart',data);toast('Entry added!','success')}
+    closeM1();timechart();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+function openTcStatus(id,clientName){
+  openM1(`UPDATE STATUS: ${clientName.toUpperCase()}`,`
+    <div class="fg"><label class="fl">New Status</label>
+      <select class="fs" id="tcs-status">
+        <option value="active">Active</option>
+        <option value="paused">Paused</option>
+        <option value="completed">Completed</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Note</label><input class="fi" id="tcs-note" placeholder="Optional note…"></div>
+    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTcStatus('${id}')">Update</button></div>`);
+}
+
+async function saveTcStatus(id){
+  const status=$('tcs-status').value;
+  try{await fsUpdate('timechart',id,{status});closeM1();toast('Status updated!','success');timechart();}
+  catch(e){toast('Error: '+e.message,'error')}
+}
+
+async function delTcEntry(id){
+  if(!confirm('Remove this time chart entry?'))return;
+  try{await fsDel('timechart',id);toast('Entry removed','success');timechart();}
+  catch(e){toast('Error: '+e.message,'error')}
+}
+
 // ── MONTHLY REPORT EXPORT (Admin) ─────────────────────────────
 async function exportMonthlyReport(){
   toast('Generating report…','info');
   const now=new Date();
   const month=now.getMonth();const year=now.getFullYear();
   const monthName=now.toLocaleString('en-IN',{month:'long'});
-
   const[clients,sessions,payments,attendance,followups,trainers,tcEntries]=await Promise.all([
     fsGetAll('clients',fn().where('active','==',true)),
     fsGetAll('sessions'),
@@ -738,17 +785,12 @@ async function exportMonthlyReport(){
     fsGetAll('users',fn().where('role','==','trainer')),
     fsGetAll('timechart')
   ]);
-
   const monthSessions=sessions.filter(s=>s.date&&new Date(s.date).getMonth()===month&&new Date(s.date).getFullYear()===year);
   const monthPayments=payments.filter(p=>p.date&&new Date(p.date).getMonth()===month&&new Date(p.date).getFullYear()===year);
-  const monthAttend=attendance.filter(a=>a.date&&new Date(a.date).getMonth()===month&&new Date(a.date).getFullYear()===year);
   const totalRevenue=monthPayments.filter(p=>p.status==='paid').reduce((s,p)=>s+Number(p.amount||0),0);
   const renewalDue=clients.filter(c=>{if(!c.startDate)return false;const days=Math.floor((new Date()-new Date(c.startDate))/(1000*60*60*24));return days>=22;});
-
-  // Build CSV content
   let csv=`GYM AT YOUR HOME - Monthly Report\n`;
   csv+=`Month: ${monthName} ${year}\nGenerated: ${new Date().toLocaleString('en-IN')}\n\n`;
-
   csv+=`=== SUMMARY ===\n`;
   csv+=`Active Clients,${clients.length}\n`;
   csv+=`Total Sessions This Month,${monthSessions.length}\n`;
@@ -756,40 +798,21 @@ async function exportMonthlyReport(){
   csv+=`Missed Sessions,${monthSessions.filter(s=>s.status==='missed').length}\n`;
   csv+=`Total Revenue,₹${totalRevenue}\n`;
   csv+=`Clients Needing Renewal,${renewalDue.length}\n\n`;
-
   csv+=`=== CLIENT DETAILS ===\n`;
   csv+=`Name,Phone,Plan,Trainer,Goal,Start Date,Sessions/Week,Days Active,Status\n`;
-  clients.forEach(c=>{
-    const days=c.startDate?Math.floor((new Date()-new Date(c.startDate))/(1000*60*60*24)):'-';
-    csv+=`"${c.name||''}","${c.phone||''}","${c.plan||''}","${c.trainerName||''}","${c.goal||''}","${c.startDate||''}","${c.sessionsPerWeek||''}","${days}","${days>=22?'Renewal Due':'Active'}"\n`;
-  });
-
+  clients.forEach(c=>{const days=c.startDate?Math.floor((new Date()-new Date(c.startDate))/(1000*60*60*24)):'-';csv+=`"${c.name||''}","${c.phone||''}","${c.plan||''}","${c.trainerName||''}","${c.goal||''}","${c.startDate||''}","${c.sessionsPerWeek||''}","${days}","${days>=22?'Renewal Due':'Active'}"\n`;});
   csv+=`\n=== SESSION DETAILS (This Month) ===\n`;
   csv+=`Date,Time,Client,Trainer,Type,Status\n`;
-  monthSessions.sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{
-    csv+=`"${s.date||''}","${s.time||''}","${s.clientName||''}","${s.trainerName||''}","${s.type||''}","${s.status||''}"\n`;
-  });
-
+  monthSessions.sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>{csv+=`"${s.date||''}","${s.time||''}","${s.clientName||''}","${s.trainerName||''}","${s.type||''}","${s.status||''}"\n`;});
   csv+=`\n=== PAYMENT DETAILS (This Month) ===\n`;
   csv+=`Client,Plan,Amount,Date,Mode,Status\n`;
-  monthPayments.forEach(p=>{
-    csv+=`"${p.clientName||''}","${p.plan||''}","₹${p.amount||0}","${p.date||''}","${p.mode||''}","${p.status||''}"\n`;
-  });
-
+  monthPayments.forEach(p=>{csv+=`"${p.clientName||''}","${p.plan||''}","₹${p.amount||0}","${p.date||''}","${p.mode||''}","${p.status||''}"\n`;});
   csv+=`\n=== TIME CHART SCHEDULE ===\n`;
   csv+=`Client,Trainer,Session Time,Session Type,Start Date,Remarks\n`;
-  tcEntries.forEach(tc=>{
-    csv+=`"${tc.clientName||''}","${tc.trainerName||''}","${tc.sessionTime||''}","${tc.sessionType||''}","${tc.startDate||''}","${tc.remarks||''}"\n`;
-  });
-
+  tcEntries.forEach(tc=>{csv+=`"${tc.clientName||''}","${tc.trainerName||''}","${tc.sessionTime||''}","${tc.sessionType||''}","${tc.startDate||''}","${tc.remarks||''}"\n`;});
   csv+=`\n=== RENEWAL DUE CLIENTS ===\n`;
   csv+=`Name,Phone,Plan,Trainer,Start Date,Days Active\n`;
-  renewalDue.forEach(c=>{
-    const days=Math.floor((new Date()-new Date(c.startDate))/(1000*60*60*24));
-    csv+=`"${c.name||''}","${c.phone||''}","${c.plan||''}","${c.trainerName||''}","${c.startDate||''}","${days}"\n`;
-  });
-
-  // Download CSV
+  renewalDue.forEach(c=>{const days=Math.floor((new Date()-new Date(c.startDate))/(1000*60*60*24));csv+=`"${c.name||''}","${c.phone||''}","${c.plan||''}","${c.trainerName||''}","${c.startDate||''}","${days}"\n`;});
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -879,7 +902,7 @@ async function saveEditRating(ratingId){
 async function delRating(id){if(!confirm('Delete this rating?'))return;try{await fsDel('trainerratings',id);toast('Rating deleted','success');trainerratings()}catch(e){toast('Error','error')}}
 async function openRateTrainer(preTrainerId='',preTrainerName=''){
   const[trainers,sessions]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('sessions',fn().where('status','==','completed'))]);
-  let selectedRating=0;
+  window._selectedRating=0;
   const trainerOpts=trainers.map(t=>`<option value="${t.id}" ${t.id===preTrainerId?'selected':''}>${t.name||t.email}</option>`).join('');
   openM1('RATE TRAINER SESSION',`<div class="fg"><label class="fl">Trainer *</label><select class="fs" id="rt-trainer" onchange="updateRatingSessionList()"><option value="">— Select trainer —</option>${trainerOpts}</select></div><div class="fg"><label class="fl">Session (optional)</label><select class="fs" id="rt-session"><option value="">— Select completed session —</option></select></div><div class="fg"><label class="fl">Session Type</label><select class="fs" id="rt-type"><option value="">— Select —</option>${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div><div class="fg"><label class="fl">Session Date</label><input class="fi" id="rt-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div><div class="fg"><label class="fl">Rating *</label><div style="margin-bottom:8px"><div class="stars" id="rt-stars">${[1,2,3,4,5].map(n=>`<span class="star" onclick="setRating(${n})" onmouseover="hoverRating(${n})" onmouseout="unhoverRating()" data-val="${n}">☆</span>`).join('')}</div><div id="rt-rating-lbl" style="font-size:12px;color:var(--muted);margin-top:5px">Click to rate</div></div><input type="hidden" id="rt-rating" value="0"></div><div class="fg"><label class="fl">Comment</label><textarea class="fta" id="rt-comment" placeholder="Notes on performance…"></textarea></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTrainerRating()">Submit Rating</button></div>`);
   window._rtSessions=sessions;if(preTrainerId){$('rt-trainer').value=preTrainerId;updateRatingSessionList()}
@@ -897,7 +920,7 @@ async function saveTrainerRating(){
 }
 async function viewTrainerRatings(trainerId,trainerName){
   const ratings=await fsGetAll('trainerratings',fn().where('trainerId','==',trainerId));ratings.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));const avg=ratings.length?avgRating(ratings):0;const certs=await fsGetAll('certificates',fn().where('trainerId','==',trainerId));const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';
-  openM2(`TRAINER: ${trainerName.toUpperCase()}`,`<div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px"><div style="text-align:center"><div style="font-size:42px;font-weight:900;color:${col}">${avg.toFixed(1)}</div><div style="font-size:20px;color:${col}">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</div><div style="font-size:12px;color:var(--muted)">${ratings.length} rating${ratings.length!==1?'s':''}</div></div><div style="flex:1">${[5,4,3,2,1].map(n=>{const cnt=ratings.filter(r=>r.rating===n).length;const pct=ratings.length?Math.round(cnt/ratings.length*100):0;return`<div class="pb-wrap"><div class="pb-lbl"><span>${'★'.repeat(n)}</span><span>${cnt}</span></div><div class="pb"><div class="pb-fill" style="width:${pct}%;background:${['','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][n]}"></div></div></div>`}).join('')}</div></div>${certs.length>0?`<div class="detail-section"><div class="detail-section-title">🎓 Certificates (${certs.length})</div><div style="display:flex;flex-wrap:wrap;gap:8px">${certs.map(c=>`<span class="badge b-a" style="font-size:12px">🎓 ${c.name} <span style="opacity:.6">(${c.issuer})</span></span>`).join('')}</div></div>`:''}${ratings.length===0?emptyState('⭐','No ratings yet','','',''):`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Rating</th><th>Session</th><th>Comment</th><th>By</th><th>Actions</th></tr></thead><tbody>${ratings.map(r=>{const rc=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';return`<tr><td style="font-size:12px">${r.sessionDate||'—'}</td><td><span style="color:${rc};font-size:16px">${'★'.repeat(r.rating||0)}${'☆'.repeat(5-(r.rating||0))}</span> <span style="font-size:11px">${r.rating}/5</span></td><td style="font-size:12px">${r.sessionType||'—'}</td><td style="font-size:12px">${r.comment||'—'}</td><td style="font-size:12px">${r.ratedByName||'—'}</td><td><button class="btn btn-g btn-sm" onclick="closeM2();openEditRating('${r.id}')">✏️ Edit</button></td></tr>`;}).join('')}</tbody></table></div>`}<div class="mo-foot">${CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-p" onclick="closeM2();openRateTrainer('${trainerId}','${trainerName.replace(/'/g,"\\'")}')">+ Rate Session</button>`:''}<button class="btn btn-g" onclick="closeM2()">Close</button></div>`);
+  openM2(`TRAINER: ${trainerName.toUpperCase()}`,`<div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px"><div style="text-align:center"><div style="font-size:42px;font-weight:900;color:${col}">${avg.toFixed(1)}</div><div style="font-size:20px;color:${col}">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</div><div style="font-size:12px;color:var(--muted)">${ratings.length} rating${ratings.length!==1?'s':''}</div></div><div style="flex:1">${[5,4,3,2,1].map(n=>{const cnt=ratings.filter(r=>r.rating===n).length;const pct=ratings.length?Math.round(cnt/ratings.length*100):0;return`<div class="pb-wrap"><div class="pb-lbl"><span>${'★'.repeat(n)}</span><span>${cnt}</span></div><div class="pb"><div class="pb-fill" style="width:${pct}%;background:${['','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][n]}"></div></div></div>`;}).join('')}</div></div>${certs.length>0?`<div class="detail-section"><div class="detail-section-title">🎓 Certificates (${certs.length})</div><div style="display:flex;flex-wrap:wrap;gap:8px">${certs.map(c=>`<span class="badge b-a" style="font-size:12px">🎓 ${c.name} <span style="opacity:.6">(${c.issuer})</span></span>`).join('')}</div></div>`:''}${ratings.length===0?emptyState('⭐','No ratings yet','','',''):`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Rating</th><th>Session</th><th>Comment</th><th>By</th><th>Actions</th></tr></thead><tbody>${ratings.map(r=>{const rc=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';return`<tr><td style="font-size:12px">${r.sessionDate||'—'}</td><td><span style="color:${rc};font-size:16px">${'★'.repeat(r.rating||0)}${'☆'.repeat(5-(r.rating||0))}</span> <span style="font-size:11px">${r.rating}/5</span></td><td style="font-size:12px">${r.sessionType||'—'}</td><td style="font-size:12px">${r.comment||'—'}</td><td style="font-size:12px">${r.ratedByName||'—'}</td><td><button class="btn btn-g btn-sm" onclick="closeM2();openEditRating('${r.id}')">✏️ Edit</button></td></tr>`;}).join('')}</tbody></table></div>`}<div class="mo-foot">${CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-p" onclick="closeM2();openRateTrainer('${trainerId}','${trainerName.replace(/'/g,"\\'")}')">+ Rate Session</button>`:''}<button class="btn btn-g" onclick="closeM2()">Close</button></div>`);
 }
 
 // ── CLIENTS ───────────────────────────────────────────────────
@@ -1248,7 +1271,6 @@ async function followups(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const myUid=auth().currentUser.uid;
   let data=await fsGetAll('followups');
-  // FIX: coordinators see follow-ups assigned to them (check both fields)
   if(CR==='coordinator'){data=data.filter(f=>f.assignedTo===myUid||f.assignedToId===myUid||f.createdBy===myUid);}
   data.sort((a,b)=>{const pd={High:0,Medium:1,Low:2};if(!a.done&&b.done)return -1;if(a.done&&!b.done)return 1;return(pd[a.priority]||1)-(pd[b.priority]||1)||(a.dueDate||'').localeCompare(b.dueDate||'')});
   const pending=data.filter(f=>!f.done&&f.status!=='completed').length,inprog=data.filter(f=>f.status==='inprogress'&&!f.done).length,done=data.filter(f=>f.done||f.status==='completed').length;
