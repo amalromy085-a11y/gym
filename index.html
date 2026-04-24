@@ -192,8 +192,6 @@ tbody tr:last-child td{border-bottom:none}
 .chart-box{position:relative;height:210px}
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
 .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-bottom:18px}
-
-/* ── CHAT LAYOUT ── */
 .chat-layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 104px);gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card)}
 .chat-sidebar{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface)}
 .chat-sidebar-tabs{display:flex;border-bottom:1px solid var(--border)}
@@ -223,7 +221,6 @@ tbody tr:last-child td{border-bottom:none}
 .chat-input:focus{border-color:var(--accent)}
 .chat-date-divider{text-align:center;margin:8px 0;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2)}
 .group-badge{display:inline-flex;align-items:center;gap:3px;background:var(--purple-dim);color:var(--purple);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:10px}
-
 .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px}
 .slot-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;transition:border-color .2s}
 .slot-card.full{border-color:var(--red);opacity:.7}
@@ -511,6 +508,8 @@ function destroyCharts(){Object.values(CH).forEach(c=>{try{c.destroy()}catch(e){
 function emptyState(icon,title,sub,btnLabel,btnFn){return`<div class="empty"><div class="empty-ico">${icon}</div><div class="empty-title">${title}</div><div class="empty-sub">${sub}</div>${btnLabel?`<button class="btn btn-p" onclick="${btnFn}">${btnLabel}</button>`:''}</div>`}
 function starsHtml(rating){const r=Math.round(rating||0);return'★'.repeat(r)+'☆'.repeat(5-r)}
 function avgRating(ratings){if(!ratings||!ratings.length)return 0;return ratings.reduce((s,r)=>s+(r.rating||0),0)/ratings.length}
+function statusBadge(s){const m={onair:`<span class="badge b-g"><span class="dot dot-g"></span>On Air</span>`,'not-started':`<span class="badge b-gray">Pending</span>`,completed:`<span class="badge b-a">Done</span>`,missed:`<span class="badge b-r">Missed</span>`,present:`<span class="badge b-g">Present</span>`,absent:`<span class="badge b-r">Absent</span>`,late:`<span class="badge b-y">Late</span>`};return m[s]||`<span class="badge b-gray">${s||'—'}</span>`}
+function planBadge(p){const m={Silver:`<span class="badge b-gray">🥈 Silver</span>`,Gold:`<span class="badge b-y">🥇 Gold</span>`,Platinum:`<span class="badge b-p">💎 Platinum</span>`,'Platinum Plus':`<span class="badge b-p">💎+ Plat+</span>`,Couple:`<span class="badge b-pk">👫 Couple</span>`,'Corporate Fitness':`<span class="badge b-b">🏢 Corporate</span>`};return m[p]||`<span class="badge b-gray">${p||'—'}</span>`}
 const db=()=>window.FB.db;
 const auth=()=>window.FB.auth;
 const fn=()=>window.FN;
@@ -678,8 +677,6 @@ async function markSessionStatus(id,status,skipRatePrompt=false){
         const heads=await fsGetAll('users',fn().where('role','==','coordinatorhead'));
         const admins=await fsGetAll('users',fn().where('role','==','admin'));
         const myUid=auth().currentUser.uid;
-
-        // Find assigned coordinator for this client
         let targetUsers=[];
         if(sess.clientId){
           const client=await fsGet('clients',sess.clientId);
@@ -690,22 +687,16 @@ async function markSessionStatus(id,status,skipRatePrompt=false){
         }
         if(!targetUsers.length)targetUsers=[...heads,...coords];
         targetUsers=[...new Set([...targetUsers,...admins])];
-
         const msgText=`⚠️ MISSED SESSION ALERT\nClient: ${sess.clientName||'—'}\nTrainer: ${sess.trainerName||'—'}\nTime: ${to12h(sess.time)} on ${sess.date}\nMarked by: ${CU.name||'System'}\n\nPlease follow up and log the reason.`;
-
-        // Send direct chat message to each coordinator
         const chatPromises=targetUsers.filter(u=>u.id!==myUid).map(async coordinator=>{
           const chatId=getChatId(myUid,coordinator.id);
           await fn().addDoc(fn().collection(db(),`chats/${chatId}/messages`),{senderId:myUid,senderName:CU.name||CU.email||'',message:msgText,timestamp:fn().serverTimestamp(),read:false,type:'missed_session_alert'});
           await fn().setDoc(fn().doc(db(),'chats',chatId),{participants:[myUid,coordinator.id],lastMessage:`⚠️ Missed: ${sess.clientName}`,lastMessageTime:fn().serverTimestamp(),lastSenderId:myUid},{merge:true});
         });
         await Promise.all(chatPromises);
-
-        // Bell notifications
         const allTargetIds=[...new Set(targetUsers.map(u=>u.id))];
         await createNotifForCoordinators({key:`missed-${id}-${Date.now()}`,title:'⚠️ Session Missed',body:`${sess.clientName||'Client'} missed session with ${sess.trainerName||'Trainer'} at ${to12h(sess.time)} on ${sess.date}. Please enter the reason.`,type:'missed_session',sessionId:id,clientName:sess.clientName||'',requiresReason:true},allTargetIds);
         toast('📨 Coordinators notified via chat','info');
-
         if(CR==='coordinator'||CR==='coordinatorhead'){
           setTimeout(()=>openMissedReasonModal(id,sess.clientName||'Client',sess.trainerName||'Trainer',sess.date||'',sess.time||''),600);
         }
@@ -792,7 +783,16 @@ async function dash(){
     setTimeout(()=>{const statusCounts={onair:0,completed:0,missed:0,'not-started':0};const thisMonth=new Date().getMonth();sessions.filter(s=>s.date&&new Date(s.date).getMonth()===thisMonth).forEach(s=>{if(statusCounts[s.status]!==undefined)statusCounts[s.status]++;});const ctx1=$('ch-status');if(ctx1)CH.s1=new Chart(ctx1,{type:'doughnut',data:{labels:['On Air','Completed','Missed','Pending'],datasets:[{data:[statusCounts.onair,statusCounts.completed,statusCounts.missed,statusCounts['not-started']],backgroundColor:['#00e676','#d4ff00','#ff4444','#888'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'var(--muted)',font:{size:12}}}}}});},100);
     if(todayS.length>0){const rows=todayS.map(s=>`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:80px">${to12h(s.time)}</div><div style="flex:1"><div style="font-weight:600;font-size:13px">${s.clientName||'—'}</div><div style="font-size:12px;color:var(--muted)">${s.trainerName||'—'} • ${s.type||'Session'}</div></div>${statusBadge(s.status)}<div style="display:flex;gap:5px">${s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair')">Start</button>`:''}${s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">Miss</button>`:''}</div></div>`).join('');$('dash-sessions').innerHTML=`<div style="padding:0 2px">${rows}</div>`;}
   } else if(CR==='coordinator'){
-    const myUid=auth().currentUser.uid;const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid),fn().where('active','==',true));const myClientIds=myClients.map(c=>c.id);const[sessions,myFollowups]=await Promise.all([fsGetAll('sessions'),fsGetAll('followups',fn().where('assignedTo','==',myUid))]);const myClientSessions=sessions.filter(s=>myClientIds.includes(s.clientId));const today=new Date().toDateString();const todayS=myClientSessions.filter(s=>s.date&&new Date(s.date).toDateString()===today);const pendingFU=myFollowups.filter(f=>!f.done&&f.status!=='completed');const doneFU=myFollowups.filter(f=>f.done||f.status==='completed');
+    const myUid=auth().currentUser.uid;
+    const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid),fn().where('active','==',true));
+    const myClientIds=myClients.map(c=>c.id);
+    const[sessions,myFollowups]=await Promise.all([fsGetAll('sessions'),fsGetAll('followups',fn().where('assignedTo','==',myUid))]);
+    // Filter sessions to only this coordinator's clients
+    const myClientSessions=sessions.filter(s=>myClientIds.includes(s.clientId));
+    const today=new Date().toDateString();
+    const todayS=myClientSessions.filter(s=>s.date&&new Date(s.date).toDateString()===today);
+    const pendingFU=myFollowups.filter(f=>!f.done&&f.status!=='completed');
+    const doneFU=myFollowups.filter(f=>f.done||f.status==='completed');
     $('page').innerHTML=`
       <div class="stats-grid">
         <div class="sc sc-a"><div class="sc-ico">🏃</div><div class="sc-lbl">My Clients</div><div class="sc-val">${myClients.length}</div></div>
@@ -819,24 +819,101 @@ async function dash(){
   }
 }
 
-// ══════ TRAINER RATINGS ══════
+// ══════ TRAINER RATINGS (COORDINATOR-SCOPED) ══════
 async function trainerratings(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
-  const[trainers,ratings,sessions]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('trainerratings'),fsGetAll('sessions')]);
-  const myUid=auth().currentUser.uid;const ranked=buildLeaderboard(trainers,ratings,[]);
+
+  let allowedTrainerIds=null;
+  if(CR==='coordinator'){
+    const myUid=auth().currentUser.uid;
+    const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));
+    allowedTrainerIds=[...new Set(myClients.map(c=>c.trainerId).filter(Boolean))];
+    window._coordAllowedTrainerIds=allowedTrainerIds;
+  }
+
+  const[allTrainers,ratings,sessions]=await Promise.all([
+    fsGetAll('users',fn().where('role','==','trainer')),
+    fsGetAll('trainerratings'),
+    fsGetAll('sessions')
+  ]);
+
+  const trainers=CR==='coordinator'&&allowedTrainerIds
+    ?allTrainers.filter(t=>allowedTrainerIds.includes(t.id))
+    :allTrainers;
+
+  const myUid=auth().currentUser.uid;
+  const ranked=buildLeaderboard(trainers,ratings,[]);
+
   $('page').innerHTML=`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px"><div><div style="font-weight:700;font-size:16px">⭐ Trainer Performance & Ratings</div></div><button class="btn btn-p" onclick="openRateTrainer()">+ Rate a Session</button></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-weight:700;font-size:16px">⭐ Trainer Performance & Ratings</div>
+        ${CR==='coordinator'?`<div style="font-size:12px;color:var(--muted);margin-top:3px">Showing trainers assigned to your clients only</div>`:''}
+      </div>
+      <button class="btn btn-p" onclick="openRateTrainer()">+ Rate a Session</button>
+    </div>
     <div class="card" style="margin-bottom:18px"><div class="card-hd"><div class="card-title">🏆 Trainer Leaderboard</div></div>${renderLeaderboard(ranked)}</div>
-    <div class="staff-grid" style="margin-bottom:24px">${trainers.map(t=>{const tRatings=ratings.filter(r=>r.trainerId===t.id);const avg=tRatings.length?avgRating(tRatings):0;const myRatings=tRatings.filter(r=>r.ratedById===myUid);const ini=(t.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);const starCol=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';const critBreakdown=RATING_CRITERIA.map(c=>{const vals=tRatings.filter(r=>r.criteria&&r.criteria[c.id]).map(r=>r.criteria[c.id]);const a=vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0;return{...c,avg:a};});return`<div class="staff-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="staff-avatar" style="background:var(--green-dim);color:var(--green)">${ini}</div><div><div style="font-weight:700;font-size:14px">${t.name||'—'}</div></div></div><div style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:22px;font-weight:700;color:${starCol}">${avg.toFixed(1)}</span><span style="font-size:18px">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span></div><div style="font-size:12px;color:var(--muted)">${tRatings.length} total · ${myRatings.length} by you</div></div><div style="margin-bottom:10px">${critBreakdown.map(c=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-size:12px;min-width:90px;color:var(--muted)">${c.icon}${c.label}</span><div style="flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden"><div style="height:100%;background:var(--yellow);width:${c.avg/5*100}%;border-radius:2px"></div></div><span style="font-size:11px;font-weight:700;min-width:24px;text-align:right">${c.avg>0?c.avg.toFixed(1):'—'}</span></div>`).join('')}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-p btn-sm" onclick="openRateTrainer('${t.id}','${(t.name||'').replace(/'/g,"\\'")}')">Rate Session</button><button class="btn btn-g btn-sm" onclick="viewTrainerRatings('${t.id}','${(t.name||'').replace(/'/g,"\\'")}')">View All</button></div></div>`;}).join('')}</div>
-    <div class="card"><div class="card-hd"><div class="card-title">Recent Ratings</div></div>${ratings.length===0?emptyState('⭐','No ratings yet','','',''):`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Trainer</th><th>Session</th><th>Rating</th><th>Comment</th><th>Rated By</th>${CR==='admin'||CR==='coordinatorhead'?'<th>Actions</th>':''}</tr></thead><tbody>${[...ratings].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,30).map(r=>{const stars='★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0));const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';return`<tr><td style="font-size:12px">${r.sessionDate||fmtDate(r.createdAt)}</td><td><strong>${r.trainerName||'—'}</strong></td><td style="font-size:12px">${r.sessionType||'—'}</td><td><span style="color:${col};font-size:16px;font-weight:700">${stars}</span></td><td style="font-size:12px;max-width:200px">${r.comment||'—'}</td><td style="font-size:12px">${r.ratedByName||'—'}</td>${CR==='admin'||CR==='coordinatorhead'?`<td><div class="td-actions"><button class="btn btn-d btn-sm" onclick="delRating('${r.id}')">Delete</button></div></td>`:''}</tr>`;}).join('')}</tbody></table></div>`}</div>`;
+    <div class="staff-grid" style="margin-bottom:24px">${trainers.length===0
+      ?emptyState('🧑‍🏫','No trainers assigned to your clients','Trainers will appear here once clients are assigned to you.','','')
+      :trainers.map(t=>{
+        const tRatings=ratings.filter(r=>r.trainerId===t.id);
+        const avg=tRatings.length?avgRating(tRatings):0;
+        const myRatings=tRatings.filter(r=>r.ratedById===myUid);
+        const ini=(t.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+        const starCol=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';
+        const critBreakdown=RATING_CRITERIA.map(c=>{const vals=tRatings.filter(r=>r.criteria&&r.criteria[c.id]).map(r=>r.criteria[c.id]);const a=vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0;return{...c,avg:a};});
+        return`<div class="staff-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="staff-avatar" style="background:var(--green-dim);color:var(--green)">${ini}</div><div><div style="font-weight:700;font-size:14px">${t.name||'—'}</div></div></div><div style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:22px;font-weight:700;color:${starCol}">${avg.toFixed(1)}</span><span style="font-size:18px">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span></div><div style="font-size:12px;color:var(--muted)">${tRatings.length} total · ${myRatings.length} by you</div></div><div style="margin-bottom:10px">${critBreakdown.map(c=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-size:12px;min-width:90px;color:var(--muted)">${c.icon}${c.label}</span><div style="flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden"><div style="height:100%;background:var(--yellow);width:${c.avg/5*100}%;border-radius:2px"></div></div><span style="font-size:11px;font-weight:700;min-width:24px;text-align:right">${c.avg>0?c.avg.toFixed(1):'—'}</span></div>`).join('')}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-p btn-sm" onclick="openRateTrainer('${t.id}','${(t.name||'').replace(/'/g,"\\'")}')">Rate Session</button><button class="btn btn-g btn-sm" onclick="viewTrainerRatings('${t.id}','${(t.name||'').replace(/'/g,"\\'")}')">View All</button></div></div>`;
+      }).join('')}
+    </div>
+    <div class="card"><div class="card-hd"><div class="card-title">Recent Ratings</div></div>${ratings.length===0?emptyState('⭐','No ratings yet','','',''):`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Trainer</th><th>Session</th><th>Rating</th><th>Comment</th><th>Rated By</th>${CR==='admin'||CR==='coordinatorhead'?'<th>Actions</th>':''}</tr></thead><tbody>${[...ratings].filter(r=>CR==='coordinator'&&allowedTrainerIds?allowedTrainerIds.includes(r.trainerId):true).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,30).map(r=>{const stars='★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0));const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';return`<tr><td style="font-size:12px">${r.sessionDate||fmtDate(r.createdAt)}</td><td><strong>${r.trainerName||'—'}</strong></td><td style="font-size:12px">${r.sessionType||'—'}</td><td><span style="color:${col};font-size:16px;font-weight:700">${stars}</span></td><td style="font-size:12px;max-width:200px">${r.comment||'—'}</td><td style="font-size:12px">${r.ratedByName||'—'}</td>${CR==='admin'||CR==='coordinatorhead'?`<td><div class="td-actions"><button class="btn btn-d btn-sm" onclick="delRating('${r.id}')">Delete</button></div></td>`:''}</tr>`;}).join('')}</tbody></table></div>`}</div>`;
 }
+
+// ══════ OPEN RATE TRAINER (COORDINATOR-SCOPED) ══════
 async function openRateTrainer(preTrainerId='',preTrainerName=''){
-  const[trainers,sessions]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('sessions',fn().where('status','==','completed'))]);
+  const[allTrainers,sessions]=await Promise.all([
+    fsGetAll('users',fn().where('role','==','trainer')),
+    fsGetAll('sessions',fn().where('status','==','completed'))
+  ]);
+
+  let trainers=allTrainers;
+  if(CR==='coordinator'){
+    let allowedIds=window._coordAllowedTrainerIds;
+    if(!allowedIds){
+      const myUid=auth().currentUser.uid;
+      const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));
+      allowedIds=[...new Set(myClients.map(c=>c.trainerId).filter(Boolean))];
+      window._coordAllowedTrainerIds=allowedIds;
+    }
+    trainers=allTrainers.filter(t=>allowedIds.includes(t.id));
+  }
+
+  let filteredSessions=sessions;
+  if(CR==='coordinator'&&window._coordAllowedTrainerIds){
+    filteredSessions=sessions.filter(s=>window._coordAllowedTrainerIds.includes(s.trainerId));
+  }
+
   const trainerOpts=trainers.map(t=>`<option value="${t.id}" ${t.id===preTrainerId?'selected':''}>${t.name||t.email}</option>`).join('');
-  openM2('RATE TRAINER SESSION',`<div class="fg"><label class="fl">Trainer *</label><select class="fs" id="rt-trainer" onchange="updateRatingSessionList()"><option value="">— Select trainer —</option>${trainerOpts}</select></div><div class="fg"><label class="fl">Session (optional)</label><select class="fs" id="rt-session"><option value="">— Select completed session —</option></select></div><div class="fr"><div class="fg"><label class="fl">Session Type</label><select class="fs" id="rt-type"><option value="">— Select —</option>${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div><div class="fg"><label class="fl">Session Date</label><input class="fi" id="rt-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div></div><label class="fl" style="margin-bottom:8px">Overall Rating *</label><div class="star-rating-widget"><div class="star-rating-row" id="rt-overall-stars">${[1,2,3,4,5].map(n=>`<button class="star-btn" data-val="${n}" onclick="rtSetOverall(${n})">★</button>`).join('')}</div><div class="star-label" id="rt-overall-label" style="color:var(--muted)">Tap a star to rate</div><div class="star-desc" id="rt-overall-desc"></div></div><input type="hidden" id="rt-rating" value="0"><label class="fl" style="margin-bottom:8px">Rate by Criteria</label><div class="rating-criteria-grid">${RATING_CRITERIA.map(c=>`<div class="criteria-card"><div class="criteria-label">${c.icon} ${c.label}</div><div style="font-size:10px;color:var(--muted2);margin-bottom:6px">${c.desc}</div><div class="mini-stars" id="rt-crit-${c.id}">${[1,2,3,4,5].map(n=>`<button class="mini-star-btn" data-val="${n}" onclick="rtSetCriteria('${c.id}',${n})">★</button>`).join('')}</div></div>`).join('')}</div><div class="fg"><label class="fl">Comment</label><textarea class="fta" id="rt-comment" placeholder="Notes on performance…"></textarea></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveTrainerRating()">Submit Rating</button></div>`);
-  window._rtSessions=sessions;window._rtCriteria={};RATING_CRITERIA.forEach(c=>window._rtCriteria[c.id]=0);window._rtSelectedRating=0;
-  if(preTrainerId){$('rt-trainer').value=preTrainerId;updateRatingSessionList()}
+
+  openM2('RATE TRAINER SESSION',`
+    ${trainers.length===0?`<div class="alert alert-err show" style="margin-bottom:14px">No trainers are assigned to your clients yet.</div>`:''}
+    <div class="fg"><label class="fl">Trainer *</label><select class="fs" id="rt-trainer" onchange="updateRatingSessionList()"><option value="">— Select trainer —</option>${trainerOpts}</select></div>
+    <div class="fg"><label class="fl">Session (optional)</label><select class="fs" id="rt-session"><option value="">— Select completed session —</option></select></div>
+    <div class="fr"><div class="fg"><label class="fl">Session Type</label><select class="fs" id="rt-type"><option value="">— Select —</option>${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div><div class="fg"><label class="fl">Session Date</label><input class="fi" id="rt-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div></div>
+    <label class="fl" style="margin-bottom:8px">Overall Rating *</label>
+    <div class="star-rating-widget"><div class="star-rating-row" id="rt-overall-stars">${[1,2,3,4,5].map(n=>`<button class="star-btn" data-val="${n}" onclick="rtSetOverall(${n})">★</button>`).join('')}</div><div class="star-label" id="rt-overall-label" style="color:var(--muted)">Tap a star to rate</div><div class="star-desc" id="rt-overall-desc"></div></div>
+    <input type="hidden" id="rt-rating" value="0">
+    <label class="fl" style="margin-bottom:8px">Rate by Criteria</label>
+    <div class="rating-criteria-grid">${RATING_CRITERIA.map(c=>`<div class="criteria-card"><div class="criteria-label">${c.icon} ${c.label}</div><div style="font-size:10px;color:var(--muted2);margin-bottom:6px">${c.desc}</div><div class="mini-stars" id="rt-crit-${c.id}">${[1,2,3,4,5].map(n=>`<button class="mini-star-btn" data-val="${n}" onclick="rtSetCriteria('${c.id}',${n})">★</button>`).join('')}</div></div>`).join('')}</div>
+    <div class="fg"><label class="fl">Comment</label><textarea class="fta" id="rt-comment" placeholder="Notes on performance…"></textarea></div>
+    <div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveTrainerRating()">Submit Rating</button></div>`);
+
+  window._rtSessions=filteredSessions;
+  window._rtCriteria={};
+  RATING_CRITERIA.forEach(c=>window._rtCriteria[c.id]=0);
+  window._rtSelectedRating=0;
+  if(preTrainerId){$('rt-trainer').value=preTrainerId;updateRatingSessionList();}
 }
+
 function rtSetOverall(n){$('rt-rating').value=n;window._rtSelectedRating=n;const labels=['','😞 Poor','😐 Fair','🙂 Good','😊 Great','🌟 Excellent!'];const colors=['','#ff4444','#ff7700','var(--yellow)','#88cc00','var(--accent)'];const stars=$('rt-overall-stars'),lbl=$('rt-overall-label'),desc=$('rt-overall-desc');if(!stars)return;stars.querySelectorAll('.star-btn').forEach((b,i)=>{b.classList.toggle('active',i<n);b.style.color=i<n?colors[n]:'';});if(lbl){lbl.textContent=labels[n]||'';lbl.style.color=colors[n]||'var(--muted)';}const descs=['','Needs improvement','Below average','Meets expectations','Above average','Outstanding!'];if(desc)desc.textContent=descs[n]||'';}
 function rtSetCriteria(cId,n){if(!window._rtCriteria)window._rtCriteria={};window._rtCriteria[cId]=n;const s=document.getElementById(`rt-crit-${cId}`);if(!s)return;s.querySelectorAll('.mini-star-btn').forEach((b,i)=>b.classList.toggle('active',i<n));}
 function updateRatingSessionList(){const tid=$('rt-trainer').value;const sel=$('rt-session');if(!sel)return;const filtered=(window._rtSessions||[]).filter(s=>s.trainerId===tid);sel.innerHTML=`<option value="">— Select completed session —</option>`+filtered.slice(0,50).map(s=>`<option value="${s.id}" data-date="${s.date||''}" data-type="${s.type||''}">${s.clientName||'—'} • ${s.date||'—'} ${to12h(s.time)} (${s.type||'—'})</option>`).join('');sel.onchange=()=>{const opt=sel.options[sel.selectedIndex];if(opt&&opt.dataset.date)$('rt-date').value=opt.dataset.date;if(opt&&opt.dataset.type&&$('rt-type'))$('rt-type').value=opt.dataset.type;};}
@@ -856,6 +933,57 @@ async function viewTrainerRatings(trainerId,trainerName){
     <div class="mo-foot"><button class="btn btn-p" onclick="closeM2();openRateTrainer('${trainerId}','${trainerName.replace(/'/g,"\\'")}')">+ Rate Session</button><button class="btn btn-g" onclick="closeM2()">Close</button></div>`);
 }
 async function delRating(id){if(!confirm('Delete?'))return;try{await fsDel('trainerratings',id);toast('Deleted','success');trainerratings()}catch(e){toast('Error','error')}}
+
+// ══════ SESSIONS (COORDINATOR-SCOPED) ══════
+async function sessions(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+
+  let coordClientIds=null;
+  if(CR==='coordinator'){
+    const myUid=auth().currentUser.uid;
+    const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));
+    coordClientIds=myClients.map(c=>c.id);
+  }
+
+  async function loadSTab(tab){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    const tabEl=document.querySelector(`.tab[data-stab="${tab}"]`);
+    if(tabEl)tabEl.classList.add('active');
+    $('sess-list').innerHTML=`<div style="padding:30px;text-align:center;color:var(--muted)"><div class="spin" style="width:22px;height:22px;margin:0 auto"></div></div>`;
+
+    let q=[];
+    if(CR==='trainer')q=[fn().where('trainerId','==',auth().currentUser.uid)];
+    if(CR==='client')q=[fn().where('clientId','==',auth().currentUser.uid)];
+
+    let data=await fsGetAll('sessions',...q);
+
+    // Coordinator: filter to their clients only
+    if(CR==='coordinator'&&coordClientIds){
+      data=data.filter(s=>coordClientIds.includes(s.clientId));
+    }
+
+    const today=new Date();today.setHours(0,0,0,0);
+    if(tab==='today')    data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()===today.getTime()});
+    else if(tab==='upcoming')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()>today.getTime()});
+    else if(tab==='past')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()<today.getTime()});
+
+    data.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
+    $('sess-list').innerHTML=renderSessionsTable(data,tab);
+  }
+
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px"><div class="tabs" style="margin:0;border:none">${['today','upcoming','past','all'].map(t=>`<div class="tab ${t==='today'?'active':''}" data-stab="${t}" onclick="window._sTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</div>`).join('')}</div>${CR!=='client'?`<button class="btn btn-p" onclick="openAddSession()">+ Schedule Session</button>`:''}</div><div class="card" style="padding:0"><div class="tbl-wrap" id="sess-list"></div></div>`;
+  window._sTab=loadSTab;
+  loadSTab('today');
+}
+
+function renderSessionsTable(data,tab){if(!data.length){const msgs={today:'No sessions today.',upcoming:'No upcoming sessions.',past:'No past sessions.',all:'No sessions found.'};return emptyState('📅',msgs[tab]||'No sessions',CR!=='client'?'Use the Schedule button to add sessions.':'Your coordinator will schedule sessions.',CR!=='client'&&tab!=='past'?'+ Schedule':'',CR!=='client'&&tab!=='past'?'openAddSession()':'');}return`<table><thead><tr><th>Date</th><th>Time</th><th>Client</th><th>Trainer</th><th>Type</th><th>Status</th><th>Meet Link</th><th>Actions</th></tr></thead><tbody>${data.map(s=>`<tr><td style="font-size:12px">${s.date||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(s.time)}</td><td><strong>${s.clientName||'—'}</strong></td><td style="font-size:12px">${s.trainerName||'—'}</td><td style="font-size:12px">${s.type||'—'}</td><td>${statusBadge(s.status)}</td><td>${s.meetLink?`<a href="${s.meetLink}" target="_blank" style="color:var(--accent);font-size:12px">Join 🔗</a>`:'—'}</td><td><div class="td-actions">${CR!=='client'&&s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair',true)">Start</button>`:''}${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">Done ✓</button>`:''}${CR==='admin'&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">Done</button>`:''}${CR==='trainer'&&(s.status==='onair'||s.status==='not-started')?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed',true)">Miss</button>`:''} ${CR==='admin'||CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-g btn-sm" onclick="openEditSession('${s.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delSession('${s.id}')">Delete</button>`:''}${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='completed'?`<button class="btn btn-yw btn-sm" onclick="openRateTrainer('${s.trainerId||''}','${(s.trainerName||'').replace(/'/g,"\\'")}')">⭐ Rate</button>`:''}</div></td></tr>`).join('')}</tbody></table>`;}
+
+function openAddSession(){loadSessionForm().then(html=>{openM2('SCHEDULE SESSION',html);initSessionFormAC()})}
+async function openEditSession(id){const s=await fsGet('sessions',id);if(!s){toast('Not found','error');return}loadSessionForm(s).then(html=>{openM2('EDIT SESSION',html);initSessionFormAC(s)})}
+async function initSessionFormAC(s={}){const[clients,trainers]=await Promise.all([fsGetAll('clients',fn().where('active','==',true)),fsGetAll('users',fn().where('role','==','trainer'))]);const clientInp=document.getElementById('sf-client-inp');if(clientInp){const items=clients.map(c=>({id:c.id,label:c.name||'',sub:c.phone||''}));createAutocomplete(clientInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-client-id');if(hid)hid.value=it.id;}});}const trainerInp=document.getElementById('sf-trainer-inp');if(trainerInp){const items=trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''}));createAutocomplete(trainerInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-trainer-id');if(hid)hid.value=it.id;}});}}
+async function loadSessionForm(s={}){return`<div class="fr"><div><label class="fl">Client *</label><input class="fi" id="sf-client-inp" placeholder="Type client name…" value="${s.clientName||''}" autocomplete="off"><input type="hidden" id="sf-client-id" value="${s.clientId||''}"></div><div><label class="fl">Trainer *</label><input class="fi" id="sf-trainer-inp" placeholder="Type trainer name…" value="${s.trainerName||''}" autocomplete="off"><input type="hidden" id="sf-trainer-id" value="${s.trainerId||''}"></div></div><div class="fr"><div><label class="fl">Date *</label><input class="fi" id="sf-date" type="date" value="${s.date||''}"></div><div><label class="fl">Time *</label><input class="fi" id="sf-time" type="time" value="${s.time||''}"></div></div><div class="fr"><div><label class="fl">Session Type</label><select class="fs" id="sf-type">${SESSION_TYPES.map(t=>`<option ${s.type===t?'selected':''}>${t}</option>`).join('')}</select></div><div><label class="fl">Status</label><select class="fs" id="sf-status">${['not-started','onair','completed','missed'].map(st=>`<option value="${st}" ${(s.status||'not-started')===st?'selected':''}>${st}</option>`).join('')}</select></div></div><div style="margin-bottom:14px"><label class="fl">Meet Link</label><input class="fi" id="sf-link" value="${s.meetLink||''}" placeholder="https://meet.google.com/…"></div><div style="margin-bottom:14px"><label class="fl">Notes</label><textarea class="fta" id="sf-notes">${s.notes||''}</textarea></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveSession('${s.id||''}')">Save Session</button></div>`;}
+async function saveSession(existingId=''){const clientId=$('sf-client-id').value||$('sf-client-inp')?.dataset.selectedId||'';const clientName=$('sf-client-inp')?.value||'';const trainerId=$('sf-trainer-id').value||$('sf-trainer-inp')?.dataset.selectedId||'';const trainerName=($('sf-trainer-inp')?.value||'').replace(/\s*\([^)]*\)\s*$/,'').trim();const date=$('sf-date').value,time=$('sf-time').value;if(!clientName||!trainerName||!date||!time){toast('Client, trainer, date and time required','error');return}const data={clientId,clientName,trainerId,trainerName,date,time,type:$('sf-type').value,status:$('sf-status').value||'not-started',meetLink:$('sf-link').value.trim(),notes:$('sf-notes').value};try{if(existingId){await fsUpdate('sessions',existingId,data);toast('Updated!','success')}else{await fsAdd('sessions',data);toast('Scheduled!','success')}closeM2();sessions();}catch(e){toast('Error: '+e.message,'error')}}
+async function delSession(id){if(!confirm('Delete?'))return;try{await fsDel('sessions',id);toast('Deleted','success');sessions()}catch(e){toast('Error: '+e.message,'error')}}
 
 // ══════ TIME CHART ══════
 async function timechart(){
@@ -965,7 +1093,7 @@ async function coordinators(){
 async function assignFollowupToCoord(coordId,coordName){const cls=await fsGetAll('clients',fn().where('active','==',true));openM1(`ASSIGN TASK TO ${coordName.toUpperCase()}`,`<div class="fg"><label class="fl">Client *</label><input class="fi" id="aft-client-inp" placeholder="Type client name…" autocomplete="off"><input type="hidden" id="aft-client-id"></div><div class="fr"><div class="fg"><label class="fl">Type *</label><select class="fs" id="aft-type"><option value="">— Select —</option>${['Motivation','Renewal','Progress Check','Diet Review','Payment Reminder','General Check-in'].map(t=>`<option>${t}</option>`).join('')}</select></div><div class="fg"><label class="fl">Priority</label><select class="fs" id="aft-priority"><option>High</option><option>Medium</option><option>Low</option></select></div></div><div class="fg"><label class="fl">Remarks</label><textarea class="fta" id="aft-remark" placeholder="Task details…"></textarea></div><div class="fg"><label class="fl">Due Date</label><input class="fi" id="aft-due" type="date" value="${new Date().toISOString().split('T')[0]}"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveAssignedFollowup('${coordId}','${coordName}')">Assign</button></div>`);attachClientAC('aft-client-inp','aft-client-id',cls);}
 async function saveAssignedFollowup(coordId,coordName){const clientId=$('aft-client-id').value||$('aft-client-inp')?.dataset.selectedId||'';const clientName=$('aft-client-inp')?.value||'';const type=$('aft-type').value;if(!clientId||!type){toast('Client and type required','error');return}try{await fsAdd('followups',{clientId,clientName,type,priority:$('aft-priority').value,remark:$('aft-remark').value,dueDate:$('aft-due').value,done:false,assignedTo:coordId,assignedToName:coordName,assignedToId:coordId,createdBy:auth().currentUser.uid,status:'pending'});closeM1();toast('Task assigned!','success');}catch(e){toast('Error: '+e.message,'error')}}
 
-// ── COORDINATOR ATTENDANCE ──
+// ══════ COORDINATOR ATTENDANCE ══════
 async function coordinatorattendance(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const data=await fsGetAll('coordinatorattendance');data.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.time||'').localeCompare(a.time||''));
@@ -977,7 +1105,7 @@ async function openEditCoordAttend(id){const a=await fsGet('coordinatorattendanc
 async function saveCoordAttend(existingId=''){const sel=$('ca-coord');const coordId=sel.value;const opt=sel.options[sel.selectedIndex];const coordName=opt?.dataset.name||'';const coordRole=opt?.dataset.role||'';const date=$('ca-date').value,status=$('ca-status').value,time=$('ca-time').value;if(!coordId||!date){toast('Select coordinator and date','error');return}const data={coordId,coordName,coordRole,date,time,status,note:$('ca-note').value,markedBy:auth().currentUser.uid,markedByName:CU.name||''};try{if(existingId){await fsUpdate('coordinatorattendance',existingId,data);toast('Updated!','success')}else{await fsAdd('coordinatorattendance',data);toast('Marked!','success')}closeM1();coordinatorattendance();}catch(e){toast('Error: '+e.message,'error')}}
 async function delCoordAttend(id){if(!confirm('Delete?'))return;try{await fsDel('coordinatorattendance',id);toast('Deleted','success');coordinatorattendance()}catch(e){toast('Error','error')}}
 
-// ── TRAINER ATTENDANCE ──
+// ══════ TRAINER ATTENDANCE ══════
 async function trainerattendance(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const data=await fsGetAll('trainerattendance');data.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.time||'').localeCompare(a.time||''));
@@ -988,31 +1116,6 @@ async function openMarkTrainerAttend(){const trainers=await fsGetAll('users',fn(
 async function openEditTrainerAttend(id){const a=await fsGet('trainerattendance',id);if(!a){toast('Not found','error');return}const trainers=await fsGetAll('users',fn().where('role','==','trainer'));openM1('EDIT TRAINER ATTENDANCE',`<div class="fg"><label class="fl">Trainer *</label><input class="fi" id="ta-trainer-inp" placeholder="Type trainer name…" value="${a.trainerName||''}" autocomplete="off"><input type="hidden" id="ta-trainer-id" value="${a.trainerId||''}"></div><div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" id="ta-date" type="date" value="${a.date||''}"></div><div class="fg"><label class="fl">Time</label><input class="fi" id="ta-time" type="time" value="${a.time||''}"></div></div><div class="fg"><label class="fl">Status *</label><select class="fs" id="ta-status"><option value="present" ${a.status==='present'?'selected':''}>✅ Present</option><option value="absent" ${a.status==='absent'?'selected':''}>❌ Absent</option><option value="late" ${a.status==='late'?'selected':''}>⏰ Late</option></select></div><div class="fg"><label class="fl">Note</label><input class="fi" id="ta-note" value="${a.note||''}"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTrainerAttend('${id}')">Update</button></div>`);attachUserAC('ta-trainer-inp','ta-trainer-id',trainers);}
 async function saveTrainerAttend(existingId=''){const trainerId=$('ta-trainer-id').value||$('ta-trainer-inp')?.dataset.selectedId||'';const trainerName=$('ta-trainer-inp')?.value||'';const date=$('ta-date').value,status=$('ta-status').value,time=$('ta-time').value;if(!trainerName||!date){toast('Select trainer and date','error');return}const data={trainerId,trainerName,date,time,status,note:$('ta-note').value,markedBy:auth().currentUser.uid,markedByName:CU.name||''};try{if(existingId){await fsUpdate('trainerattendance',existingId,data);toast('Updated!','success')}else{await fsAdd('trainerattendance',data);toast('Marked!','success')}closeM1();trainerattendance();}catch(e){toast('Error: '+e.message,'error')}}
 async function delTrainerAttend(id){if(!confirm('Delete?'))return;try{await fsDel('trainerattendance',id);toast('Deleted','success');trainerattendance()}catch(e){toast('Error: '+e.message,'error')}}
-
-// ══════ SESSIONS ══════
-async function sessions(){
-  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
-  async function loadSTab(tab){
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const tabEl=document.querySelector(`.tab[data-stab="${tab}"]`);if(tabEl)tabEl.classList.add('active');
-    $('sess-list').innerHTML=`<div style="padding:30px;text-align:center;color:var(--muted)"><div class="spin" style="width:22px;height:22px;margin:0 auto"></div></div>`;
-    let q=[];if(CR==='trainer')q=[fn().where('trainerId','==',auth().currentUser.uid)];if(CR==='client')q=[fn().where('clientId','==',auth().currentUser.uid)];
-    let data=await fsGetAll('sessions',...q);const today=new Date();today.setHours(0,0,0,0);
-    if(tab==='today')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()===today.getTime()});
-    else if(tab==='upcoming')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()>today.getTime()});
-    else if(tab==='past')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()<today.getTime()});
-    data.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
-    $('sess-list').innerHTML=renderSessionsTable(data,tab);
-  }
-  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px"><div class="tabs" style="margin:0;border:none">${['today','upcoming','past','all'].map(t=>`<div class="tab ${t==='today'?'active':''}" data-stab="${t}" onclick="window._sTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</div>`).join('')}</div>${CR!=='client'?`<button class="btn btn-p" onclick="openAddSession()">+ Schedule Session</button>`:''}</div><div class="card" style="padding:0"><div class="tbl-wrap" id="sess-list"></div></div>`;
-  window._sTab=loadSTab;loadSTab('today');
-}
-function renderSessionsTable(data,tab){if(!data.length){const msgs={today:'No sessions today.',upcoming:'No upcoming sessions.',past:'No past sessions.',all:'No sessions found.'};return emptyState('📅',msgs[tab]||'No sessions',CR!=='client'?'Use the Schedule button to add sessions.':'Your coordinator will schedule sessions.',CR!=='client'&&tab!=='past'?'+ Schedule':'',CR!=='client'&&tab!=='past'?'openAddSession()':'');}return`<table><thead><tr><th>Date</th><th>Time</th><th>Client</th><th>Trainer</th><th>Type</th><th>Status</th><th>Meet Link</th><th>Actions</th></tr></thead><tbody>${data.map(s=>`<tr><td style="font-size:12px">${s.date||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(s.time)}</td><td><strong>${s.clientName||'—'}</strong></td><td style="font-size:12px">${s.trainerName||'—'}</td><td style="font-size:12px">${s.type||'—'}</td><td>${statusBadge(s.status)}</td><td>${s.meetLink?`<a href="${s.meetLink}" target="_blank" style="color:var(--accent);font-size:12px">Join 🔗</a>`:'—'}</td><td><div class="td-actions">${CR!=='client'&&s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair',true)">Start</button>`:''}${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">Done ✓</button>`:''}${CR==='admin'&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">Done</button>`:''}${CR==='trainer'&&(s.status==='onair'||s.status==='not-started')?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed',true)">Miss</button>`:''} ${CR==='admin'||CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-g btn-sm" onclick="openEditSession('${s.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delSession('${s.id}')">Delete</button>`:''}${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='completed'?`<button class="btn btn-yw btn-sm" onclick="openRateTrainer('${s.trainerId||''}','${(s.trainerName||'').replace(/'/g,"\\'")}')">⭐ Rate</button>`:''}</div></td></tr>`).join('')}</tbody></table>`;}
-function openAddSession(){loadSessionForm().then(html=>{openM2('SCHEDULE SESSION',html);initSessionFormAC()})}
-async function openEditSession(id){const s=await fsGet('sessions',id);if(!s){toast('Not found','error');return}loadSessionForm(s).then(html=>{openM2('EDIT SESSION',html);initSessionFormAC(s)})}
-async function initSessionFormAC(s={}){const[clients,trainers]=await Promise.all([fsGetAll('clients',fn().where('active','==',true)),fsGetAll('users',fn().where('role','==','trainer'))]);const clientInp=document.getElementById('sf-client-inp');if(clientInp){const items=clients.map(c=>({id:c.id,label:c.name||'',sub:c.phone||''}));createAutocomplete(clientInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-client-id');if(hid)hid.value=it.id;}});}const trainerInp=document.getElementById('sf-trainer-inp');if(trainerInp){const items=trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''}));createAutocomplete(trainerInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-trainer-id');if(hid)hid.value=it.id;}});}}
-async function loadSessionForm(s={}){return`<div class="fr"><div><label class="fl">Client *</label><input class="fi" id="sf-client-inp" placeholder="Type client name…" value="${s.clientName||''}" autocomplete="off"><input type="hidden" id="sf-client-id" value="${s.clientId||''}"></div><div><label class="fl">Trainer *</label><input class="fi" id="sf-trainer-inp" placeholder="Type trainer name…" value="${s.trainerName||''}" autocomplete="off"><input type="hidden" id="sf-trainer-id" value="${s.trainerId||''}"></div></div><div class="fr"><div><label class="fl">Date *</label><input class="fi" id="sf-date" type="date" value="${s.date||''}"></div><div><label class="fl">Time *</label><input class="fi" id="sf-time" type="time" value="${s.time||''}"></div></div><div class="fr"><div><label class="fl">Session Type</label><select class="fs" id="sf-type">${SESSION_TYPES.map(t=>`<option ${s.type===t?'selected':''}>${t}</option>`).join('')}</select></div><div><label class="fl">Status</label><select class="fs" id="sf-status">${['not-started','onair','completed','missed'].map(st=>`<option value="${st}" ${(s.status||'not-started')===st?'selected':''}>${st}</option>`).join('')}</select></div></div><div style="margin-bottom:14px"><label class="fl">Meet Link</label><input class="fi" id="sf-link" value="${s.meetLink||''}" placeholder="https://meet.google.com/…"></div><div style="margin-bottom:14px"><label class="fl">Notes</label><textarea class="fta" id="sf-notes">${s.notes||''}</textarea></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveSession('${s.id||''}')">Save Session</button></div>`;}
-async function saveSession(existingId=''){const clientId=$('sf-client-id').value||$('sf-client-inp')?.dataset.selectedId||'';const clientName=$('sf-client-inp')?.value||'';const trainerId=$('sf-trainer-id').value||$('sf-trainer-inp')?.dataset.selectedId||'';const trainerName=($('sf-trainer-inp')?.value||'').replace(/\s*\([^)]*\)\s*$/,'').trim();const date=$('sf-date').value,time=$('sf-time').value;if(!clientName||!trainerName||!date||!time){toast('Client, trainer, date and time required','error');return}const data={clientId,clientName,trainerId,trainerName,date,time,type:$('sf-type').value,status:$('sf-status').value||'not-started',meetLink:$('sf-link').value.trim(),notes:$('sf-notes').value};try{if(existingId){await fsUpdate('sessions',existingId,data);toast('Updated!','success')}else{await fsAdd('sessions',data);toast('Scheduled!','success')}closeM2();sessions();}catch(e){toast('Error: '+e.message,'error')}}
-async function delSession(id){if(!confirm('Delete?'))return;try{await fsDel('sessions',id);toast('Deleted','success');sessions()}catch(e){toast('Error: '+e.message,'error')}}
 
 // ══════ ATTENDANCE ══════
 async function attendance(){
@@ -1026,7 +1129,6 @@ async function openMarkAttendance(){const cls=await fsGetAll('clients',fn().wher
 async function openEditAttend(id){const a=await fsGet('attendance',id);if(!a){toast('Not found','error');return}const cls=await fsGetAll('clients',fn().where('active','==',true));openM1('EDIT ATTENDANCE',`<div class="fg"><label class="fl">Client *</label><input class="fi" id="at-client-inp" placeholder="Type client name…" value="${a.clientName||''}" autocomplete="off"><input type="hidden" id="at-client-id" value="${a.clientId||''}"></div><div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" id="at-date" type="date" value="${a.date||''}"></div><div class="fg"><label class="fl">Status *</label><select class="fs" id="at-status"><option value="present" ${a.status==='present'?'selected':''}>✅ Present</option><option value="absent" ${a.status==='absent'?'selected':''}>❌ Absent</option><option value="late" ${a.status==='late'?'selected':''}>⏰ Late</option></select></div></div><div class="fg"><label class="fl">Reason</label><input class="fi" id="at-reason" value="${a.reason||''}"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveAttendance('${id}')">Update</button></div>`);attachClientAC('at-client-inp','at-client-id',cls);}
 async function saveAttendance(existingId=''){const clientId=$('at-client-id').value||$('at-client-inp')?.dataset.selectedId||'';const clientName=$('at-client-inp')?.value||'';const date=$('at-date').value,status=$('at-status').value;if(!clientName||!date||!status){toast('Fill required fields','error');return}const clientDoc=clientId?await fsGet('clients',clientId):null;const data={clientId,clientName,trainerId:clientDoc?.trainerId||'',trainerName:clientDoc?.trainerName||'',date,status,sessionType:document.getElementById('at-type')?.value||'',reason:$('at-reason').value,markedBy:auth().currentUser.uid};try{if(existingId){await fsUpdate('attendance',existingId,data);toast('Updated!','success')}else{await fsAdd('attendance',data);toast('Marked!','success')}closeM1();attendance();}catch(e){toast('Error: '+e.message,'error')}}
 async function delAttend(id){if(!confirm('Delete?'))return;try{await fsDel('attendance',id);toast('Deleted','success');attendance()}catch(e){toast('Error: '+e.message,'error')}}
-
 // ══════ ANALYTICS ══════
 async function analytics(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
