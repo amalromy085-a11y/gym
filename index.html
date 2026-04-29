@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -316,18 +315,15 @@ tbody tr:last-child td{border-bottom:none}
 .tc-dash-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.5px;background:var(--purple-dim);color:var(--purple)}
 .quick-rate-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(4px);z-index:1100;display:flex;align-items:center;justify-content:center;padding:20px}
 .quick-rate-box{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:28px;max-width:480px;width:100%;animation:moslide .2s ease}
-/* reminder toast special */
 .reminder-toast{position:fixed;top:70px;right:20px;z-index:8000;background:var(--card);border:2px solid var(--accent);border-radius:14px;padding:16px 20px;max-width:340px;box-shadow:0 12px 40px rgba(212,255,0,.2);animation:tslide .3s ease}
 .reminder-toast-title{font-weight:700;font-size:14px;color:var(--accent);margin-bottom:4px}
 .reminder-toast-body{font-size:13px;color:var(--text)}
 .reminder-toast-close{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer}
-/* leave card */
 .leave-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;transition:border-color .2s}
 .leave-card:hover{border-color:var(--border2)}
 .leave-status-pending{border-left:3px solid var(--yellow)}
 .leave-status-approved{border-left:3px solid var(--green)}
 .leave-status-rejected{border-left:3px solid var(--red)}
-/* dots menu */
 .dots-menu-wrap{position:relative;display:inline-block}
 .dots-btn{background:transparent;border:1px solid var(--border2);border-radius:7px;padding:6px 10px;cursor:pointer;color:var(--text);font-size:18px;line-height:1;transition:border-color .2s}
 .dots-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -337,7 +333,6 @@ tbody tr:last-child td{border-bottom:none}
 .dots-item:last-child{border-bottom:none}
 .dots-item:hover{background:var(--accent-dim);color:var(--accent)}
 .dots-item-ico{font-size:15px}
-/* collapsible */
 .collapsible-section{margin-bottom:18px}
 .collapsible-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .2s;user-select:none}
 .collapsible-hd:hover{border-color:var(--accent)}
@@ -346,7 +341,6 @@ tbody tr:last-child td{border-bottom:none}
 .collapsible-body.open{display:block}
 .collapsible-arrow{font-size:12px;color:var(--muted);transition:transform .2s}
 .collapsible-hd.open .collapsible-arrow{transform:rotate(180deg)}
-/* old clients */
 .old-client-section{margin-bottom:14px}
 .old-client-section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding:8px 12px;background:rgba(128,128,128,.06);border-radius:7px;display:flex;align-items:center;gap:8px}
 .old-client-card{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);margin-bottom:7px;transition:border-color .2s}
@@ -375,7 +369,6 @@ tbody tr:last-child td{border-bottom:none}
   <div class="ld-bar"><div class="ld-fill"></div></div>
 </div>
 <div id="toasts"></div>
-
 <div class="notif-panel" id="notif-panel">
   <div class="notif-header">
     <div style="font-weight:700;font-size:14px">🔔 Notifications</div>
@@ -386,7 +379,6 @@ tbody tr:last-child td{border-bottom:none}
   </div>
   <div class="notif-list" id="notif-list"></div>
 </div>
-
 <div id="login-page" style="display:flex">
   <div class="lc">
     <div class="lc-logo">
@@ -404,7 +396,6 @@ tbody tr:last-child td{border-bottom:none}
     <div style="text-align:center;margin-top:14px"><a style="color:var(--accent);font-size:13px;cursor:pointer" onclick="showForgot()">Forgot password? Reset via email →</a></div>
   </div>
 </div>
-
 <div id="app">
   <div id="mob-ov" onclick="closeSB()"></div>
   <div class="layout">
@@ -432,11 +423,9 @@ tbody tr:last-child td{border-bottom:none}
     </div>
   </div>
 </div>
-
 <div class="mo" id="m1"><div class="mb" id="m1b"><div class="mo-hd"><div class="mo-title" id="m1t"></div><button class="mo-x" onclick="closeM1()">✕</button></div><div id="m1c"></div></div></div>
 <div class="mo" id="m2"><div class="mb mb-lg" id="m2b"><div class="mo-hd"><div class="mo-title" id="m2t"></div><button class="mo-x" onclick="closeM2()">✕</button></div><div id="m2c"></div></div></div>
 <div class="mo" id="m3"><div class="mb mb-xl" id="m3b"><div class="mo-hd"><div class="mo-title" id="m3t"></div><button class="mo-x" onclick="closeM3()">✕</button></div><div id="m3c"></div></div></div>
-
 <script>
 'use strict';
 const PLANS=['Silver','Gold','Platinum','Platinum Plus','Couple','Corporate Fitness'];
@@ -456,163 +445,55 @@ let _chatUnsub=null,_notifUnsub=null,_notifCheckTimer=null,_midnightTimer=null,_
 let _notifications=[];
 
 // ══════════════════════════════════════════════════════════════
-//  ① TIME CHART AUTO-RESET AT MIDNIGHT
+//  TIME CHART AUTO-RESET AT MIDNIGHT
 // ══════════════════════════════════════════════════════════════
 const TC_RESET_KEY='gyh_tc_last_reset';
-
 function getTodayStr(){return new Date().toISOString().split('T')[0];}
-
 async function doTcDailyReset(){
-  const today=getTodayStr();
-  const last=localStorage.getItem(TC_RESET_KEY);
-  if(last===today)return; // already reset today
-  try{
-    const entries=await fsGetAll('timechart');
-    const toReset=entries.filter(e=>e.todayStatus&&e.todayStatus!=='not-started'&&e.lastStatusUpdate!==today);
-    await Promise.all(toReset.map(e=>fsUpdate('timechart',e.id,{todayStatus:'not-started',lastStatusUpdate:today})));
-    localStorage.setItem(TC_RESET_KEY,today);
-    if(toReset.length>0){
-      console.log(`[TC Reset] Reset ${toReset.length} entries to not-started for ${today}`);
-      toast(`📋 Time Chart reset for ${today} (${toReset.length} entries)`,'info');
-    }
-  }catch(e){console.warn('[TC Reset] error:',e);}
+  const today=getTodayStr();const last=localStorage.getItem(TC_RESET_KEY);if(last===today)return;
+  try{const entries=await fsGetAll('timechart');const toReset=entries.filter(e=>e.todayStatus&&e.todayStatus!=='not-started'&&e.lastStatusUpdate!==today);await Promise.all(toReset.map(e=>fsUpdate('timechart',e.id,{todayStatus:'not-started',lastStatusUpdate:today})));localStorage.setItem(TC_RESET_KEY,today);if(toReset.length>0){console.log(`[TC Reset] Reset ${toReset.length} entries`);toast(`📋 Time Chart reset for ${today}`,'info');}}catch(e){console.warn('[TC Reset] error:',e);}
 }
-
 function scheduleMidnightReset(){
   if(_midnightTimer){clearTimeout(_midnightTimer);_midnightTimer=null;}
-  const now=new Date();
-  const nextMidnight=new Date(now);
-  nextMidnight.setHours(24,0,0,500); // 12:00:00.5 AM next day
-  const msUntilMidnight=nextMidnight-now;
-  _midnightTimer=setTimeout(async()=>{
-    await doTcDailyReset();
-    scheduleMidnightReset(); // reschedule for next midnight
-  },msUntilMidnight);
-  console.log(`[TC Reset] Next reset in ${Math.round(msUntilMidnight/60000)} minutes`);
+  const now=new Date();const nextMidnight=new Date(now);nextMidnight.setHours(24,0,0,500);const msUntilMidnight=nextMidnight-now;
+  _midnightTimer=setTimeout(async()=>{await doTcDailyReset();scheduleMidnightReset();},msUntilMidnight);
 }
 
 // ══════════════════════════════════════════════════════════════
-//  ② ENHANCED SESSION REMINDERS (1 hour before)
+//  SESSION REMINDERS
 // ══════════════════════════════════════════════════════════════
-const REMINDED_KEY='gyh_reminded_sessions'; // localStorage set of "sessionId_date"
-
-function getReminderSet(){
-  try{return new Set(JSON.parse(localStorage.getItem(REMINDED_KEY)||'[]'));}catch{return new Set();}
-}
-function addToReminderSet(key){
-  const s=getReminderSet();s.add(key);
-  // prune old entries (keep only today's)
-  const today=getTodayStr();const fresh=[...s].filter(k=>k.includes(today));
-  localStorage.setItem(REMINDED_KEY,JSON.stringify(fresh));
-}
-
+const REMINDED_KEY='gyh_reminded_sessions';
+function getReminderSet(){try{return new Set(JSON.parse(localStorage.getItem(REMINDED_KEY)||'[]'));}catch{return new Set();}}
+function addToReminderSet(key){const s=getReminderSet();s.add(key);const today=getTodayStr();const fresh=[...s].filter(k=>k.includes(today));localStorage.setItem(REMINDED_KEY,JSON.stringify(fresh));}
 function showReminderToast(title,body,onJoin){
-  // remove existing
   document.querySelectorAll('.reminder-toast').forEach(r=>r.remove());
-  const div=document.createElement('div');
-  div.className='reminder-toast';
-  div.innerHTML=`<button class="reminder-toast-close" onclick="this.parentElement.remove()">✕</button>
-    <div class="reminder-toast-title">⏰ ${title}</div>
-    <div class="reminder-toast-body">${body}</div>
-    ${onJoin?`<button class="btn btn-p btn-sm" style="margin-top:10px" onclick="${onJoin}">Join Session 🔗</button>`:''}`;
-  document.body.appendChild(div);
-  setTimeout(()=>div.remove(),30000); // auto-dismiss 30s
+  const div=document.createElement('div');div.className='reminder-toast';
+  div.innerHTML=`<button class="reminder-toast-close" onclick="this.parentElement.remove()">✕</button><div class="reminder-toast-title">⏰ ${title}</div><div class="reminder-toast-body">${body}</div>${onJoin?`<button class="btn btn-p btn-sm" style="margin-top:10px" onclick="${onJoin}">Join Session 🔗</button>`:''}`;
+  document.body.appendChild(div);setTimeout(()=>div.remove(),30000);
 }
-
 async function checkUpcomingSessions(){
   if(!CU||!CR)return;
   try{
-    const now=new Date();
-    const today=getTodayStr();
-    let sessions=[];
-    if(CR==='trainer'){
-      sessions=await fsGetAll('sessions',fn().where('trainerId','==',auth().currentUser.uid),fn().where('date','==',today),fn().where('status','==','not-started'));
-    } else if(CR==='coordinator'){
-      const myUid=auth().currentUser.uid;
-      const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));
-      const ids=myClients.map(c=>c.id);
-      const allToday=await fsGetAll('sessions',fn().where('date','==',today),fn().where('status','==','not-started'));
-      sessions=allToday.filter(s=>ids.includes(s.clientId));
-    } else {
-      sessions=await fsGetAll('sessions',fn().where('date','==',today),fn().where('status','==','not-started'));
-    }
-    // Also check TC entries
+    const now=new Date();const today=getTodayStr();let sessions=[];
+    if(CR==='trainer'){sessions=await fsGetAll('sessions',fn().where('trainerId','==',auth().currentUser.uid),fn().where('date','==',today),fn().where('status','==','not-started'));}
+    else if(CR==='coordinator'){const myUid=auth().currentUser.uid;const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));const ids=myClients.map(c=>c.id);const allToday=await fsGetAll('sessions',fn().where('date','==',today),fn().where('status','==','not-started'));sessions=allToday.filter(s=>ids.includes(s.clientId));}
+    else{sessions=await fsGetAll('sessions',fn().where('date','==',today),fn().where('status','==','not-started'));}
     let tcSessions=[];
-    if(CR==='trainer'){
-      tcSessions=await fsGetAll('timechart',fn().where('trainerId','==',auth().currentUser.uid));
-    } else {
-      tcSessions=await fsGetAll('timechart');
-    }
-
+    if(CR==='trainer'){tcSessions=await fsGetAll('timechart',fn().where('trainerId','==',auth().currentUser.uid));}
+    else{tcSessions=await fsGetAll('timechart');}
     const reminded=getReminderSet();
-    const allItems=[
-      ...sessions.map(s=>({id:s.id,time:s.time,clientName:s.clientName,trainerName:s.trainerName,type:s.type,meetLink:s.meetLink||'',isTc:false})),
-      ...tcSessions.filter(t=>t.sessionTime).map(t=>({id:'tc_'+t.id,time:t.sessionTime,clientName:t.clientName,trainerName:t.trainerName,type:t.sessionType,meetLink:'',isTc:true}))
-    ];
-
+    const allItems=[...sessions.map(s=>({id:s.id,time:s.time,clientName:s.clientName,trainerName:s.trainerName,type:s.type,meetLink:s.meetLink||'',isTc:false})),...tcSessions.filter(t=>t.sessionTime).map(t=>({id:'tc_'+t.id,time:t.sessionTime,clientName:t.clientName,trainerName:t.trainerName,type:t.sessionType,meetLink:'',isTc:true}))];
     for(const s of allItems){
-      if(!s.time)continue;
-      const[h,m]=s.time.split(':').map(Number);
-      if(isNaN(h)||isNaN(m))continue;
-      const sessTime=new Date(now);sessTime.setHours(h,m,0,0);
-      const diffMin=(sessTime-now)/60000;
-
-      // 1-hour reminder window: between 55-65 minutes before
-      if(diffMin>55&&diffMin<=65){
-        const rKey=`${s.id}_${today}_1hr`;
-        if(!reminded.has(rKey)){
-          addToReminderSet(rKey);
-          // Show reminder toast
-          showReminderToast(
-            'Session in 1 Hour',
-            `${s.clientName||'Client'} with ${s.trainerName||'Trainer'} at ${to12h(s.time)} — ${s.type||'Session'}`,
-            s.meetLink?`window.open('${s.meetLink}','_blank')`:'null'
-          );
-          // Also write to notifications
-          await createNotifForUsers({
-            key:rKey,
-            title:'⏰ Session Reminder — 1 Hour',
-            body:`${s.clientName||'Client'} with ${s.trainerName||'Trainer'} at ${to12h(s.time)}. ${s.type||'Session'}`,
-            type:'session_reminder',
-            sessionId:s.id
-          },[auth().currentUser.uid]);
-          toast(`⏰ Reminder: ${s.clientName} at ${to12h(s.time)}`,'info');
-        }
-      }
-    }
-
-    // Also create global notifications for admin/coord-head (existing logic, deduped)
-    if(CR==='admin'||CR==='coordinatorhead'){
-      for(const s of sessions){
-        if(!s.time)continue;
-        const[h,m]=s.time.split(':').map(Number);
-        const sessTime=new Date(now);sessTime.setHours(h,m,0,0);
-        const diffMin=(sessTime-now)/60000;
-        if(diffMin>55&&diffMin<=65){
-          const rKey=`global_${s.id}_${today}_1hr`;
-          const already=await fsGetAll('notifications',fn().where('key','==',rKey));
-          if(!already.length){
-            const users=await fsGetAll('users');
-            await Promise.all(users.map(u=>fsAdd('notifications',{
-              key:rKey,title:'⏰ Session in 1 Hour',
-              body:`${s.clientName} with trainer ${s.trainerName} at ${to12h(s.time)}`,
-              type:'session_reminder',sessionId:s.id,userId:u.id,read:false,createdAt:fn().serverTimestamp()
-            })));
-          }
-        }
-      }
+      if(!s.time)continue;const[h,m]=s.time.split(':').map(Number);if(isNaN(h)||isNaN(m))continue;
+      const sessTime=new Date(now);sessTime.setHours(h,m,0,0);const diffMin=(sessTime-now)/60000;
+      if(diffMin>55&&diffMin<=65){const rKey=`${s.id}_${today}_1hr`;if(!reminded.has(rKey)){addToReminderSet(rKey);showReminderToast('Session in 1 Hour',`${s.clientName||'Client'} with ${s.trainerName||'Trainer'} at ${to12h(s.time)} — ${s.type||'Session'}`,s.meetLink?`window.open('${s.meetLink}','_blank')`:'null');await createNotifForUsers({key:rKey,title:'⏰ Session Reminder — 1 Hour',body:`${s.clientName||'Client'} with ${s.trainerName||'Trainer'} at ${to12h(s.time)}. ${s.type||'Session'}`,type:'session_reminder',sessionId:s.id},[auth().currentUser.uid]);toast(`⏰ Reminder: ${s.clientName} at ${to12h(s.time)}`,'info');}}
     }
   }catch(e){console.warn('[Reminder]',e);}
 }
-
-function initNotifications(){
-  if(_notifCheckTimer)clearInterval(_notifCheckTimer);
-  checkUpcomingSessions();
-  _notifCheckTimer=setInterval(checkUpcomingSessions,60000); // check every minute
-}
+function initNotifications(){if(_notifCheckTimer)clearInterval(_notifCheckTimer);checkUpcomingSessions();_notifCheckTimer=setInterval(checkUpcomingSessions,60000);}
 
 // ══════════════════════════════════════════════════════════════
-//  MISSED SESSION REASON POPUP (unchanged)
+//  MISSED SESSION REASON POPUP
 // ══════════════════════════════════════════════════════════════
 function showMissedReasonPopup(sessionId,clientName,trainerName,date,time,reqId=''){
   const existing=document.getElementById('missed-reason-overlay');if(existing)existing.remove();
@@ -639,21 +520,11 @@ async function submitMissedReasonPopup(sessionId,clientName,trainerName,date,tim
 }
 
 // ══════ 3-DOTS MENU ══════
-function openDotsMenu(menuId){
-  document.querySelectorAll('.dots-dropdown').forEach(d=>{if(d.id!==menuId)d.classList.remove('open');});
-  const dd=document.getElementById(menuId);if(dd)dd.classList.toggle('open');
-}
-document.addEventListener('click',e=>{
-  if(!e.target.closest('.dots-menu-wrap')){document.querySelectorAll('.dots-dropdown').forEach(d=>d.classList.remove('open'));}
-});
+function openDotsMenu(menuId){document.querySelectorAll('.dots-dropdown').forEach(d=>{if(d.id!==menuId)d.classList.remove('open');});const dd=document.getElementById(menuId);if(dd)dd.classList.toggle('open');}
+document.addEventListener('click',e=>{if(!e.target.closest('.dots-menu-wrap')){document.querySelectorAll('.dots-dropdown').forEach(d=>d.classList.remove('open'));}});
 
-// ══════ COLLAPSIBLE SECTIONS ══════
-function toggleCollapsible(id){
-  const hd=document.getElementById('col-hd-'+id);const body=document.getElementById('col-body-'+id);
-  if(!hd||!body)return;
-  const isOpen=body.classList.contains('open');
-  hd.classList.toggle('open',!isOpen);body.classList.toggle('open',!isOpen);
-}
+// ══════ COLLAPSIBLE ══════
+function toggleCollapsible(id){const hd=document.getElementById('col-hd-'+id);const body=document.getElementById('col-body-'+id);if(!hd||!body)return;const isOpen=body.classList.contains('open');hd.classList.toggle('open',!isOpen);body.classList.toggle('open',!isOpen);}
 
 // ══════ TIME CHART HELPERS ══════
 function getTcVisibleSessions(tcEntries,clients,todayStr){
@@ -667,9 +538,7 @@ function getTcVisibleSessions(tcEntries,clients,todayStr){
   }
   return result;
 }
-async function tcMarkStatus(tcId,status){
-  try{await fsUpdate('timechart',tcId,{todayStatus:status,lastStatusUpdate:getTodayStr()});toast(`Status updated: ${status}`,'success');dash();}catch(e){toast('Error: '+e.message,'error');}
-}
+async function tcMarkStatus(tcId,status){try{await fsUpdate('timechart',tcId,{todayStatus:status,lastStatusUpdate:getTodayStr()});toast(`Status updated: ${status}`,'success');dash();}catch(e){toast('Error: '+e.message,'error');}}
 
 // ══════ NOTIFICATION SYSTEM ══════
 function listenNotifications(){if(!CU)return;if(_notifUnsub){_notifUnsub();_notifUnsub=null;}try{const q=fn().query(fn().collection(db(),'notifications'),fn().where('userId','==',CU.id),fn().orderBy('createdAt','desc'),fn().limit(50));_notifUnsub=fn().onSnapshot(q,snap=>{_notifications=[];snap.forEach(d=>_notifications.push({id:d.id,...d.data()}));const unread=_notifications.filter(n=>!n.read).length;const dot=$('notif-dot');if(dot)dot.style.display=unread>0?'block':'none';if($('notif-panel').classList.contains('open'))renderNotifList();});}catch(e){}}
@@ -763,9 +632,7 @@ function startApp(){
   $('login-page').style.display='none';$('app').style.display='block';
   $('tb-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
   renderSBUser();renderSBNav();listenNotifications();initNotifications();
-  // ▶ Run daily TC reset check immediately on login
-  doTcDailyReset();
-  scheduleMidnightReset();
+  doTcDailyReset();scheduleMidnightReset();
   const first=navItems()[0];if(first)navTo(first.id);
   if(CR==='coordinator'||CR==='coordinatorhead'){listenForMissedRequests();}
 }
@@ -790,45 +657,11 @@ function roleColor(r){return{admin:'var(--purple)',coordinatorhead:'var(--orange
 function renderSBUser(){const ini=(CU.name||'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);const rc=roleColor(CR);const rl={admin:'Admin',coordinatorhead:'Coord. Head',coordinator:'Coordinator',trainer:'Trainer',client:'Client'}[CR]||CR;$('sb-user').innerHTML=`<div class="ua" style="background:${rc}20;color:${rc}">${ini}</div><div style="min-width:0"><div class="un">${CU.name||CU.email}</div><span class="ur r-${CR}">${rl}</span></div>`;}
 function navItems(){
   const all={
-    admin:[
-      {id:'dash',l:'Dashboard',i:'📊',s:'OVERVIEW'},
-      {id:'clients',l:'Clients',i:'🏃',s:'MANAGEMENT'},{id:'users',l:'Users',i:'👥',s:'MANAGEMENT'},{id:'trainers',l:'Trainers',i:'🧑‍🏫',s:'MANAGEMENT'},{id:'coordinators',l:'Coordinators',i:'🧑‍💼',s:'MANAGEMENT'},
-      {id:'sessions',l:'Sessions',i:'📅',s:'MANAGEMENT'},{id:'slots',l:'Time Slots',i:'🕐',s:'MANAGEMENT'},{id:'batches',l:'Corporate Fitness',i:'🏢',s:'MANAGEMENT'},{id:'timechart',l:'Time Chart',i:'📋',s:'MANAGEMENT'},
-      {id:'leavemgmt',l:'Leave Management',i:'🏖',s:'MANAGEMENT'},
-      {id:'analytics',l:'Analytics',i:'📈',s:'REPORTS'},
-      {id:'chatmonitor',l:'Chat Monitor',i:'💬',s:'MONITOR'},{id:'missedreasons',l:'Missed Reasons',i:'⚠️',s:'MONITOR'},
-      {id:'followups',l:'Follow-ups',i:'📞',s:'CRM'},
-      {id:'coordinatorattendance',l:'Coord. Attendance',i:'🗓',s:'ATTENDANCE'},{id:'trainerattendance',l:'Trainer Attendance',i:'✅',s:'ATTENDANCE'},
-      {id:'chat',l:'Messages',i:'✉️',s:'COMMUNICATION'}
-    ],
-    coordinatorhead:[
-      {id:'dash',l:'Dashboard',i:'📊',s:'OVERVIEW'},
-      {id:'clients',l:'Clients',i:'🏃',s:'MANAGEMENT'},{id:'coordinators',l:'Coordinators',i:'🧑‍💼',s:'MANAGEMENT'},{id:'trainers',l:'Trainers',i:'🧑‍🏫',s:'MANAGEMENT'},{id:'timechart',l:'Time Chart',i:'📋',s:'MANAGEMENT'},
-      {id:'leavemgmt',l:'Leave Management',i:'🏖',s:'MANAGEMENT'},
-      {id:'coordinatorattendance',l:'Coord. Attendance',i:'🗓',s:'ATTENDANCE'},{id:'trainerattendance',l:'Trainer Attendance',i:'✅',s:'ATTENDANCE'},{id:'trainerratings',l:'Trainer Ratings',i:'⭐',s:'MANAGEMENT'},
-      {id:'sessions',l:'Sessions',i:'📅',s:'MANAGEMENT'},{id:'slots',l:'Time Slots',i:'🕐',s:'MANAGEMENT'},{id:'batches',l:'Corporate Fitness',i:'🏢',s:'MANAGEMENT'},
-      {id:'missedreasons',l:'Missed Reasons',i:'⚠️',s:'MONITOR'},{id:'followups',l:'Follow-ups',i:'📞',s:'CRM'},
-      {id:'chat',l:'Messages',i:'✉️',s:'COMMUNICATION'}
-    ],
-    coordinator:[
-      {id:'dash',l:'Dashboard',i:'📊',s:'OVERVIEW'},
-      {id:'clients',l:'My Clients',i:'🏃',s:'MANAGEMENT'},{id:'sessions',l:'Sessions',i:'📅',s:'MANAGEMENT'},{id:'attendance',l:'Attendance',i:'✅',s:'MANAGEMENT'},{id:'trainerratings',l:'Rate Trainers',i:'⭐',s:'MANAGEMENT'},
-      {id:'followups',l:'Follow-ups',i:'📞',s:'CRM'},{id:'missedreasons',l:'Missed Reports',i:'⚠️',s:'CRM'},
-      {id:'myleaves',l:'My Leave Requests',i:'🏖',s:'LEAVES'},
-      {id:'chat',l:'Messages',i:'✉️',s:'COMMUNICATION'}
-    ],
-    trainer:[
-      {id:'dash',l:'My Day',i:'📊',s:'OVERVIEW'},
-      {id:'sessions',l:'My Sessions',i:'📅',s:'SESSIONS'},{id:'clients',l:'My Clients',i:'🏃',s:'SESSIONS'},{id:'feedback',l:'Feedback',i:'📝',s:'SESSIONS'},
-      {id:'certificates',l:'My Certificates',i:'🎓',s:'PROFILE'},
-      {id:'myleaves',l:'My Leave Requests',i:'🏖',s:'LEAVES'},
-      {id:'chat',l:'Client Chat',i:'💬',s:'COMMUNICATION'}
-    ],
-    client:[
-      {id:'dash',l:'Dashboard',i:'📊',s:'OVERVIEW'},
-      {id:'sessions',l:'My Sessions',i:'📅',s:'MY PLAN'},{id:'slots',l:'Book Session',i:'🕐',s:'MY PLAN'},{id:'attendance',l:'Attendance',i:'✅',s:'MY PLAN'},
-      {id:'chat',l:'Chat Trainer',i:'💬',s:'COMMUNICATION'}
-    ]
+    admin:[{id:'dash',l:'Dashboard',i:'📊',s:'OVERVIEW'},{id:'clients',l:'Clients',i:'🏃',s:'MANAGEMENT'},{id:'users',l:'Users',i:'👥',s:'MANAGEMENT'},{id:'trainers',l:'Trainers',i:'🧑‍🏫',s:'MANAGEMENT'},{id:'coordinators',l:'Coordinators',i:'🧑‍💼',s:'MANAGEMENT'},{id:'sessions',l:'Sessions',i:'📅',s:'MANAGEMENT'},{id:'slots',l:'Time Slots',i:'🕐',s:'MANAGEMENT'},{id:'batches',l:'Corporate Fitness',i:'🏢',s:'MANAGEMENT'},{id:'timechart',l:'Time Chart',i:'📋',s:'MANAGEMENT'},{id:'leavemgmt',l:'Leave Management',i:'🏖',s:'MANAGEMENT'},{id:'analytics',l:'Analytics',i:'📈',s:'REPORTS'},{id:'chatmonitor',l:'Chat Monitor',i:'💬',s:'MONITOR'},{id:'missedreasons',l:'Missed Reasons',i:'⚠️',s:'MONITOR'},{id:'followups',l:'Follow-ups',i:'📞',s:'CRM'},{id:'coordinatorattendance',l:'Coord. Attendance',i:'🗓',s:'ATTENDANCE'},{id:'trainerattendance',l:'Trainer Attendance',i:'✅',s:'ATTENDANCE'},{id:'chat',l:'Messages',i:'✉️',s:'COMMUNICATION'}],
+    coordinatorhead:[{id:'dash',l:'Dashboard',i:'📊',s:'OVERVIEW'},{id:'clients',l:'Clients',i:'🏃',s:'MANAGEMENT'},{id:'coordinators',l:'Coordinators',i:'🧑‍💼',s:'MANAGEMENT'},{id:'trainers',l:'Trainers',i:'🧑‍🏫',s:'MANAGEMENT'},{id:'timechart',l:'Time Chart',i:'📋',s:'MANAGEMENT'},{id:'leavemgmt',l:'Leave Management',i:'🏖',s:'MANAGEMENT'},{id:'coordinatorattendance',l:'Coord. Attendance',i:'🗓',s:'ATTENDANCE'},{id:'trainerattendance',l:'Trainer Attendance',i:'✅',s:'ATTENDANCE'},{id:'trainerratings',l:'Trainer Ratings',i:'⭐',s:'MANAGEMENT'},{id:'sessions',l:'Sessions',i:'📅',s:'MANAGEMENT'},{id:'slots',l:'Time Slots',i:'🕐',s:'MANAGEMENT'},{id:'batches',l:'Corporate Fitness',i:'🏢',s:'MANAGEMENT'},{id:'missedreasons',l:'Missed Reasons',i:'⚠️',s:'MONITOR'},{id:'followups',l:'Follow-ups',i:'📞',s:'CRM'},{id:'chat',l:'Messages',i:'✉️',s:'COMMUNICATION'}],
+    coordinator:[{id:'dash',l:'Dashboard',i:'📊',s:'OVERVIEW'},{id:'clients',l:'My Clients',i:'🏃',s:'MANAGEMENT'},{id:'sessions',l:'Sessions',i:'📅',s:'MANAGEMENT'},{id:'attendance',l:'Attendance',i:'✅',s:'MANAGEMENT'},{id:'trainerratings',l:'Rate Trainers',i:'⭐',s:'MANAGEMENT'},{id:'followups',l:'Follow-ups',i:'📞',s:'CRM'},{id:'missedreasons',l:'Missed Reports',i:'⚠️',s:'CRM'},{id:'myleaves',l:'My Leave Requests',i:'🏖',s:'LEAVES'},{id:'chat',l:'Messages',i:'✉️',s:'COMMUNICATION'}],
+    trainer:[{id:'dash',l:'My Day',i:'📊',s:'OVERVIEW'},{id:'sessions',l:'My Sessions',i:'📅',s:'SESSIONS'},{id:'clients',l:'My Clients',i:'🏃',s:'SESSIONS'},{id:'feedback',l:'Feedback',i:'📝',s:'SESSIONS'},{id:'certificates',l:'My Certificates',i:'🎓',s:'PROFILE'},{id:'myleaves',l:'My Leave Requests',i:'🏖',s:'LEAVES'},{id:'chat',l:'Client Chat',i:'💬',s:'COMMUNICATION'}],
+    client:[{id:'dash',l:'Dashboard',i:'📊',s:'OVERVIEW'},{id:'sessions',l:'My Sessions',i:'📅',s:'MY PLAN'},{id:'slots',l:'Book Session',i:'🕐',s:'MY PLAN'},{id:'attendance',l:'Attendance',i:'✅',s:'MY PLAN'},{id:'chat',l:'Chat Trainer',i:'💬',s:'COMMUNICATION'}]
   };
   return all[CR]||[];
 }
@@ -845,10 +678,8 @@ function navTo(id){
 }
 
 // ══════════════════════════════════════════════════════════════
-//  ③ LEAVE MANAGEMENT
+//  LEAVE MANAGEMENT
 // ══════════════════════════════════════════════════════════════
-
-// MY LEAVE REQUESTS (Trainer / Coordinator)
 async function myleaves(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const myUid=auth().currentUser.uid;
@@ -856,11 +687,7 @@ async function myleaves(){
   data.sort((a,b)=>(b.fromDate||'').localeCompare(a.fromDate||''));
   $('page').innerHTML=`
     <div class="card" style="background:var(--blue-dim);border-color:rgba(77,159,255,.3);margin-bottom:18px">
-      <div style="display:flex;align-items:center;gap:12px">
-        <span style="font-size:28px">🏖</span>
-        <div><div style="font-weight:700;color:var(--blue)">My Leave Requests</div><div style="font-size:12px;color:var(--muted)">Submit and track your leave applications. Approved by Admin or Coordinator Head.</div></div>
-        <button class="btn btn-p btn-sm" style="margin-left:auto" onclick="openRequestLeave()">+ Request Leave</button>
-      </div>
+      <div style="display:flex;align-items:center;gap:12px"><span style="font-size:28px">🏖</span><div><div style="font-weight:700;color:var(--blue)">My Leave Requests</div><div style="font-size:12px;color:var(--muted)">Submit and track your leave applications.</div></div><button class="btn btn-p btn-sm" style="margin-left:auto" onclick="openRequestLeave()">+ Request Leave</button></div>
     </div>
     <div class="stats-grid" style="margin-bottom:18px">
       <div class="sc sc-y"><div class="sc-ico">⏳</div><div class="sc-lbl">Pending</div><div class="sc-val">${data.filter(l=>l.status==='pending').length}</div></div>
@@ -868,94 +695,35 @@ async function myleaves(){
       <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Rejected</div><div class="sc-val">${data.filter(l=>l.status==='rejected').length}</div></div>
     </div>
     <div class="card" style="padding:0"><div class="tbl-wrap">
-      ${data.length===0
-        ? emptyState('🏖','No leave requests yet','Submit your first leave request.','+Request Leave','openRequestLeave()')
-        : `<table><thead><tr><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Notes</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>
-          ${data.map(l=>{
-            const days=Math.ceil((new Date(l.toDate)-new Date(l.fromDate))/(1000*60*60*24))+1;
-            const canCancel=l.status==='pending';
-            return`<tr>
-              <td style="font-size:12px">${l.fromDate||'—'}</td>
-              <td style="font-size:12px">${l.toDate||'—'}</td>
-              <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${days}</td>
-              <td><span class="badge b-b">${l.reason||'—'}</span></td>
-              <td style="font-size:12px;max-width:160px">${l.notes||'—'}</td>
-              <td>${statusBadge(l.status||'pending')}</td>
-              <td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td>
-              <td>${canCancel?`<button class="btn btn-d btn-sm" onclick="cancelLeave('${l.id}')">Cancel</button>`:'—'}</td>
-            </tr>`;
-          }).join('')}
-          </tbody></table>`}
+      ${data.length===0?emptyState('🏖','No leave requests yet','Submit your first leave request.','+Request Leave','openRequestLeave()'):
+      `<table><thead><tr><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Notes</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>
+        ${data.map(l=>{const days=Math.ceil((new Date(l.toDate)-new Date(l.fromDate))/(1000*60*60*24))+1;const canCancel=l.status==='pending';return`<tr><td style="font-size:12px">${l.fromDate||'—'}</td><td style="font-size:12px">${l.toDate||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px">${days}</td><td><span class="badge b-b">${l.reason||'—'}</span></td><td style="font-size:12px;max-width:160px">${l.notes||'—'}</td><td>${statusBadge(l.status||'pending')}</td><td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td><td>${canCancel?`<button class="btn btn-d btn-sm" onclick="cancelLeave('${l.id}')">Cancel</button>`:'—'}</td></tr>`;}).join('')}
+      </tbody></table>`}
     </div></div>`;
 }
-
 function openRequestLeave(){
   const today=getTodayStr();
-  openM1('REQUEST LEAVE',`
-    <div class="fr">
-      <div class="fg"><label class="fl">From Date *</label><input class="fi" id="lv-from" type="date" value="${today}" min="${today}"></div>
-      <div class="fg"><label class="fl">To Date *</label><input class="fi" id="lv-to" type="date" value="${today}" min="${today}"></div>
-    </div>
-    <div class="fg"><label class="fl">Reason *</label><select class="fs" id="lv-reason">
-      <option value="">— Select reason —</option>
-      ${LEAVE_REASONS.map(r=>`<option>${r}</option>`).join('')}
-    </select></div>
-    <div class="fg"><label class="fl">Additional Notes</label><textarea class="fta" id="lv-notes" placeholder="Any details for the approver…" style="min-height:70px"></textarea></div>
-    <div style="background:var(--yellow-dim);border:1px solid rgba(255,187,0,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--yellow);margin-bottom:14px">
-      ⚠️ Leave requests are reviewed by Admin or Coordinator Head. Sessions during approved leave may be rescheduled.
-    </div>
-    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="submitLeaveRequest()">Submit Request</button></div>`);
+  openM1('REQUEST LEAVE',`<div class="fr"><div class="fg"><label class="fl">From Date *</label><input class="fi" id="lv-from" type="date" value="${today}" min="${today}"></div><div class="fg"><label class="fl">To Date *</label><input class="fi" id="lv-to" type="date" value="${today}" min="${today}"></div></div><div class="fg"><label class="fl">Reason *</label><select class="fs" id="lv-reason"><option value="">— Select reason —</option>${LEAVE_REASONS.map(r=>`<option>${r}</option>`).join('')}</select></div><div class="fg"><label class="fl">Additional Notes</label><textarea class="fta" id="lv-notes" placeholder="Any details for the approver…" style="min-height:70px"></textarea></div><div style="background:var(--yellow-dim);border:1px solid rgba(255,187,0,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--yellow);margin-bottom:14px">⚠️ Leave requests are reviewed by Admin or Coordinator Head.</div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="submitLeaveRequest()">Submit Request</button></div>`);
 }
-
 async function submitLeaveRequest(){
-  const from=document.getElementById('lv-from')?.value;
-  const to=document.getElementById('lv-to')?.value;
-  const reason=document.getElementById('lv-reason')?.value;
-  const notes=document.getElementById('lv-notes')?.value.trim()||'';
-  if(!from||!to||!reason){toast('Fill all required fields','error');return}
-  if(to<from){toast('To date must be on or after from date','error');return}
+  const from=document.getElementById('lv-from')?.value,to=document.getElementById('lv-to')?.value,reason=document.getElementById('lv-reason')?.value,notes=document.getElementById('lv-notes')?.value.trim()||'';
+  if(!from||!to||!reason){toast('Fill all required fields','error');return}if(to<from){toast('To date must be on or after from date','error');return}
   const days=Math.ceil((new Date(to)-new Date(from))/(1000*60*60*24))+1;
   try{
-    await fsAdd('leaves',{
-      requestedById:auth().currentUser.uid,
-      requestedByName:CU.name||CU.email||'',
-      requestedByRole:CR,
-      fromDate:from,toDate:to,days,reason,notes,
-      status:'pending',
-      reviewedBy:'',reviewedByName:'',reviewNote:'',
-    });
-    // Notify admin and coord heads
+    await fsAdd('leaves',{requestedById:auth().currentUser.uid,requestedByName:CU.name||CU.email||'',requestedByRole:CR,fromDate:from,toDate:to,days,reason,notes,status:'pending',reviewedBy:'',reviewedByName:'',reviewNote:''});
     const approvers=await fsGetAll('users',fn().where('role','in',['admin','coordinatorhead']));
-    await createNotifForUsers({
-      key:`leave_${auth().currentUser.uid}_${from}`,
-      title:`🏖 Leave Request — ${CU.name||'Staff'}`,
-      body:`${CU.name||'Staff'} (${CR}) requests leave from ${from} to ${to}. Reason: ${reason}`,
-      type:'leave_request'
-    },approvers.map(u=>u.id));
+    await createNotifForUsers({key:`leave_${auth().currentUser.uid}_${from}`,title:`🏖 Leave Request — ${CU.name||'Staff'}`,body:`${CU.name||'Staff'} (${CR}) requests leave from ${from} to ${to}. Reason: ${reason}`,type:'leave_request'},approvers.map(u=>u.id));
     closeM1();toast('Leave request submitted! ✅','success');myleaves();
   }catch(e){toast('Error: '+e.message,'error');}
 }
-
-async function cancelLeave(id){
-  if(!confirm('Cancel this leave request?'))return;
-  try{await fsDel('leaves',id);toast('Cancelled','success');myleaves();}catch(e){toast('Error','error');}
-}
-
-// LEAVE MANAGEMENT (Admin / Coordinator Head)
+async function cancelLeave(id){if(!confirm('Cancel this leave request?'))return;try{await fsDel('leaves',id);toast('Cancelled','success');myleaves();}catch(e){toast('Error','error');}}
 async function leavemgmt(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const[data,users]=await Promise.all([fsGetAll('leaves'),fsGetAll('users')]);
   data.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-  const pending=data.filter(l=>l.status==='pending');
-  const approved=data.filter(l=>l.status==='approved');
-  const rejected=data.filter(l=>l.status==='rejected');
-
-  // Active leaves today
-  const today=getTodayStr();
-  const activeToday=approved.filter(l=>l.fromDate<=today&&l.toDate>=today);
-
+  const pending=data.filter(l=>l.status==='pending'),approved=data.filter(l=>l.status==='approved'),rejected=data.filter(l=>l.status==='rejected');
+  const today=getTodayStr();const activeToday=approved.filter(l=>l.fromDate<=today&&l.toDate>=today);
   function userRoleBadge(role){return role==='trainer'?'<span class="badge b-g">🧑‍🏫 Trainer</span>':role==='coordinator'?'<span class="badge b-b">🧑‍💼 Coordinator</span>':role==='coordinatorhead'?'<span class="badge b-o">👑 Coord. Head</span>':'<span class="badge b-gray">—</span>';}
-
   $('page').innerHTML=`
     <div class="stats-grid" style="margin-bottom:18px">
       <div class="sc sc-y"><div class="sc-ico">⏳</div><div class="sc-lbl">Pending</div><div class="sc-val">${pending.length}</div><div class="sc-sub">Needs review</div></div>
@@ -963,104 +731,24 @@ async function leavemgmt(){
       <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Rejected</div><div class="sc-val">${rejected.length}</div></div>
       <div class="sc sc-o"><div class="sc-ico">🏖</div><div class="sc-lbl">On Leave Today</div><div class="sc-val">${activeToday.length}</div></div>
     </div>
-
-    ${activeToday.length?`<div class="card" style="background:var(--orange-dim);border-color:rgba(255,140,0,.3);margin-bottom:18px">
-      <div style="font-weight:700;color:var(--orange);margin-bottom:10px">🏖 Staff On Leave Today (${today})</div>
-      ${activeToday.map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,140,0,.15)">
-        <span style="font-size:18px">${l.requestedByRole==='trainer'?'🧑‍🏫':'🧑‍💼'}</span>
-        <div><div style="font-weight:600;font-size:13px">${l.requestedByName||'—'}</div>
-        <div style="font-size:11px;color:var(--muted)">${l.requestedByRole} · Leave: ${l.fromDate} to ${l.toDate} · ${l.reason}</div></div>
-      </div>`).join('')}
-    </div>`:''}
-
-    ${pending.length?`<div class="card" style="border-color:rgba(255,187,0,.4);margin-bottom:18px">
-      <div class="card-hd"><div class="card-title" style="color:var(--yellow)">⏳ Pending Requests (${pending.length})</div></div>
-      ${pending.map(l=>`<div class="leave-card leave-status-pending">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
-          <div>
-            <div style="font-weight:700;font-size:14px">${l.requestedByName||'—'} ${userRoleBadge(l.requestedByRole)}</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px">📅 ${l.fromDate} → ${l.toDate} <strong style="color:var(--text)">(${l.days} day${l.days!==1?'s':''})</strong></div>
-            <div style="font-size:12px;margin-top:4px"><span class="badge b-b">${l.reason}</span></div>
-            ${l.notes?`<div style="font-size:12px;color:var(--muted);margin-top:4px">📝 ${l.notes}</div>`:''}
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px;min-width:180px">
-            <button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅ Approve</button>
-            <button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌ Reject</button>
-          </div>
-        </div>
-      </div>`).join('')}
-    </div>`:''}
-
-    <div class="card" style="padding:0">
-      <div class="card-hd" style="padding:14px 18px"><div class="card-title">All Leave History</div></div>
-      <div class="tbl-wrap">
-        ${data.length===0?emptyState('🏖','No leave requests','Staff will appear here when they submit requests.','',''):
-        `<table><thead><tr><th>Staff</th><th>Role</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>
-        ${data.map(l=>`<tr>
-          <td><strong>${l.requestedByName||'—'}</strong></td>
-          <td>${userRoleBadge(l.requestedByRole)}</td>
-          <td style="font-size:12px">${l.fromDate||'—'}</td>
-          <td style="font-size:12px">${l.toDate||'—'}</td>
-          <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${l.days||'—'}</td>
-          <td><span class="badge b-b">${l.reason||'—'}</span></td>
-          <td>${statusBadge(l.status||'pending')}</td>
-          <td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td>
-          <td><div class="td-actions">
-            ${l.status==='pending'?`<button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅</button>
-            <button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌</button>`:''}
-            <button class="btn btn-d btn-sm" onclick="delLeave('${l.id}')">Del</button>
-          </div></td>
-        </tr>`).join('')}
-        </tbody></table>`}
-      </div>
-    </div>`;
+    ${activeToday.length?`<div class="card" style="background:var(--orange-dim);border-color:rgba(255,140,0,.3);margin-bottom:18px"><div style="font-weight:700;color:var(--orange);margin-bottom:10px">🏖 Staff On Leave Today (${today})</div>${activeToday.map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,140,0,.15)"><span style="font-size:18px">${l.requestedByRole==='trainer'?'🧑‍🏫':'🧑‍💼'}</span><div><div style="font-weight:600;font-size:13px">${l.requestedByName||'—'}</div><div style="font-size:11px;color:var(--muted)">${l.requestedByRole} · ${l.fromDate} to ${l.toDate} · ${l.reason}</div></div></div>`).join('')}</div>`:''}
+    ${pending.length?`<div class="card" style="border-color:rgba(255,187,0,.4);margin-bottom:18px"><div class="card-hd"><div class="card-title" style="color:var(--yellow)">⏳ Pending Requests (${pending.length})</div></div>${pending.map(l=>`<div class="leave-card leave-status-pending"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><div style="font-weight:700;font-size:14px">${l.requestedByName||'—'} ${userRoleBadge(l.requestedByRole)}</div><div style="font-size:12px;color:var(--muted);margin-top:4px">📅 ${l.fromDate} → ${l.toDate} <strong style="color:var(--text)">(${l.days} day${l.days!==1?'s':''})</strong></div><div style="font-size:12px;margin-top:4px"><span class="badge b-b">${l.reason}</span></div>${l.notes?`<div style="font-size:12px;color:var(--muted);margin-top:4px">📝 ${l.notes}</div>`:''}</div><div style="display:flex;flex-direction:column;gap:6px;min-width:180px"><button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅ Approve</button><button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌ Reject</button></div></div></div>`).join('')}</div>`:''}
+    <div class="card" style="padding:0"><div class="card-hd" style="padding:14px 18px"><div class="card-title">All Leave History</div></div><div class="tbl-wrap">${data.length===0?emptyState('🏖','No leave requests','','',''):`<table><thead><tr><th>Staff</th><th>Role</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>${data.map(l=>`<tr><td><strong>${l.requestedByName||'—'}</strong></td><td>${userRoleBadge(l.requestedByRole)}</td><td style="font-size:12px">${l.fromDate||'—'}</td><td style="font-size:12px">${l.toDate||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px">${l.days||'—'}</td><td><span class="badge b-b">${l.reason||'—'}</span></td><td>${statusBadge(l.status||'pending')}</td><td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td><td><div class="td-actions">${l.status==='pending'?`<button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅</button><button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌</button>`:''}<button class="btn btn-d btn-sm" onclick="delLeave('${l.id}')">Del</button></div></td></tr>`).join('')}</tbody></table>`}</div></div>`;
 }
-
 function openReviewLeave(leaveId,decision,staffName,staffRole,fromDate,toDate){
   const isApprove=decision==='approved';
-  openM1(`${isApprove?'APPROVE':'REJECT'} LEAVE`,`
-    <div style="background:${isApprove?'var(--green-dim)':'var(--red-dim)'};border:1px solid ${isApprove?'rgba(0,230,118,.3)':'rgba(255,68,68,.3)'};border-radius:10px;padding:14px;margin-bottom:14px">
-      <div style="font-weight:700;color:${isApprove?'var(--green)':'var(--red)'};margin-bottom:6px">${isApprove?'✅ Approving Leave':'❌ Rejecting Leave'}</div>
-      <div style="font-size:13px"><strong>${staffName}</strong> (${staffRole})</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:3px">📅 ${fromDate} → ${toDate}</div>
-    </div>
-    <div class="fg"><label class="fl">Review Note (optional)</label><textarea class="fta" id="lv-rnote" placeholder="${isApprove?'e.g. Approved. Ensure backup coverage.':'e.g. Insufficient notice period.'}" style="min-height:70px"></textarea></div>
-    <div class="mo-foot">
-      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
-      <button class="btn ${isApprove?'btn-gr':'btn-d'}" onclick="submitLeaveReview('${leaveId}','${decision}','${staffName.replace(/'/g,"\\'")}','${staffRole}')">
-        ${isApprove?'✅ Confirm Approve':'❌ Confirm Reject'}
-      </button>
-    </div>`);
+  openM1(`${isApprove?'APPROVE':'REJECT'} LEAVE`,`<div style="background:${isApprove?'var(--green-dim)':'var(--red-dim)'};border:1px solid ${isApprove?'rgba(0,230,118,.3)':'rgba(255,68,68,.3)'};border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-weight:700;color:${isApprove?'var(--green)':'var(--red)'};margin-bottom:6px">${isApprove?'✅ Approving Leave':'❌ Rejecting Leave'}</div><div style="font-size:13px"><strong>${staffName}</strong> (${staffRole})</div><div style="font-size:12px;color:var(--muted);margin-top:3px">📅 ${fromDate} → ${toDate}</div></div><div class="fg"><label class="fl">Review Note (optional)</label><textarea class="fta" id="lv-rnote" placeholder="${isApprove?'e.g. Approved. Ensure backup coverage.':'e.g. Insufficient notice period.'}" style="min-height:70px"></textarea></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn ${isApprove?'btn-gr':'btn-d'}" onclick="submitLeaveReview('${leaveId}','${decision}','${staffName.replace(/'/g,"\\'")}','${staffRole}')">${isApprove?'✅ Confirm Approve':'❌ Confirm Reject'}</button></div>`);
 }
-
 async function submitLeaveReview(leaveId,decision,staffName,staffRole){
   const note=document.getElementById('lv-rnote')?.value.trim()||'';
   try{
-    await fsUpdate('leaves',leaveId,{
-      status:decision,
-      reviewedBy:auth().currentUser.uid,
-      reviewedByName:CU.name||'',
-      reviewNote:note,
-      reviewedAt:fn().serverTimestamp()
-    });
-    // Notify the requester
+    await fsUpdate('leaves',leaveId,{status:decision,reviewedBy:auth().currentUser.uid,reviewedByName:CU.name||'',reviewNote:note,reviewedAt:fn().serverTimestamp()});
     const leave=await fsGet('leaves',leaveId);
-    if(leave?.requestedById){
-      await createNotifForUsers({
-        key:`leave_review_${leaveId}`,
-        title:`🏖 Leave ${decision==='approved'?'Approved ✅':'Rejected ❌'}`,
-        body:`Your leave request (${leave.fromDate} – ${leave.toDate}) has been ${decision} by ${CU.name||'Manager'}.${note?` Note: "${note}"`:'' }`,
-        type:'leave_review'
-      },[leave.requestedById]);
-    }
+    if(leave?.requestedById){await createNotifForUsers({key:`leave_review_${leaveId}`,title:`🏖 Leave ${decision==='approved'?'Approved ✅':'Rejected ❌'}`,body:`Your leave request (${leave.fromDate} – ${leave.toDate}) has been ${decision} by ${CU.name||'Manager'}.${note?` Note: "${note}"`:'' }`,type:'leave_review'},[leave.requestedById]);}
     closeM1();toast(`Leave ${decision}!`,'success');leavemgmt();
   }catch(e){toast('Error: '+e.message,'error');}
 }
-
-async function delLeave(id){
-  if(!confirm('Delete this leave record?'))return;
-  try{await fsDel('leaves',id);toast('Deleted','success');leavemgmt();}catch(e){toast('Error','error');}
-}
+async function delLeave(id){if(!confirm('Delete this leave record?'))return;try{await fsDel('leaves',id);toast('Deleted','success');leavemgmt();}catch(e){toast('Error','error');}}
 
 // ══════ RATING SYSTEM ══════
 function showQuickRateOverlay(sessionId,trainerId,trainerName,sessionType,sessionDate){
@@ -1121,136 +809,38 @@ async function missedreasons(){
 }
 async function delMissedReason(id){if(!confirm('Delete?'))return;try{await fsDel('missedreasons',id);toast('Deleted','success');missedreasons()}catch(e){toast('Error','error')}}
 
-// ══════ OLD CLIENTS SECTION RENDERER ══════
-function renderOldClientsSection(inactiveClients, batches){
-  if(!inactiveClients.length){
-    return`<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">🎉 No inactive clients</div>`;
-  }
-
-  // Determine batch membership for each inactive client
-  const batchMap = {}; // clientId -> batch name
-  (batches||[]).forEach(b=>{
-    (b.enrolledClients||[]).forEach(cid=>{
-      batchMap[cid] = b.batchName || 'Unnamed Batch';
-    });
-  });
-
-  // Split: batch clients vs one-on-one clients
-  const batchClients = inactiveClients.filter(c=>batchMap[c.id]||c.plan==='Corporate Fitness');
-  const onoClients   = inactiveClients.filter(c=>!batchMap[c.id]&&c.plan!=='Corporate Fitness');
-
-  // Group batch clients by batch name
-  const byBatch = {};
-  batchClients.forEach(c=>{
-    const key = batchMap[c.id] || (c.company ? `${c.company} Batch` : 'Corporate Batch');
-    if(!byBatch[key]) byBatch[key]=[];
-    byBatch[key].push(c);
-  });
-
-  const planColors = {Silver:'var(--muted)',Gold:'var(--yellow)',Platinum:'var(--purple)','Platinum Plus':'var(--purple)',Couple:'var(--pink)','Corporate Fitness':'var(--blue)'};
-
-  let html = '';
-
-  // Batch section
-  if(batchClients.length){
-    html += `<div class="old-client-section">
-      <div class="old-client-section-title">🏢 Batch / Corporate (${batchClients.length})</div>`;
-    Object.entries(byBatch).forEach(([bname,cls])=>{
-      html += `<div class="old-batch-group">
-        <div class="old-batch-group-name">🏢 ${bname} <span class="badge b-o" style="font-size:10px">${cls.length} client${cls.length!==1?'s':''}</span></div>
-        ${cls.map(c=>{
-          const ini=(c.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-          const endDate=c.endDate?` · Ended: ${c.endDate}`:'';
-          return`<div class="old-client-card">
-            <div class="old-client-avatar">${ini}</div>
-            <div class="old-client-info">
-              <div class="old-client-name">${c.name||'—'}</div>
-              <div class="old-client-meta">${c.trainerName||'No trainer'} · ${c.phone||'—'}${endDate}</div>
-            </div>
-            ${planBadge(c.plan)}
-            ${CR!=='trainer'&&CR!=='client'?`<button class="btn btn-g btn-sm" onclick="reactivateClient('${c.id}')">Reactivate</button>`:''}
-          </div>`;
-        }).join('')}
-      </div>`;
-    });
-    html += `</div>`;
-  }
-
-  // One-on-One section
-  if(onoClients.length){
-    html += `<div class="old-client-section">
-      <div class="old-client-section-title">🧑 One on One (${onoClients.length})</div>
-      ${onoClients.map(c=>{
-        const ini=(c.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-        const endDate=c.endDate?` · Ended: ${c.endDate}`:'';
-        return`<div class="old-client-card">
-          <div class="old-client-avatar">${ini}</div>
-          <div class="old-client-info">
-            <div class="old-client-name">${c.name||'—'}</div>
-            <div class="old-client-meta">${c.trainerName||'No trainer'} · ${c.phone||'—'}${endDate}</div>
-          </div>
-          ${planBadge(c.plan)}
-          ${CR!=='trainer'&&CR!=='client'?`<button class="btn btn-g btn-sm" onclick="reactivateClient('${c.id}')">Reactivate</button>`:''}
-        </div>`;
-      }).join('')}
-    </div>`;
-  }
-
+// ══════ OLD CLIENTS SECTION ══════
+function renderOldClientsSection(inactiveClients,batches){
+  if(!inactiveClients.length){return`<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">🎉 No inactive clients</div>`;}
+  const batchMap={};(batches||[]).forEach(b=>{(b.enrolledClients||[]).forEach(cid=>{batchMap[cid]=b.batchName||'Unnamed Batch';});});
+  const batchClients=inactiveClients.filter(c=>batchMap[c.id]||c.plan==='Corporate Fitness');
+  const onoClients=inactiveClients.filter(c=>!batchMap[c.id]&&c.plan!=='Corporate Fitness');
+  const byBatch={};batchClients.forEach(c=>{const key=batchMap[c.id]||(c.company?`${c.company} Batch`:'Corporate Batch');if(!byBatch[key])byBatch[key]=[];byBatch[key].push(c);});
+  let html='';
+  if(batchClients.length){html+=`<div class="old-client-section"><div class="old-client-section-title">🏢 Batch / Corporate (${batchClients.length})</div>`;Object.entries(byBatch).forEach(([bname,cls])=>{html+=`<div class="old-batch-group"><div class="old-batch-group-name">🏢 ${bname} <span class="badge b-o" style="font-size:10px">${cls.length} client${cls.length!==1?'s':''}</span></div>${cls.map(c=>{const ini=(c.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);const endDate=c.endDate?` · Ended: ${c.endDate}`:'';return`<div class="old-client-card"><div class="old-client-avatar">${ini}</div><div class="old-client-info"><div class="old-client-name">${c.name||'—'}</div><div class="old-client-meta">${c.trainerName||'No trainer'} · ${c.phone||'—'}${endDate}</div></div>${planBadge(c.plan)}${CR!=='trainer'&&CR!=='client'?`<button class="btn btn-g btn-sm" onclick="reactivateClient('${c.id}')">Reactivate</button>`:''}</div>`;}).join('')}</div>`;});html+=`</div>`;}
+  if(onoClients.length){html+=`<div class="old-client-section"><div class="old-client-section-title">🧑 One on One (${onoClients.length})</div>${onoClients.map(c=>{const ini=(c.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);const endDate=c.endDate?` · Ended: ${c.endDate}`:'';return`<div class="old-client-card"><div class="old-client-avatar">${ini}</div><div class="old-client-info"><div class="old-client-name">${c.name||'—'}</div><div class="old-client-meta">${c.trainerName||'No trainer'} · ${c.phone||'—'}${endDate}</div></div>${planBadge(c.plan)}${CR!=='trainer'&&CR!=='client'?`<button class="btn btn-g btn-sm" onclick="reactivateClient('${c.id}')">Reactivate</button>`:''}</div>`;}).join('')}</div>`;}
   return html;
 }
-
-async function reactivateClient(id){
-  if(!confirm('Reactivate this client?'))return;
-  try{await fsUpdate('clients',id,{active:true});toast('Client reactivated! ✅','success');dash();}catch(e){toast('Error: '+e.message,'error');}
-}
+async function reactivateClient(id){if(!confirm('Reactivate this client?'))return;try{await fsUpdate('clients',id,{active:true});toast('Client reactivated! ✅','success');dash();}catch(e){toast('Error: '+e.message,'error');}}
 
 // ══════ DASHBOARD ══════
 async function dash(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
-  const todayStr=new Date().toISOString().split('T')[0];
+  const todayStr=getTodayStr();
 
   if(CR==='admin'||CR==='coordinatorhead'){
-    const[clients,sessions,trainers,allRatings,tcEntries,allBatches]=await Promise.all([
-      fsGetAll('clients'),  // fetch ALL clients (active + inactive)
-      fsGetAll('sessions'),
-      fsGetAll('users',fn().where('role','==','trainer')),
-      fsGetAll('trainerratings'),
-      fsGetAll('timechart'),
-      fsGetAll('batches'),
-    ]);
+    const[clients,sessions,trainers,allRatings,tcEntries,allBatches]=await Promise.all([fsGetAll('clients'),fsGetAll('sessions'),fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('trainerratings'),fsGetAll('timechart'),fsGetAll('batches')]);
     let coordUsers=[],headUsers=[];
     if(CR==='admin'){[coordUsers,headUsers]=await Promise.all([fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','coordinatorhead'))]);}
-
-    const activeClients   = clients.filter(c=>c.active!==false);
-    const inactiveClients = clients.filter(c=>c.active===false);
-
-    const today=new Date().toDateString();
-    const todayS=sessions.filter(s=>s.date&&new Date(s.date).toDateString()===today);
-    const onair=todayS.filter(s=>s.status==='onair').length;
-    const missed=todayS.filter(s=>s.status==='missed').length;
+    const activeClients=clients.filter(c=>c.active!==false);const inactiveClients=clients.filter(c=>c.active===false);
+    const today=new Date().toDateString();const todayS=sessions.filter(s=>s.date&&new Date(s.date).toDateString()===today);
+    const onair=todayS.filter(s=>s.status==='onair').length;const missed=todayS.filter(s=>s.status==='missed').length;
     const tcVisible=getTcVisibleSessions(tcEntries,activeClients,todayStr);
     const ranked=buildLeaderboard(trainers,allRatings,activeClients);
-
-    // Pending missed reasons banner
     let pendingReqsHtml='';
-    try{
-      const allReqs=await fsGetAll('missedreasonrequests',fn().where('resolved','==',false));
-      if(allReqs.length){pendingReqsHtml=`<div class="missed-banner" style="animation:none"><div class="missed-banner-header"><div class="missed-banner-title"><span style="font-size:22px">🚨</span> ${allReqs.length} Unresolved Missed Session Reason${allReqs.length>1?'s':''}</div><button class="btn btn-g btn-sm" onclick="navTo('missedreasons')">View All →</button></div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Coordinators have not yet submitted reasons for these sessions.</div>${allReqs.slice(0,5).map(r=>`<div class="missed-banner-item"><div class="missed-banner-info"><div class="missed-banner-client">🏃 ${r.clientName||'—'}</div><div class="missed-banner-meta">Trainer: ${r.trainerName||'—'} | ${r.date||'—'} at ${to12h(r.time)} | By: ${r.markedByName||'—'}</div></div><span class="badge b-r">Awaiting Reason</span></div>`).join('')}${allReqs.length>5?`<div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted)">+${allReqs.length-5} more pending</div>`:''}</div>`;}
-    }catch(e){}
-
+    try{const allReqs=await fsGetAll('missedreasonrequests',fn().where('resolved','==',false));if(allReqs.length){pendingReqsHtml=`<div class="missed-banner" style="animation:none"><div class="missed-banner-header"><div class="missed-banner-title"><span style="font-size:22px">🚨</span> ${allReqs.length} Unresolved Missed Session Reason${allReqs.length>1?'s':''}</div><button class="btn btn-g btn-sm" onclick="navTo('missedreasons')">View All →</button></div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Coordinators have not yet submitted reasons for these sessions.</div>${allReqs.slice(0,5).map(r=>`<div class="missed-banner-item"><div class="missed-banner-info"><div class="missed-banner-client">🏃 ${r.clientName||'—'}</div><div class="missed-banner-meta">Trainer: ${r.trainerName||'—'} | ${r.date||'—'} at ${to12h(r.time)} | By: ${r.markedByName||'—'}</div></div><span class="badge b-r">Awaiting Reason</span></div>`).join('')}${allReqs.length>5?`<div style="text-align:center;margin-top:8px;font-size:12px;color:var(--muted)">+${allReqs.length-5} more pending</div>`:''}</div>`;}}catch(e){}
     const totalTodayCount=(()=>{const realIds=new Set(todayS.map(s=>s.clientId).filter(Boolean));return todayS.length+tcVisible.filter(tc=>!realIds.has(tc.clientId)).length;})();
-
-    // 3-dots menu for extra sections
-    const dotsMenuHtml=`
-      <div class="dots-menu-wrap">
-        <button class="dots-btn" onclick="openDotsMenu('dash-dots-dd')" title="More sections">⋯</button>
-        <div class="dots-dropdown" id="dash-dots-dd">
-          <div class="dots-item" onclick="closeDotsAndScroll('col-hd-leaderboard')"><span class="dots-item-ico">🏆</span> Trainer Leaderboard</div>
-          ${CR==='admin'?`<div class="dots-item" onclick="closeDotsAndScroll('col-hd-alltrainers')"><span class="dots-item-ico">🧑‍🏫</span> All Trainers</div>`:'' }
-          <div class="dots-item" onclick="closeDotsAndScroll('col-hd-oldclients')"><span class="dots-item-ico">📦</span> Old Clients</div>
-        </div>
-      </div>`;
-
+    const dotsMenuHtml=`<div class="dots-menu-wrap"><button class="dots-btn" onclick="openDotsMenu('dash-dots-dd')" title="More sections">⋯</button><div class="dots-dropdown" id="dash-dots-dd"><div class="dots-item" onclick="closeDotsAndScroll('col-hd-leaderboard')"><span class="dots-item-ico">🏆</span> Trainer Leaderboard</div>${CR==='admin'?`<div class="dots-item" onclick="closeDotsAndScroll('col-hd-alltrainers')"><span class="dots-item-ico">🧑‍🏫</span> All Trainers</div>`:''}<div class="dots-item" onclick="closeDotsAndScroll('col-hd-oldclients')"><span class="dots-item-ico">📦</span> Old Clients</div></div></div>`;
     $('page').innerHTML=`
       ${pendingReqsHtml}
       <div class="stats-grid">
@@ -1260,61 +850,18 @@ async function dash(){
         <div class="sc sc-g"><div class="sc-ico">🧑‍🏫</div><div class="sc-lbl">Total Trainers</div><div class="sc-val">${trainers.length}</div><div class="sc-sub">${trainers.filter(t=>t.active!==false).length} active</div></div>
         ${CR==='admin'?`<div class="sc sc-b"><div class="sc-ico">🧑‍💼</div><div class="sc-lbl">Coordinators</div><div class="sc-val">${coordUsers.length+headUsers.length}</div><div class="sc-sub">${headUsers.length} head, ${coordUsers.length} coord.</div></div>`:''}
       </div>
-
-      <div class="card"><div class="card-hd">
-        <div class="card-title">📊 Sessions by Status (This Month)</div>
-        ${dotsMenuHtml}
-      </div><div class="chart-box"><canvas id="ch-status"></canvas></div></div>
-
+      <div class="card"><div class="card-hd"><div class="card-title">📊 Sessions by Status (This Month)</div>${dotsMenuHtml}</div><div class="chart-box"><canvas id="ch-status"></canvas></div></div>
       <div class="card"><div class="card-hd"><div class="card-title">Today's Sessions <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:6px">📋 Fixed = from Time Chart</span></div><div style="display:flex;gap:8px"><button class="btn btn-g btn-sm" onclick="navTo('timechart')">📋 Time Chart</button><button class="btn btn-p btn-sm" onclick="navTo('sessions')">View All →</button></div></div>
         <div id="dash-sessions">${renderDashTodaySessions(todayS,tcVisible,true)}</div>
       </div>
+      <div class="collapsible-section"><div class="collapsible-hd" id="col-hd-leaderboard" onclick="toggleCollapsible('leaderboard')"><div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px">🏆 Trainer Leaderboard <span class="badge b-a" style="font-size:10px">${ranked.length}</span></div><div style="display:flex;align-items:center;gap:8px"><button class="btn btn-g btn-sm" onclick="event.stopPropagation();navTo('trainerratings')">Full Ratings →</button><span class="collapsible-arrow">▼</span></div></div><div class="collapsible-body" id="col-body-leaderboard">${renderLeaderboard(ranked)}</div></div>
+      ${CR==='admin'?`<div class="collapsible-section"><div class="collapsible-hd" id="col-hd-alltrainers" onclick="toggleCollapsible('alltrainers')"><div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px">🧑‍🏫 All Trainers <span class="badge b-g" style="font-size:10px">${trainers.length}</span></div><div style="display:flex;align-items:center;gap:8px"><button class="btn btn-g btn-sm" onclick="event.stopPropagation();navTo('trainers')">View All →</button><span class="collapsible-arrow">▼</span></div></div><div class="collapsible-body" id="col-body-alltrainers">${trainers.length===0?emptyState('🧑‍🏫','No trainers yet','','',''):trainers.map(t=>{const tR=allRatings.filter(r=>r.trainerId===t.id);const avg=tR.length?avgRating(tR):0;const tc=activeClients.filter(c=>c.trainerId===t.id).length;const ini=(t.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);const col=['#888','#ff4444','#ff7700','var(--yellow)','#88cc00','var(--accent)'][Math.round(avg)]||'#888';return`<div class="trainer-list-item"><div style="width:36px;height:36px;border-radius:50%;background:var(--green-dim);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${ini}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${t.name||'—'}</div><div style="font-size:11px;color:var(--muted)">${t.gender||'—'} · ${tc} client${tc!==1?'s':''}</div></div><div style="text-align:right">${tR.length?`<div style="color:${col};font-weight:700;font-size:14px">★ ${avg.toFixed(1)}</div><div style="font-size:10px;color:var(--muted)">${tR.length} ratings</div>`:'<div style="color:var(--muted2);font-size:12px">No ratings</div>'}</div><span class="badge ${t.active!==false?'b-g':'b-r'}" style="margin-left:8px">${t.active!==false?'Active':'Inactive'}</span></div>`;}).join('')}</div></div>`:''}
+      <div class="collapsible-section"><div class="collapsible-hd" id="col-hd-oldclients" onclick="toggleCollapsible('oldclients')"><div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px">📦 Old Clients <span class="badge b-r" style="font-size:10px">${inactiveClients.length} inactive</span></div><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--muted)">Batch & One-on-One</span><span class="collapsible-arrow">▼</span></div></div><div class="collapsible-body" id="col-body-oldclients">${renderOldClientsSection(inactiveClients,allBatches)}</div></div>`;
+    setTimeout(()=>{const statusCounts={onair:0,completed:0,missed:0,'not-started':0};const thisMonth=new Date().getMonth();sessions.filter(s=>s.date&&new Date(s.date).getMonth()===thisMonth).forEach(s=>{if(statusCounts[s.status]!==undefined)statusCounts[s.status]++;});const ctx1=$('ch-status');if(ctx1)CH.s1=new Chart(ctx1,{type:'doughnut',data:{labels:['On Air','Completed','Missed','Pending'],datasets:[{data:[statusCounts.onair,statusCounts.completed,statusCounts.missed,statusCounts['not-started']],backgroundColor:['#00e676','#d4ff00','#ff4444','#888'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'var(--muted)',font:{size:12}}}}}});},100);
 
-      <!-- ── COLLAPSIBLE: LEADERBOARD ── -->
-      <div class="collapsible-section">
-        <div class="collapsible-hd" id="col-hd-leaderboard" onclick="toggleCollapsible('leaderboard')">
-          <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px">🏆 Trainer Leaderboard <span class="badge b-a" style="font-size:10px">${ranked.length}</span></div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <button class="btn btn-g btn-sm" onclick="event.stopPropagation();navTo('trainerratings')">Full Ratings →</button>
-            <span class="collapsible-arrow">▼</span>
-          </div>
-        </div>
-        <div class="collapsible-body" id="col-body-leaderboard">${renderLeaderboard(ranked)}</div>
-      </div>
-
-      ${CR==='admin'?`
-      <!-- ── COLLAPSIBLE: ALL TRAINERS ── -->
-      <div class="collapsible-section">
-        <div class="collapsible-hd" id="col-hd-alltrainers" onclick="toggleCollapsible('alltrainers')">
-          <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px">🧑‍🏫 All Trainers <span class="badge b-g" style="font-size:10px">${trainers.length}</span></div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <button class="btn btn-g btn-sm" onclick="event.stopPropagation();navTo('trainers')">View All →</button>
-            <span class="collapsible-arrow">▼</span>
-          </div>
-        </div>
-        <div class="collapsible-body" id="col-body-alltrainers">${trainers.length===0?emptyState('🧑‍🏫','No trainers yet','','',''):trainers.map(t=>{const tR=allRatings.filter(r=>r.trainerId===t.id);const avg=tR.length?avgRating(tR):0;const tc=activeClients.filter(c=>c.trainerId===t.id).length;const ini=(t.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);const col=['#888','#ff4444','#ff7700','var(--yellow)','#88cc00','var(--accent)'][Math.round(avg)]||'#888';return`<div class="trainer-list-item"><div style="width:36px;height:36px;border-radius:50%;background:var(--green-dim);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${ini}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">${t.name||'—'}</div><div style="font-size:11px;color:var(--muted)">${t.gender||'—'} · ${tc} client${tc!==1?'s':''}</div></div><div style="text-align:right">${tR.length?`<div style="color:${col};font-weight:700;font-size:14px">★ ${avg.toFixed(1)}</div><div style="font-size:10px;color:var(--muted)">${tR.length} ratings</div>`:'<div style="color:var(--muted2);font-size:12px">No ratings</div>'}</div><span class="badge ${t.active!==false?'b-g':'b-r'}" style="margin-left:8px">${t.active!==false?'Active':'Inactive'}</span></div>`;}).join('')}</div>
-      </div>`:''}
-
-      <!-- ── COLLAPSIBLE: OLD CLIENTS ── -->
-      <div class="collapsible-section">
-        <div class="collapsible-hd" id="col-hd-oldclients" onclick="toggleCollapsible('oldclients')">
-          <div style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px">📦 Old Clients <span class="badge b-r" style="font-size:10px">${inactiveClients.length} inactive</span></div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span style="font-size:11px;color:var(--muted)">Batch & One-on-One</span>
-            <span class="collapsible-arrow">▼</span>
-          </div>
-        </div>
-        <div class="collapsible-body" id="col-body-oldclients">${renderOldClientsSection(inactiveClients,allBatches)}</div>
-      </div>`;
-
-    setTimeout(()=>{
-      const statusCounts={onair:0,completed:0,missed:0,'not-started':0};
-      const thisMonth=new Date().getMonth();
-      sessions.filter(s=>s.date&&new Date(s.date).getMonth()===thisMonth).forEach(s=>{if(statusCounts[s.status]!==undefined)statusCounts[s.status]++;});
-      const ctx1=$('ch-status');
-      if(ctx1)CH.s1=new Chart(ctx1,{type:'doughnut',data:{labels:['On Air','Completed','Missed','Pending'],datasets:[{data:[statusCounts.onair,statusCounts.completed,statusCounts.missed,statusCounts['not-started']],backgroundColor:['#00e676','#d4ff00','#ff4444','#888'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'var(--muted)',font:{size:12}}}}}});
-    },100);
-
+  // ══════════════════════════════════════════════════════════════
+  //  COORDINATOR DASHBOARD — FIX: auto-show popup on load
+  // ══════════════════════════════════════════════════════════════
   } else if(CR==='coordinator'){
     const myUid=auth().currentUser.uid;
     const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid),fn().where('active','==',true));
@@ -1329,10 +876,15 @@ async function dash(){
     const tcVisible=getTcVisibleSessions(myTcEntries,myClients,todayStr);
 
     let missedBannerHtml='';
+    let firstUnresolvedReq=null; // ← KEY FIX: track first unresolved req for auto-popup
+
     try{
       const allReqs=await fsGetAll('missedreasonrequests',fn().where('resolved','==',false));
       const mine=allReqs.filter(r=>r.assignedCoordIds&&r.assignedCoordIds.includes(myUid));
-      if(mine.length){missedBannerHtml=`<div class="missed-banner"><div class="missed-banner-header"><div class="missed-banner-title"><span style="font-size:22px">🚨</span> ACTION REQUIRED — ${mine.length} Missed Session${mine.length>1?'s':''} Need${mine.length===1?'s':''} a Reason</div><span class="badge b-r" style="font-size:12px;padding:5px 12px">${mine.length} Pending</span></div><div style="font-size:12px;color:var(--muted);margin-bottom:12px">Please enter the reason for each missed session below.</div>${mine.map(r=>`<div class="missed-banner-item"><div class="missed-banner-info"><div class="missed-banner-client">🏃 ${r.clientName||'—'}</div><div class="missed-banner-meta">Trainer: ${r.trainerName||'—'} | ${r.date||'—'} at ${to12h(r.time)} | Marked by: ${r.markedByName||'—'}</div></div><button class="btn btn-d btn-sm" style="flex-shrink:0" onclick="showMissedReasonPopup('${r.sessionId||''}','${(r.clientName||'').replace(/'/g,"\\'")}','${(r.trainerName||'').replace(/'/g,"\\'")}','${r.date||''}','${r.time||''}','${r.id}')">⚠️ Enter Reason</button></div>`).join('')}</div>`;}
+      if(mine.length){
+        firstUnresolvedReq=mine[0]; // ← KEY FIX: capture first one
+        missedBannerHtml=`<div class="missed-banner"><div class="missed-banner-header"><div class="missed-banner-title"><span style="font-size:22px">🚨</span> ACTION REQUIRED — ${mine.length} Missed Session${mine.length>1?'s':''} Need${mine.length===1?'s':''} a Reason</div><span class="badge b-r" style="font-size:12px;padding:5px 12px">${mine.length} Pending</span></div><div style="font-size:12px;color:var(--muted);margin-bottom:12px">Please enter the reason for each missed session below.</div>${mine.map(r=>`<div class="missed-banner-item"><div class="missed-banner-info"><div class="missed-banner-client">🏃 ${r.clientName||'—'}</div><div class="missed-banner-meta">Trainer: ${r.trainerName||'—'} | ${r.date||'—'} at ${to12h(r.time)} | Marked by: ${r.markedByName||'—'}</div></div><button class="btn btn-d btn-sm" style="flex-shrink:0" onclick="showMissedReasonPopup('${r.sessionId||''}','${(r.clientName||'').replace(/'/g,"\\'")}','${(r.trainerName||'').replace(/'/g,"\\'")}','${r.date||''}','${r.time||''}','${r.id}')">⚠️ Enter Reason</button></div>`).join('')}</div>`;
+      }
     }catch(e){}
 
     const tcRealSet=new Set(todayS.map(s=>s.clientId));
@@ -1350,6 +902,21 @@ async function dash(){
       <div class="card"><div class="card-hd"><div class="card-title">My Clients' Sessions Today <span style="font-size:11px;color:var(--muted);font-weight:400;margin-left:6px">📋 Fixed = from Time Chart</span></div><button class="btn btn-p btn-sm" onclick="navTo('sessions')">View All →</button></div>
         <div id="dash-sessions">${renderDashTodaySessions(todayS,tcVisible,true)}</div>
       </div>`;
+
+    // ── KEY FIX: auto-show missed reason popup on dashboard load ──
+    if(firstUnresolvedReq){
+      const r=firstUnresolvedReq;
+      setTimeout(()=>{
+        showMissedReasonPopup(
+          r.sessionId||'',
+          r.clientName||'',
+          r.trainerName||'',
+          r.date||'',
+          r.time||'',
+          r.id
+        );
+      },600);
+    }
 
   } else if(CR==='trainer'){
     const myUid=auth().currentUser.uid;
@@ -1373,18 +940,7 @@ async function dash(){
   }
 }
 
-// Scroll helper for dots menu
-function closeDotsAndScroll(headerId){
-  document.querySelectorAll('.dots-dropdown').forEach(d=>d.classList.remove('open'));
-  const el=document.getElementById(headerId);
-  if(el){
-    el.scrollIntoView({behavior:'smooth',block:'start'});
-    // Auto-open if not already open
-    const sectionId=headerId.replace('col-hd-','');
-    const body=document.getElementById('col-body-'+sectionId);
-    if(body&&!body.classList.contains('open')){toggleCollapsible(sectionId);}
-  }
-}
+function closeDotsAndScroll(headerId){document.querySelectorAll('.dots-dropdown').forEach(d=>d.classList.remove('open'));const el=document.getElementById(headerId);if(el){el.scrollIntoView({behavior:'smooth',block:'start'});const sectionId=headerId.replace('col-hd-','');const body=document.getElementById('col-body-'+sectionId);if(body&&!body.classList.contains('open')){toggleCollapsible(sectionId);}}}
 
 // ══════ RENDER TODAY SESSIONS ══════
 function renderDashTodaySessions(todayS,tcVisible,canStart){
@@ -1394,21 +950,15 @@ function renderDashTodaySessions(todayS,tcVisible,canStart){
   if(!combined.length)return emptyState('📅','No sessions today','','','');
   const rows=combined.map(s=>{
     const isTc=!!s._isTc;const tcBadge=isTc?`<span class="tc-dash-badge" title="From Time Chart">📋 Fixed</span>`:'';
-    const actBtns=canStart?`${s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair')">▶ Start</button>`:''}${s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}`:''
+    const actBtns=canStart?`${s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair')">▶ Start</button>`:''}${s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}`:'';
     return`<div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)"><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);min-width:80px">${to12h(s.time)}</div><div style="flex:1"><div style="font-weight:600;font-size:13px">${s.clientName||'—'} ${tcBadge}</div><div style="font-size:12px;color:var(--muted)">${s.trainerName||'—'} • ${s.type||'Session'}</div></div>${statusBadge(s.status)}<div style="display:flex;gap:5px">${actBtns}</div></div>`;
   }).join('');
   return`<div style="padding:0 2px">${rows}</div>`;
 }
 
 // ══════ LEADERBOARD ══════
-function buildLeaderboard(trainers,allRatings,allClients){
-  return trainers.map(t=>{const tRatings=allRatings.filter(r=>r.trainerId===t.id);const avg=tRatings.length?avgRating(tRatings):0;const tClients=allClients.filter(c=>c.trainerId===t.id).length;const criteriaAvg={};RATING_CRITERIA.forEach(c=>{const vals=tRatings.filter(r=>r.criteria&&r.criteria[c.id]).map(r=>r.criteria[c.id]);criteriaAvg[c.id]=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;});return{...t,avg,totalRatings:tRatings.length,clientCount:tClients,criteriaAvg};}).sort((a,b)=>b.avg-a.avg||b.totalRatings-a.totalRatings);
-}
-function renderLeaderboard(ranked){
-  if(!ranked.length)return emptyState('🏆','No trainer ratings yet','Rate trainers after sessions.','','');
-  const medals=['🥇','🥈','🥉'];const rankClasses=['gold','silver','bronze','other'];const starColors={5:'var(--accent)',4:'#88cc00',3:'var(--yellow)',2:'#ff7700',1:'#ff4444',0:'var(--muted)'};
-  return`<div>${ranked.map((t,i)=>{const ini=(t.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);const col=starColors[Math.round(t.avg)]||'var(--muted)';const bestCrit=RATING_CRITERIA.filter(c=>t.criteriaAvg[c.id]>0).sort((a,b)=>t.criteriaAvg[b.id]-t.criteriaAvg[a.id])[0];return`<div class="lb-row"><div class="lb-rank ${rankClasses[i]||'other'}">${i+1}</div><div class="lb-medal">${medals[i]||''}</div><div class="lb-avatar" style="background:var(--green-dim);color:var(--green)">${ini}</div><div class="lb-info"><div class="lb-name">${t.name||'—'}</div><div class="lb-meta">${t.clientCount} client${t.clientCount!==1?'s':''} · ${t.totalRatings} rating${t.totalRatings!==1?'s':''}${bestCrit?` · Best: ${bestCrit.icon}${bestCrit.label}`:''}</div><div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${t.avg/5*100}%"></div></div></div><div class="lb-score"><div class="lb-stars">${'★'.repeat(Math.round(t.avg))}${'☆'.repeat(5-Math.round(t.avg))}</div><div class="lb-num" style="color:${col}">${t.avg.toFixed(1)}</div><div class="lb-cnt">/ 5.0</div></div></div>`;}).join('')}</div>`;
-}
+function buildLeaderboard(trainers,allRatings,allClients){return trainers.map(t=>{const tRatings=allRatings.filter(r=>r.trainerId===t.id);const avg=tRatings.length?avgRating(tRatings):0;const tClients=allClients.filter(c=>c.trainerId===t.id).length;const criteriaAvg={};RATING_CRITERIA.forEach(c=>{const vals=tRatings.filter(r=>r.criteria&&r.criteria[c.id]).map(r=>r.criteria[c.id]);criteriaAvg[c.id]=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;});return{...t,avg,totalRatings:tRatings.length,clientCount:tClients,criteriaAvg};}).sort((a,b)=>b.avg-a.avg||b.totalRatings-a.totalRatings);}
+function renderLeaderboard(ranked){if(!ranked.length)return emptyState('🏆','No trainer ratings yet','Rate trainers after sessions.','','');const medals=['🥇','🥈','🥉'];const rankClasses=['gold','silver','bronze','other'];const starColors={5:'var(--accent)',4:'#88cc00',3:'var(--yellow)',2:'#ff7700',1:'#ff4444',0:'var(--muted)'};return`<div>${ranked.map((t,i)=>{const ini=(t.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);const col=starColors[Math.round(t.avg)]||'var(--muted)';const bestCrit=RATING_CRITERIA.filter(c=>t.criteriaAvg[c.id]>0).sort((a,b)=>t.criteriaAvg[b.id]-t.criteriaAvg[a.id])[0];return`<div class="lb-row"><div class="lb-rank ${rankClasses[i]||'other'}">${i+1}</div><div class="lb-medal">${medals[i]||''}</div><div class="lb-avatar" style="background:var(--green-dim);color:var(--green)">${ini}</div><div class="lb-info"><div class="lb-name">${t.name||'—'}</div><div class="lb-meta">${t.clientCount} client${t.clientCount!==1?'s':''} · ${t.totalRatings} rating${t.totalRatings!==1?'s':''}${bestCrit?` · Best: ${bestCrit.icon}${bestCrit.label}`:''}</div><div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${t.avg/5*100}%"></div></div></div><div class="lb-score"><div class="lb-stars">${'★'.repeat(Math.round(t.avg))}${'☆'.repeat(5-Math.round(t.avg))}</div><div class="lb-num" style="color:${col}">${t.avg.toFixed(1)}</div><div class="lb-cnt">/ 5.0</div></div></div>`;}).join('')}</div>`;}
 
 // ══════ TRAINER RATINGS ══════
 async function trainerratings(){
@@ -1428,30 +978,12 @@ async function trainerratings(){
     </div>
     <div class="card"><div class="card-hd"><div class="card-title">Recent Ratings</div></div>${ratings.length===0?emptyState('⭐','No ratings yet','','',''):`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Trainer</th><th>Session</th><th>Rating</th><th>Comment</th><th>Rated By</th>${CR==='admin'||CR==='coordinatorhead'?'<th>Actions</th>':''}</tr></thead><tbody>${[...ratings].filter(r=>CR==='coordinator'&&allowedTrainerIds?allowedTrainerIds.includes(r.trainerId):true).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,30).map(r=>{const stars='★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0));const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';return`<tr><td style="font-size:12px">${r.sessionDate||fmtDate(r.createdAt)}</td><td><strong>${r.trainerName||'—'}</strong></td><td style="font-size:12px">${r.sessionType||'—'}</td><td><span style="color:${col};font-size:16px;font-weight:700">${stars}</span></td><td style="font-size:12px;max-width:200px">${r.comment||'—'}</td><td style="font-size:12px">${r.ratedByName||'—'}</td>${CR==='admin'||CR==='coordinatorhead'?`<td><div class="td-actions"><button class="btn btn-d btn-sm" onclick="delRating('${r.id}')">Delete</button></div></td>`:''}</tr>`;}).join('')}</tbody></table></div>`}</div>`;
 }
-async function openRateTrainer(preTrainerId='',preTrainerName=''){
-  const[allTrainers,sessions]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('sessions',fn().where('status','==','completed'))]);
-  let trainers=allTrainers;if(CR==='coordinator'){let allowedIds=window._coordAllowedTrainerIds;if(!allowedIds){const myUid=auth().currentUser.uid;const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));allowedIds=[...new Set(myClients.map(c=>c.trainerId).filter(Boolean))];window._coordAllowedTrainerIds=allowedIds;}trainers=allTrainers.filter(t=>allowedIds.includes(t.id));}
-  let filteredSessions=sessions;if(CR==='coordinator'&&window._coordAllowedTrainerIds){filteredSessions=sessions.filter(s=>window._coordAllowedTrainerIds.includes(s.trainerId));}
-  const trainerOpts=trainers.map(t=>`<option value="${t.id}" ${t.id===preTrainerId?'selected':''}>${t.name||t.email}</option>`).join('');
-  openM2('RATE TRAINER SESSION',`${trainers.length===0?`<div class="alert alert-err show" style="margin-bottom:14px">No trainers are assigned to your clients yet.</div>`:''}<div class="fg"><label class="fl">Trainer *</label><select class="fs" id="rt-trainer" onchange="updateRatingSessionList()"><option value="">— Select trainer —</option>${trainerOpts}</select></div><div class="fg"><label class="fl">Session (optional)</label><select class="fs" id="rt-session"><option value="">— Select completed session —</option></select></div><div class="fr"><div class="fg"><label class="fl">Session Type</label><select class="fs" id="rt-type"><option value="">— Select —</option>${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div><div class="fg"><label class="fl">Session Date</label><input class="fi" id="rt-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div></div><label class="fl" style="margin-bottom:8px">Overall Rating *</label><div class="star-rating-widget"><div class="star-rating-row" id="rt-overall-stars">${[1,2,3,4,5].map(n=>`<button class="star-btn" data-val="${n}" onclick="rtSetOverall(${n})">★</button>`).join('')}</div><div class="star-label" id="rt-overall-label" style="color:var(--muted)">Tap a star to rate</div><div class="star-desc" id="rt-overall-desc"></div></div><input type="hidden" id="rt-rating" value="0"><label class="fl" style="margin-bottom:8px">Rate by Criteria</label><div class="rating-criteria-grid">${RATING_CRITERIA.map(c=>`<div class="criteria-card"><div class="criteria-label">${c.icon} ${c.label}</div><div style="font-size:10px;color:var(--muted2);margin-bottom:6px">${c.desc}</div><div class="mini-stars" id="rt-crit-${c.id}">${[1,2,3,4,5].map(n=>`<button class="mini-star-btn" data-val="${n}" onclick="rtSetCriteria('${c.id}',${n})">★</button>`).join('')}</div></div>`).join('')}</div><div class="fg"><label class="fl">Comment</label><textarea class="fta" id="rt-comment" placeholder="Notes on performance…"></textarea></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveTrainerRating()">Submit Rating</button></div>`);
-  window._rtSessions=filteredSessions;window._rtCriteria={};RATING_CRITERIA.forEach(c=>window._rtCriteria[c.id]=0);window._rtSelectedRating=0;
-  if(preTrainerId){$('rt-trainer').value=preTrainerId;updateRatingSessionList();}
-}
+async function openRateTrainer(preTrainerId='',preTrainerName=''){const[allTrainers,sessions]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('sessions',fn().where('status','==','completed'))]);let trainers=allTrainers;if(CR==='coordinator'){let allowedIds=window._coordAllowedTrainerIds;if(!allowedIds){const myUid=auth().currentUser.uid;const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));allowedIds=[...new Set(myClients.map(c=>c.trainerId).filter(Boolean))];window._coordAllowedTrainerIds=allowedIds;}trainers=allTrainers.filter(t=>allowedIds.includes(t.id));}let filteredSessions=sessions;if(CR==='coordinator'&&window._coordAllowedTrainerIds){filteredSessions=sessions.filter(s=>window._coordAllowedTrainerIds.includes(s.trainerId));}const trainerOpts=trainers.map(t=>`<option value="${t.id}" ${t.id===preTrainerId?'selected':''}>${t.name||t.email}</option>`).join('');openM2('RATE TRAINER SESSION',`${trainers.length===0?`<div class="alert alert-err show" style="margin-bottom:14px">No trainers are assigned to your clients yet.</div>`:''}<div class="fg"><label class="fl">Trainer *</label><select class="fs" id="rt-trainer" onchange="updateRatingSessionList()"><option value="">— Select trainer —</option>${trainerOpts}</select></div><div class="fg"><label class="fl">Session (optional)</label><select class="fs" id="rt-session"><option value="">— Select completed session —</option></select></div><div class="fr"><div class="fg"><label class="fl">Session Type</label><select class="fs" id="rt-type"><option value="">— Select —</option>${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div><div class="fg"><label class="fl">Session Date</label><input class="fi" id="rt-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div></div><label class="fl" style="margin-bottom:8px">Overall Rating *</label><div class="star-rating-widget"><div class="star-rating-row" id="rt-overall-stars">${[1,2,3,4,5].map(n=>`<button class="star-btn" data-val="${n}" onclick="rtSetOverall(${n})">★</button>`).join('')}</div><div class="star-label" id="rt-overall-label" style="color:var(--muted)">Tap a star to rate</div><div class="star-desc" id="rt-overall-desc"></div></div><input type="hidden" id="rt-rating" value="0"><label class="fl" style="margin-bottom:8px">Rate by Criteria</label><div class="rating-criteria-grid">${RATING_CRITERIA.map(c=>`<div class="criteria-card"><div class="criteria-label">${c.icon} ${c.label}</div><div style="font-size:10px;color:var(--muted2);margin-bottom:6px">${c.desc}</div><div class="mini-stars" id="rt-crit-${c.id}">${[1,2,3,4,5].map(n=>`<button class="mini-star-btn" data-val="${n}" onclick="rtSetCriteria('${c.id}',${n})">★</button>`).join('')}</div></div>`).join('')}</div><div class="fg"><label class="fl">Comment</label><textarea class="fta" id="rt-comment" placeholder="Notes on performance…"></textarea></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveTrainerRating()">Submit Rating</button></div>`);window._rtSessions=filteredSessions;window._rtCriteria={};RATING_CRITERIA.forEach(c=>window._rtCriteria[c.id]=0);window._rtSelectedRating=0;if(preTrainerId){$('rt-trainer').value=preTrainerId;updateRatingSessionList();}}
 function rtSetOverall(n){$('rt-rating').value=n;window._rtSelectedRating=n;const labels=['','😞 Poor','😐 Fair','🙂 Good','😊 Great','🌟 Excellent!'];const colors=['','#ff4444','#ff7700','var(--yellow)','#88cc00','var(--accent)'];const stars=$('rt-overall-stars'),lbl=$('rt-overall-label'),desc=$('rt-overall-desc');if(!stars)return;stars.querySelectorAll('.star-btn').forEach((b,i)=>{b.classList.toggle('active',i<n);b.style.color=i<n?colors[n]:'';});if(lbl){lbl.textContent=labels[n]||'';lbl.style.color=colors[n]||'var(--muted)';}const descs=['','Needs improvement','Below average','Meets expectations','Above average','Outstanding!'];if(desc)desc.textContent=descs[n]||'';}
 function rtSetCriteria(cId,n){if(!window._rtCriteria)window._rtCriteria={};window._rtCriteria[cId]=n;const s=document.getElementById(`rt-crit-${cId}`);if(!s)return;s.querySelectorAll('.mini-star-btn').forEach((b,i)=>b.classList.toggle('active',i<n));}
 function updateRatingSessionList(){const tid=$('rt-trainer').value;const sel=$('rt-session');if(!sel)return;const filtered=(window._rtSessions||[]).filter(s=>s.trainerId===tid);sel.innerHTML=`<option value="">— Select completed session —</option>`+filtered.slice(0,50).map(s=>`<option value="${s.id}" data-date="${s.date||''}" data-type="${s.type||''}">${s.clientName||'—'} • ${s.date||'—'} ${to12h(s.time)} (${s.type||'—'})</option>`).join('');sel.onchange=()=>{const opt=sel.options[sel.selectedIndex];if(opt&&opt.dataset.date)$('rt-date').value=opt.dataset.date;if(opt&&opt.dataset.type&&$('rt-type'))$('rt-type').value=opt.dataset.type;};}
-async function saveTrainerRating(){
-  const trainerId=$('rt-trainer').value;const rating=Number($('rt-rating').value||0);const trainerSel=$('rt-trainer');const trainerName=trainerId?trainerSel.options[trainerSel.selectedIndex].text:'';
-  if(!trainerId||!rating){toast('Select trainer and give an overall rating','error');return}
-  const sessionSel=$('rt-session');const sessionId=sessionSel?sessionSel.value:'';
-  try{await fsAdd('trainerratings',{trainerId,trainerName,rating,criteria:window._rtCriteria||{},comment:$('rt-comment').value.trim(),sessionId,sessionType:$('rt-type').value,sessionDate:$('rt-date').value,ratedById:auth().currentUser.uid,ratedByName:CU.name||'',ratedByRole:CR});closeM2();toast('Rating submitted! 🌟','success');trainerratings();}catch(e){toast('Error: '+e.message,'error')}
-}
-async function viewTrainerRatings(trainerId,trainerName){
-  const[ratings,certs]=await Promise.all([fsGetAll('trainerratings',fn().where('trainerId','==',trainerId)),fsGetAll('certificates',fn().where('trainerId','==',trainerId))]);
-  ratings.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));const avg=ratings.length?avgRating(ratings):0;const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';
-  const critBreakdown=RATING_CRITERIA.map(c=>{const vals=ratings.filter(r=>r.criteria&&r.criteria[c.id]).map(r=>r.criteria[c.id]);const a=vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0;return{...c,avg:a};});
-  openM2(`TRAINER: ${trainerName.toUpperCase()}`,`<div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px"><div style="text-align:center"><div style="font-size:42px;font-weight:900;color:${col}">${avg.toFixed(1)}</div><div style="font-size:20px;color:${col}">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</div><div style="font-size:12px;color:var(--muted)">${ratings.length} rating${ratings.length!==1?'s':''}</div></div><div style="flex:1">${[5,4,3,2,1].map(n=>{const cnt=ratings.filter(r=>r.rating===n).length;const pct=ratings.length?Math.round(cnt/ratings.length*100):0;return`<div class="pb-wrap"><div class="pb-lbl"><span>${'★'.repeat(n)}</span><span>${cnt}</span></div><div class="pb"><div class="pb-fill" style="width:${pct}%;background:${['','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][n]}"></div></div></div>`;}).join('')}</div></div><div class="detail-section"><div class="detail-section-title">Performance by Criteria</div><div class="rating-criteria-grid">${critBreakdown.map(c=>`<div class="criteria-card"><div class="criteria-label">${c.icon} ${c.label}</div><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div style="flex:1"><div class="pb"><div class="pb-fill" style="width:${c.avg/5*100}%;background:var(--yellow)"></div></div></div><div style="font-weight:700;font-size:13px;color:var(--yellow)">${c.avg>0?c.avg.toFixed(1):'—'}</div></div></div>`).join('')}</div></div>${certs.length>0?`<div class="detail-section"><div class="detail-section-title">🎓 Certificates (${certs.length})</div><div style="display:flex;flex-wrap:wrap;gap:8px">${certs.map(c=>`<span class="badge b-a">🎓 ${c.name}</span>`).join('')}</div></div>`:''}<div class="mo-foot"><button class="btn btn-p" onclick="closeM2();openRateTrainer('${trainerId}','${trainerName.replace(/'/g,"\\'")}')">+ Rate Session</button><button class="btn btn-g" onclick="closeM2()">Close</button></div>`);
-}
+async function saveTrainerRating(){const trainerId=$('rt-trainer').value;const rating=Number($('rt-rating').value||0);const trainerSel=$('rt-trainer');const trainerName=trainerId?trainerSel.options[trainerSel.selectedIndex].text:'';if(!trainerId||!rating){toast('Select trainer and give an overall rating','error');return}const sessionSel=$('rt-session');const sessionId=sessionSel?sessionSel.value:'';try{await fsAdd('trainerratings',{trainerId,trainerName,rating,criteria:window._rtCriteria||{},comment:$('rt-comment').value.trim(),sessionId,sessionType:$('rt-type').value,sessionDate:$('rt-date').value,ratedById:auth().currentUser.uid,ratedByName:CU.name||'',ratedByRole:CR});closeM2();toast('Rating submitted! 🌟','success');trainerratings();}catch(e){toast('Error: '+e.message,'error')}}
+async function viewTrainerRatings(trainerId,trainerName){const[ratings,certs]=await Promise.all([fsGetAll('trainerratings',fn().where('trainerId','==',trainerId)),fsGetAll('certificates',fn().where('trainerId','==',trainerId))]);ratings.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));const avg=ratings.length?avgRating(ratings):0;const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';const critBreakdown=RATING_CRITERIA.map(c=>{const vals=ratings.filter(r=>r.criteria&&r.criteria[c.id]).map(r=>r.criteria[c.id]);const a=vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0;return{...c,avg:a};});openM2(`TRAINER: ${trainerName.toUpperCase()}`,`<div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px"><div style="text-align:center"><div style="font-size:42px;font-weight:900;color:${col}">${avg.toFixed(1)}</div><div style="font-size:20px;color:${col}">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</div><div style="font-size:12px;color:var(--muted)">${ratings.length} rating${ratings.length!==1?'s':''}</div></div><div style="flex:1">${[5,4,3,2,1].map(n=>{const cnt=ratings.filter(r=>r.rating===n).length;const pct=ratings.length?Math.round(cnt/ratings.length*100):0;return`<div class="pb-wrap"><div class="pb-lbl"><span>${'★'.repeat(n)}</span><span>${cnt}</span></div><div class="pb"><div class="pb-fill" style="width:${pct}%;background:${['','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][n]}"></div></div></div>`;}).join('')}</div></div><div class="detail-section"><div class="detail-section-title">Performance by Criteria</div><div class="rating-criteria-grid">${critBreakdown.map(c=>`<div class="criteria-card"><div class="criteria-label">${c.icon} ${c.label}</div><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div style="flex:1"><div class="pb"><div class="pb-fill" style="width:${c.avg/5*100}%;background:var(--yellow)"></div></div></div><div style="font-weight:700;font-size:13px;color:var(--yellow)">${c.avg>0?c.avg.toFixed(1):'—'}</div></div></div>`).join('')}</div></div>${certs.length>0?`<div class="detail-section"><div class="detail-section-title">🎓 Certificates (${certs.length})</div><div style="display:flex;flex-wrap:wrap;gap:8px">${certs.map(c=>`<span class="badge b-a">🎓 ${c.name}</span>`).join('')}</div></div>`:''}<div class="mo-foot"><button class="btn btn-p" onclick="closeM2();openRateTrainer('${trainerId}','${trainerName.replace(/'/g,"\\'")}')">+ Rate Session</button><button class="btn btn-g" onclick="closeM2()">Close</button></div>`);}
 async function delRating(id){if(!confirm('Delete?'))return;try{await fsDel('trainerratings',id);toast('Deleted','success');trainerratings()}catch(e){toast('Error','error')}}
 
 // ══════ SESSIONS ══════
@@ -1475,11 +1007,7 @@ async function sessions(){
   $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px"><div class="tabs" style="margin:0;border:none">${['today','upcoming','past','all'].map(t=>`<div class="tab ${t==='today'?'active':''}" data-stab="${t}" onclick="window._sTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</div>`).join('')}</div>${CR!=='client'?`<button class="btn btn-p" onclick="openAddSession()">+ Schedule Session</button>`:''}</div><div class="card" style="padding:0"><div class="tbl-wrap" id="sess-list"></div></div>`;
   window._sTab=loadSTab;loadSTab('today');
 }
-function renderSessionsTable(data,tab){
-  if(!data.length){const msgs={today:'No sessions today.',upcoming:'No upcoming sessions.',past:'No past sessions.',all:'No sessions found.'};return emptyState('📅',msgs[tab]||'No sessions',CR!=='client'?'Use the Schedule button to add sessions.':'Your coordinator will schedule sessions.',CR!=='client'&&tab!=='past'?'+ Schedule':'',CR!=='client'&&tab!=='past'?'openAddSession()':'');}
-  return`<table><thead><tr><th>Date</th><th>Time</th><th>Client</th><th>Trainer</th><th>Type</th><th>Status</th><th>Meet Link</th><th>Actions</th></tr></thead><tbody>${data.map(s=>`<tr><td style="font-size:12px">${s.date||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(s.time)}</td><td><strong>${s.clientName||'—'}</strong></td><td style="font-size:12px">${s.trainerName||'—'}</td><td style="font-size:12px">${s.type||'—'}</td><td>${statusBadge(s.status)}</td><td>${s.meetLink?`<a href="${s.meetLink}" target="_blank" style="color:var(--accent);font-size:12px">Join 🔗</a>`:'—'}</td><td><div class="td-actions">${CR!=='client'&&s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair',true)">▶ Start</button>`:''}${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}${CR==='admin'&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}${CR==='trainer'&&(s.status==='onair'||s.status==='not-started')?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed',true)">✗ Miss</button>`:''}${CR==='admin'||CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-g btn-sm" onclick="openEditSession('${s.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delSession('${s.id}')">Del</button>`:''}${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='completed'?`<button class="btn btn-yw btn-sm" onclick="openRateTrainer('${s.trainerId||''}','${(s.trainerName||'').replace(/'/g,"\\'")}')">⭐ Rate</button>`:''}
-  </div></td></tr>`).join('')}</tbody></table>`;
-}
+function renderSessionsTable(data,tab){if(!data.length){const msgs={today:'No sessions today.',upcoming:'No upcoming sessions.',past:'No past sessions.',all:'No sessions found.'};return emptyState('📅',msgs[tab]||'No sessions',CR!=='client'?'Use the Schedule button to add sessions.':'Your coordinator will schedule sessions.',CR!=='client'&&tab!=='past'?'+ Schedule':'',CR!=='client'&&tab!=='past'?'openAddSession()':'');}return`<table><thead><tr><th>Date</th><th>Time</th><th>Client</th><th>Trainer</th><th>Type</th><th>Status</th><th>Meet Link</th><th>Actions</th></tr></thead><tbody>${data.map(s=>`<tr><td style="font-size:12px">${s.date||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(s.time)}</td><td><strong>${s.clientName||'—'}</strong></td><td style="font-size:12px">${s.trainerName||'—'}</td><td style="font-size:12px">${s.type||'—'}</td><td>${statusBadge(s.status)}</td><td>${s.meetLink?`<a href="${s.meetLink}" target="_blank" style="color:var(--accent);font-size:12px">Join 🔗</a>`:'—'}</td><td><div class="td-actions">${CR!=='client'&&s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair',true)">▶ Start</button>`:''}${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}${CR==='admin'&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}${CR==='trainer'&&(s.status==='onair'||s.status==='not-started')?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed',true)">✗ Miss</button>`:''}${CR==='admin'||CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-g btn-sm" onclick="openEditSession('${s.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delSession('${s.id}')">Del</button>`:''}${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='completed'?`<button class="btn btn-yw btn-sm" onclick="openRateTrainer('${s.trainerId||''}','${(s.trainerName||'').replace(/'/g,"\\'")}')">⭐ Rate</button>`:''}</div></td></tr>`).join('')}</tbody></table>`;}
 function openAddSession(){loadSessionForm().then(html=>{openM2('SCHEDULE SESSION',html);initSessionFormAC()})}
 async function openEditSession(id){const s=await fsGet('sessions',id);if(!s){toast('Not found','error');return}loadSessionForm(s).then(html=>{openM2('EDIT SESSION',html);initSessionFormAC(s)})}
 async function initSessionFormAC(s={}){const[clients,trainers]=await Promise.all([fsGetAll('clients',fn().where('active','==',true)),fsGetAll('users',fn().where('role','==','trainer'))]);const clientInp=document.getElementById('sf-client-inp');if(clientInp){const items=clients.map(c=>({id:c.id,label:c.name||'',sub:c.phone||''}));createAutocomplete(clientInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-client-id');if(hid)hid.value=it.id;}});}const trainerInp=document.getElementById('sf-trainer-inp');if(trainerInp){const items=trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''}));createAutocomplete(trainerInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-trainer-id');if(hid)hid.value=it.id;}});}}
