@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,8 +53,12 @@ document.dispatchEvent(new Event('fbReady'));
   --pink:#ff69b4;--pink-dim:rgba(255,105,180,0.12);
   --sw:250px;
   --bg-image:none;
+  /* Animated BG vars */
+  --orb1-color: rgba(212,255,0,0.06);
+  --orb2-color: rgba(77,159,255,0.05);
+  --orb3-color: rgba(170,102,255,0.04);
+  --particle-color: rgba(212,255,0,0.35);
 }
-/* LIGHT */
 body.theme-light{
   --bg:#f4f4f0;--surface:#ffffff;--card:#fafafa;--border:#e0e0e0;--border2:#d0d0d0;
   --text:#1a1a1a;--muted:#666;--muted2:#999;
@@ -65,8 +70,11 @@ body.theme-light{
   --purple:#7733cc;--purple-dim:rgba(119,51,204,0.12);
   --orange:#cc5500;--orange-dim:rgba(204,85,0,0.12);
   --pink:#cc3377;--pink-dim:rgba(204,51,119,0.12);
+  --orb1-color: rgba(90,158,0,0.06);
+  --orb2-color: rgba(34,102,204,0.05);
+  --orb3-color: rgba(119,51,204,0.04);
+  --particle-color: rgba(90,158,0,0.4);
 }
-/* OCEAN BLUE */
 body.theme-ocean{
   --bg:#050d1a;--surface:#091426;--card:#0d1f35;--border:#152d4a;--border2:#1e3f66;
   --text:#d0e8ff;--muted:#6a9ec0;--muted2:#3a607a;
@@ -78,8 +86,11 @@ body.theme-ocean{
   --purple:#7c4dff;--purple-dim:rgba(124,77,255,0.12);
   --orange:#ff9100;--orange-dim:rgba(255,145,0,0.12);
   --pink:#f48fb1;--pink-dim:rgba(244,143,177,0.12);
+  --orb1-color: rgba(0,188,212,0.08);
+  --orb2-color: rgba(64,196,255,0.06);
+  --orb3-color: rgba(124,77,255,0.05);
+  --particle-color: rgba(0,188,212,0.5);
 }
-/* FOREST GREEN */
 body.theme-forest{
   --bg:#050f07;--surface:#0a1a0d;--card:#0f2313;--border:#1a3a1f;--border2:#254d2b;
   --text:#d4f0d8;--muted:#6aaa78;--muted2:#3a6a42;
@@ -91,8 +102,11 @@ body.theme-forest{
   --purple:#ce93d8;--purple-dim:rgba(206,147,216,0.12);
   --orange:#ffab40;--orange-dim:rgba(255,171,64,0.12);
   --pink:#f48fb1;--pink-dim:rgba(244,143,177,0.12);
+  --orb1-color: rgba(105,240,174,0.07);
+  --orb2-color: rgba(100,181,246,0.05);
+  --orb3-color: rgba(255,204,2,0.04);
+  --particle-color: rgba(105,240,174,0.45);
 }
-/* PURPLE VIOLET */
 body.theme-purple{
   --bg:#0a0510;--surface:#120a1e;--card:#1a1028;--border:#2a1840;--border2:#3d2460;
   --text:#ede0ff;--muted:#9a7cc0;--muted2:#5a4880;
@@ -104,8 +118,11 @@ body.theme-purple{
   --purple:#ce93d8;--purple-dim:rgba(206,147,216,0.12);
   --orange:#ffab40;--orange-dim:rgba(255,171,64,0.12);
   --pink:#f8bbd0;--pink-dim:rgba(248,187,208,0.12);
+  --orb1-color: rgba(224,64,251,0.08);
+  --orb2-color: rgba(128,216,255,0.05);
+  --orb3-color: rgba(255,171,64,0.04);
+  --particle-color: rgba(224,64,251,0.45);
 }
-/* SUNSET ORANGE */
 body.theme-sunset{
   --bg:#120800;--surface:#1e0f00;--card:#2a1500;--border:#3d2200;--border2:#5a3300;
   --text:#fff3e0;--muted:#c09060;--muted2:#7a5030;
@@ -117,8 +134,11 @@ body.theme-sunset{
   --purple:#ce93d8;--purple-dim:rgba(206,147,216,0.12);
   --orange:#ffcc02;--orange-dim:rgba(255,204,2,0.12);
   --pink:#f48fb1;--pink-dim:rgba(244,143,177,0.12);
+  --orb1-color: rgba(255,152,0,0.08);
+  --orb2-color: rgba(255,82,82,0.06);
+  --orb3-color: rgba(255,224,130,0.04);
+  --particle-color: rgba(255,152,0,0.45);
 }
-/* ROSE PINK */
 body.theme-rose{
   --bg:#120510;--surface:#1e0a1a;--card:#2a1024;--border:#401830;--border2:#5a2244;
   --text:#fce4ec;--muted:#c07090;--muted2:#7a4060;
@@ -130,8 +150,11 @@ body.theme-rose{
   --purple:#ce93d8;--purple-dim:rgba(206,147,216,0.12);
   --orange:#ffab40;--orange-dim:rgba(255,171,64,0.12);
   --pink:#f8bbd0;--pink-dim:rgba(248,187,208,0.12);
+  --orb1-color: rgba(240,98,146,0.08);
+  --orb2-color: rgba(248,187,208,0.06);
+  --orb3-color: rgba(206,147,216,0.04);
+  --particle-color: rgba(240,98,146,0.45);
 }
-/* HIGH CONTRAST */
 body.theme-contrast{
   --bg:#000000;--surface:#111111;--card:#1a1a1a;--border:#444444;--border2:#666666;
   --text:#ffffff;--muted:#cccccc;--muted2:#888888;
@@ -143,8 +166,11 @@ body.theme-contrast{
   --purple:#cc44ff;--purple-dim:rgba(204,68,255,0.15);
   --orange:#ff8800;--orange-dim:rgba(255,136,0,0.15);
   --pink:#ff44aa;--pink-dim:rgba(255,68,170,0.15);
+  --orb1-color: rgba(255,255,0,0.06);
+  --orb2-color: rgba(0,170,255,0.05);
+  --orb3-color: rgba(204,68,255,0.04);
+  --particle-color: rgba(255,255,0,0.4);
 }
-/* SOLARIZED */
 body.theme-solarized{
   --bg:#002b36;--surface:#073642;--card:#0a3d4a;--border:#124e5a;--border2:#1a6070;
   --text:#fdf6e3;--muted:#93a1a1;--muted2:#586e75;
@@ -156,25 +182,40 @@ body.theme-solarized{
   --purple:#6c71c4;--purple-dim:rgba(108,113,196,0.15);
   --orange:#cb4b16;--orange-dim:rgba(203,75,22,0.15);
   --pink:#d33682;--pink-dim:rgba(211,54,130,0.15);
+  --orb1-color: rgba(42,161,152,0.08);
+  --orb2-color: rgba(38,139,210,0.06);
+  --orb3-color: rgba(108,113,196,0.05);
+  --particle-color: rgba(42,161,152,0.4);
 }
 
-/* ── BACKGROUND PATTERNS ──────────────────────────────────── */
+/* ══════════════════════════════════════════════════
+   ANIMATED BACKGROUND CANVAS
+══════════════════════════════════════════════════ */
+#bg-canvas{
+  position:fixed;inset:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;
+  opacity:1;
+  transition:opacity 0.8s ease;
+}
+body.bg-off #bg-canvas{ opacity:0; }
+
+/* ── EXISTING PATTERN OVERLAYS ────────────────────── */
 body.bg-dots #app .main::before,
 body.bg-dots #login-page::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
   background-image:radial-gradient(circle,var(--muted2) 1px,transparent 1px);
   background-size:24px 24px;opacity:.35;
 }
 body.bg-grid #app .main::before,
 body.bg-grid #login-page::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
   background-image:linear-gradient(var(--border) 1px,transparent 1px),
                    linear-gradient(90deg,var(--border) 1px,transparent 1px);
   background-size:40px 40px;opacity:.5;
 }
 body.bg-circuit #app .main::before,
 body.bg-circuit #login-page::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
   background-image:
     linear-gradient(var(--border) 1px,transparent 1px),
     linear-gradient(90deg,var(--border) 1px,transparent 1px),
@@ -184,21 +225,80 @@ body.bg-circuit #login-page::before{
 }
 body.bg-gradient #app .main,
 body.bg-gradient #login-page{
-  background:radial-gradient(ellipse 80% 60% at 10% 10%,rgba(var(--accent-rgb,212,255,0),0.07) 0,transparent 55%),
+  background:radial-gradient(ellipse 80% 60% at 10% 10%,rgba(212,255,0,0.07) 0,transparent 55%),
              radial-gradient(ellipse 60% 80% at 90% 90%,rgba(77,159,255,0.06) 0,transparent 55%),
              var(--bg) !important;
 }
 body.bg-mesh #app .main::before,
 body.bg-mesh #login-page::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:1;
   background:
     radial-gradient(ellipse 40% 40% at 20% 20%,rgba(212,255,0,.05) 0,transparent 70%),
     radial-gradient(ellipse 40% 40% at 80% 40%,rgba(77,159,255,.05) 0,transparent 70%),
     radial-gradient(ellipse 40% 40% at 50% 80%,rgba(170,102,255,.05) 0,transparent 70%);
 }
 
+/* ── SMOOTH TRANSITION ON THEME/BG CHANGE ───────── */
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  /* Smooth transitions for all CSS vars */
+  transition:background 0.6s cubic-bezier(0.4,0,0.2,1),
+             color 0.4s ease;
+}
+
+/* Smooth sidebar, cards, surfaces */
+.sidebar,.card,.sc,.mb,.chat-main,.chat-sidebar,
+.topbar,.notif-panel,.lc,.slot-card,.batch-card,
+.leave-card,.staff-card,.lb-row,.criteria-card,
+.detail-section,.toast,.ac-dropdown,.dots-dropdown{
+  transition:background 0.5s cubic-bezier(0.4,0,0.2,1),
+             border-color 0.5s ease,
+             color 0.4s ease,
+             box-shadow 0.4s ease !important;
+}
+
+/* Sidebar & surface elements */
+.sidebar,.topbar,.chat-sidebar,.chat-header,
+.chat-input-area,.sb-head,.sb-user,.sb-foot{
+  transition:background 0.5s cubic-bezier(0.4,0,0.2,1),
+             border-color 0.5s ease !important;
+}
+
+/* Accent colored elements */
+.ni.active,.btn-p,.btn-gr,
+.sc::before, .pb-fill,.badge{
+  transition:background 0.4s ease,
+             color 0.4s ease,
+             border-color 0.4s ease !important;
+}
+
+/* Page content fade on nav */
+#page{
+  animation:pageFadeIn 0.3s ease;
+}
+@keyframes pageFadeIn{
+  from{opacity:0;transform:translateY(6px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* Theme switcher transition ripple */
+body.theme-transitioning::after{
+  content:'';position:fixed;inset:0;
+  background:var(--bg);
+  z-index:9998;
+  animation:themeRipple 0.5s ease forwards;
+  pointer-events:none;
+}
+@keyframes themeRipple{
+  from{opacity:0.6}
+  to{opacity:0}
+}
+
 #loader{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s}
 #loader.out{opacity:0;pointer-events:none}
 .ld-logo{width:80px;height:80px;object-fit:contain;margin-bottom:20px;animation:ldpulse 1.4s ease-in-out infinite}
@@ -207,9 +307,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .ld-fill{height:100%;background:var(--accent);animation:ldfill 1.6s ease forwards}
 @keyframes ldpulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes ldfill{from{width:0}to{width:100%}}
-#login-page{display:none;min-height:100vh;align-items:center;justify-content:center;padding:20px;
-  background:radial-gradient(ellipse 70% 50% at 80% 10%,rgba(212,255,0,.06) 0,transparent 60%),
-             radial-gradient(ellipse 50% 70% at 5% 90%,rgba(77,159,255,.05) 0,transparent 60%),var(--bg)}
+#login-page{display:none;min-height:100vh;align-items:center;justify-content:center;padding:20px;position:relative;z-index:1;background:transparent}
 .lc{background:var(--surface);border:1px solid var(--border2);border-radius:16px;padding:44px 40px;width:100%;max-width:420px;box-shadow:0 32px 80px rgba(0,0,0,.3);position:relative;z-index:1}
 .lc-logo{display:flex;align-items:center;gap:12px;margin-bottom:28px}
 .lc-logo img{width:48px;height:48px;object-fit:contain;border-radius:10px}
@@ -219,7 +317,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .lc p{color:var(--muted);font-size:13px;margin-bottom:28px}
 .fg{margin-bottom:14px}
 .fg label{display:block;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.fi,.fs,.fta{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.fi,.fs,.fta{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s,background 0.5s ease,color 0.4s ease}
 .fi:focus,.fs:focus,.fta:focus{border-color:var(--accent)}
 .fs option{background:var(--surface)}
 .fta{resize:vertical;min-height:76px}
@@ -243,9 +341,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .btn-pu{background:var(--purple);color:#fff}
 .btn-bl{background:var(--blue);color:#fff}
 .btn-pk{background:var(--pink);color:#fff}
-#app{display:none;min-height:100vh}
+#app{display:none;min-height:100vh;position:relative;z-index:1}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:var(--sw);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .28s;overflow:hidden}
+.sidebar{width:var(--sw);height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;overflow:hidden}
 .sb-head{padding:18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
 .sb-logo{width:36px;height:36px;object-fit:contain;border-radius:8px;flex-shrink:0}
 .sb-brand{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.8px;line-height:1.2}
@@ -264,16 +362,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .sb-nav::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 .nav-sec{padding:0 16px;margin-top:4px}
 .nav-sec-lbl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);padding:8px 0 4px}
-.ni{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-left:2px solid transparent;transition:all .15s}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-left:2px solid transparent;transition:all .2s ease}
 .ni:hover{background:rgba(128,128,128,.08);color:var(--text)}
 .ni.active{background:var(--accent-dim);color:var(--accent);border-left-color:var(--accent)}
 .ni-ico{font-size:15px;width:18px;text-align:center;flex-shrink:0}
 .sb-foot{padding:14px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
-.main{margin-left:var(--sw);flex:1;min-height:100vh;background:var(--bg);position:relative}
-.topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;position:sticky;top:0;z-index:50;gap:14px}
+.main{margin-left:var(--sw);flex:1;min-height:100vh;background:transparent;position:relative}
+.topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;position:sticky;top:0;z-index:50;gap:14px;
+  /* glassmorphism on topbar */
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  background:rgba(var(--surface-rgb,20,20,20),0.85)!important;
+}
 .tb-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;flex:1}
 .tb-date{font-size:12px;color:var(--muted)}
-.notif-btn,.theme-btn,.settings-btn{background:transparent;border:1px solid var(--border2);border-radius:7px;padding:7px 9px;cursor:pointer;color:var(--text);font-size:14px;transition:border-color .2s;position:relative}
+.notif-btn,.theme-btn,.settings-btn{background:transparent;border:1px solid var(--border2);border-radius:7px;padding:7px 9px;cursor:pointer;color:var(--text);font-size:14px;transition:border-color .2s,background 0.5s;position:relative}
 .notif-btn:hover,.theme-btn:hover,.settings-btn:hover{border-color:var(--accent);color:var(--accent)}
 .ndot{position:absolute;top:5px;right:5px;width:6px;height:6px;background:var(--red);border-radius:50%}
 .mob-menu{display:none;background:transparent;border:1px solid var(--border2);color:var(--text);padding:7px 10px;border-radius:7px;cursor:pointer;font-size:17px}
@@ -316,7 +419,7 @@ tbody tr:last-child td{border-bottom:none}
 .empty-title{font-size:15px;font-weight:600;margin-bottom:6px;color:var(--muted)}
 .empty-sub{font-size:13px;color:var(--muted2);margin-bottom:20px}
 .tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:18px;flex-wrap:wrap}
-.tab{padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;color:var(--muted)}
+.tab{padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s ease;color:var(--muted)}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .tab:hover{color:var(--text)}
 #toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:7px}
@@ -346,7 +449,7 @@ tbody tr:last-child td{border-bottom:none}
 .chat-input{flex:1;padding:10px 14px;background:var(--bg);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;min-height:40px;max-height:120px;line-height:1.4}
 .chat-input:focus{border-color:var(--accent)}
 .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:16px}
-.slot-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .2s,background .2s}
+.slot-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .2s,background .5s ease}
 .slot-card:hover{border-color:var(--border2)}
 .slot-time{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--accent)}
 .slot-trainer{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:5px}
@@ -476,7 +579,9 @@ tbody tr:last-child td{border-bottom:none}
 .old-batch-group{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px}
 .old-batch-group-name{font-weight:700;font-size:13px;margin-bottom:8px;color:var(--orange);display:flex;align-items:center;gap:7px}
 
-/* ── SETTINGS MODAL ─────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════
+   SETTINGS MODAL — WITH BG ANIMATION OPTION
+══════════════════════════════════════════════════ */
 .settings-modal{max-width:640px}
 .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:18px}
 .theme-swatch{border:2px solid var(--border2);border-radius:10px;padding:10px 8px;cursor:pointer;transition:border-color .2s,transform .15s;text-align:center}
@@ -492,7 +597,18 @@ tbody tr:last-child td{border-bottom:none}
 .bg-option-preview{height:40px;border-radius:6px;margin-bottom:6px;overflow:hidden;background:var(--bg);position:relative}
 .bg-option-name{font-size:11px;font-weight:600}
 
-/* ── DATE FILTER BAR ──────────────────────────────────────── */
+/* Animated BG intensity slider */
+.anim-slider-wrap{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;margin-bottom:14px}
+.anim-slider-wrap label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.anim-slider{flex:1;accent-color:var(--accent);cursor:pointer}
+.anim-mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.anim-mode-btn{border:2px solid var(--border2);border-radius:8px;padding:10px 6px;cursor:pointer;text-align:center;transition:border-color .2s,background .2s;background:transparent}
+.anim-mode-btn:hover{border-color:var(--muted)}
+.anim-mode-btn.active{border-color:var(--accent);background:var(--accent-dim)}
+.anim-mode-btn-icon{font-size:20px;display:block;margin-bottom:4px}
+.anim-mode-btn-name{font-size:10px;font-weight:700;color:var(--muted)}
+
+/* DATE FILTER BAR */
 .date-filter-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px}
 .date-filter-bar label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
 .date-filter-bar .fi{margin:0;max-width:160px;padding:8px 12px;font-size:12px}
@@ -512,10 +628,15 @@ tbody tr:last-child td{border-bottom:none}
   .slot-grid{grid-template-columns:1fr}
   .theme-grid{grid-template-columns:repeat(3,1fr)}
   .date-filter-bar{flex-direction:column;align-items:flex-start}
+  .anim-mode-grid{grid-template-columns:repeat(3,1fr)}
 }
 </style>
 </head>
 <body>
+
+<!-- ANIMATED BACKGROUND CANVAS -->
+<canvas id="bg-canvas"></canvas>
+
 <div id="loader">
   <img src="logo.png" class="ld-logo" alt="" onerror="this.style.display='none'">
   <div class="ld-name">GYM AT YOUR HOME</div>
@@ -586,28 +707,197 @@ tbody tr:last-child td{border-bottom:none}
     <div id="settings-content"></div>
   </div>
 </div>
+
 <script>
 'use strict';
-const PLANS=['Silver','Gold','Platinum','Platinum Plus','Couple','Corporate Fitness'];
-const SESSION_TYPES=['Batch Session','One on One','Corporate Fitness','Couple Training','Strength Training','Cardio','HIIT','Yoga','CrossFit','Pilates','Zumba','Rehabilitation','General Fitness'];
-const COUNTRIES=['Afghanistan','Albania','Algeria','Argentina','Australia','Austria','Bahrain','Bangladesh','Belgium','Brazil','Canada','Chile','China','Colombia','Croatia','Czech Republic','Denmark','Egypt','Ethiopia','Finland','France','Germany','Ghana','Greece','Hungary','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Japan','Jordan','Kenya','Kuwait','Lebanon','Malaysia','Mexico','Morocco','Netherlands','New Zealand','Nigeria','Norway','Oman','Pakistan','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Saudi Arabia','Singapore','South Africa','South Korea','Spain','Sri Lanka','Sweden','Switzerland','Thailand','Turkey','UAE','Uganda','Ukraine','United Kingdom','United States','Vietnam','Zimbabwe'];
-const RATING_CRITERIA=[
-  {id:'punctuality',label:'Punctuality',icon:'⏰',desc:'On time for sessions'},
-  {id:'technique',label:'Technique',icon:'💪',desc:'Correct form & guidance'},
-  {id:'communication',label:'Communication',icon:'🗣',desc:'Clear & motivating'},
-  {id:'clientProgress',label:'Client Progress',icon:'📈',desc:'Results & improvement'},
-  {id:'professionalism',label:'Professionalism',icon:'🎯',desc:'Conduct & attitude'},
-];
-const LEAVE_REASONS=['Personal Emergency','Medical Leave','Family Emergency','Planned Vacation','Other'];
-let CU=null,CR=null,CH={};
-let _chatUnsub=null,_notifUnsub=null,_notifCheckTimer=null,_midnightTimer=null;
-let _notifications=[];
-const TC_RESET_KEY='gyh_tc_last_reset';
-const REMINDED_KEY='gyh_reminded_sessions';
 
-// ══════════════════════════════════════════════════════════════
-// THEME & APPEARANCE SYSTEM
-// ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════════════
+   ANIMATED BACKGROUND ENGINE
+══════════════════════════════════════════════════════════════ */
+const BGCanvas=(()=>{
+  const canvas=document.getElementById('bg-canvas');
+  const ctx=canvas.getContext('2d');
+  let W=0,H=0,raf=null,t=0;
+  let mode='orbs'; // orbs | particles | waves | none
+  let intensity=0.7;
+  let particles=[];
+  let orbs=[];
+
+  function resize(){
+    W=canvas.width=window.innerWidth;
+    H=canvas.height=window.innerHeight;
+    if(mode==='particles')initParticles();
+    if(mode==='orbs')initOrbs();
+  }
+
+  // ── ORB HELPERS ───────────────────────────────────────────
+  function getOrbColors(){
+    const s=getComputedStyle(document.documentElement);
+    return[
+      s.getPropertyValue('--orb1-color').trim()||'rgba(212,255,0,0.06)',
+      s.getPropertyValue('--orb2-color').trim()||'rgba(77,159,255,0.05)',
+      s.getPropertyValue('--orb3-color').trim()||'rgba(170,102,255,0.04)',
+    ];
+  }
+  function initOrbs(){
+    const cols=getOrbColors();
+    orbs=[
+      {x:W*0.15,y:H*0.2,r:Math.min(W,H)*0.38,vx:0.18,vy:0.12,col:cols[0]},
+      {x:W*0.80,y:H*0.7,r:Math.min(W,H)*0.30,vx:-0.14,vy:-0.10,col:cols[1]},
+      {x:W*0.50,y:H*0.85,r:Math.min(W,H)*0.22,vx:0.10,vy:-0.16,col:cols[2]},
+    ];
+  }
+  function drawOrbs(){
+    ctx.clearRect(0,0,W,H);
+    for(const o of orbs){
+      const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r*intensity);
+      g.addColorStop(0,o.col);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;
+      ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);ctx.fill();
+      // Slow drift
+      o.x+=Math.sin(t*0.0005+o.vx)*0.4;
+      o.y+=Math.cos(t*0.0004+o.vy)*0.35;
+      // Bounce softly
+      if(o.x<-o.r*.5)o.vx=Math.abs(o.vx);
+      if(o.x>W+o.r*.5)o.vx=-Math.abs(o.vx);
+      if(o.y<-o.r*.5)o.vy=Math.abs(o.vy);
+      if(o.y>H+o.r*.5)o.vy=-Math.abs(o.vy);
+    }
+  }
+
+  // ── PARTICLE HELPERS ──────────────────────────────────────
+  function getParticleColor(){
+    const s=getComputedStyle(document.documentElement);
+    return s.getPropertyValue('--particle-color').trim()||'rgba(212,255,0,0.35)';
+  }
+  function initParticles(){
+    const count=Math.floor(60*intensity);
+    particles=Array.from({length:count},()=>({
+      x:Math.random()*W,y:Math.random()*H,
+      r:Math.random()*1.8+0.5,
+      vx:(Math.random()-0.5)*0.3,
+      vy:(Math.random()-0.5)*0.3,
+      opacity:Math.random()*0.6+0.2,
+      pulse:Math.random()*Math.PI*2
+    }));
+  }
+  function drawParticles(){
+    ctx.clearRect(0,0,W,H);
+    const col=getParticleColor();
+    for(const p of particles){
+      p.x+=p.vx;p.y+=p.vy;p.pulse+=0.012;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+      const a=p.opacity*(0.7+0.3*Math.sin(p.pulse));
+      ctx.globalAlpha=a*intensity;
+      ctx.fillStyle=col;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();
+    }
+    // Draw connections
+    ctx.globalAlpha=1;
+    const base=col.replace(/[\d.]+\)$/,'');
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<90){
+          const a=(1-dist/90)*0.12*intensity;
+          ctx.strokeStyle=col.replace(/[\d.]+\)$/,`${a})`);
+          ctx.lineWidth=0.7;
+          ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha=1;
+  }
+
+  // ── WAVE HELPERS ──────────────────────────────────────────
+  function drawWaves(){
+    ctx.clearRect(0,0,W,H);
+    const cols=getOrbColors();
+    const waveDefs=[
+      {amp:55,freq:0.0025,speed:0.0008,yBase:H*0.35,col:cols[0]},
+      {amp:40,freq:0.003,speed:0.0012,yBase:H*0.55,col:cols[1]},
+      {amp:30,freq:0.0035,speed:0.0006,yBase:H*0.75,col:cols[2]},
+    ];
+    for(const w of waveDefs){
+      ctx.beginPath();
+      ctx.moveTo(0,H);
+      for(let x=0;x<=W;x+=4){
+        const y=w.yBase+Math.sin(x*w.freq+t*w.speed)*w.amp*intensity;
+        ctx.lineTo(x,y);
+      }
+      ctx.lineTo(W,H);ctx.closePath();
+      ctx.fillStyle=w.col;
+      ctx.globalAlpha=intensity*0.8;
+      ctx.fill();
+      ctx.globalAlpha=1;
+    }
+  }
+
+  // ── AURORA HELPERS ────────────────────────────────────────
+  function drawAurora(){
+    ctx.clearRect(0,0,W,H);
+    const cols=getOrbColors();
+    for(let i=0;i<3;i++){
+      const yMid=H*(0.2+i*0.25)+Math.sin(t*0.0004+i)*H*0.08;
+      const g=ctx.createLinearGradient(0,yMid-120,0,yMid+120);
+      g.addColorStop(0,'transparent');
+      g.addColorStop(0.5,cols[i].replace(/[\d.]+\)$/,`${0.09*intensity})`));
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;
+      ctx.beginPath();
+      ctx.moveTo(0,yMid-120);
+      for(let x=0;x<=W;x+=6){
+        const yOff=Math.sin(x*0.004+t*0.0005+i*1.5)*60*intensity;
+        ctx.lineTo(x,yMid+yOff);
+      }
+      ctx.lineTo(W,yMid+120);ctx.lineTo(0,yMid+120);ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  function loop(ts){
+    t=ts;
+    if(mode==='orbs')drawOrbs();
+    else if(mode==='particles')drawParticles();
+    else if(mode==='waves')drawWaves();
+    else if(mode==='aurora')drawAurora();
+    else ctx.clearRect(0,0,W,H);
+    raf=requestAnimationFrame(loop);
+  }
+
+  function setMode(m){
+    mode=m;
+    if(m==='particles')initParticles();
+    if(m==='orbs')initOrbs();
+    if(m==='none'){canvas.style.opacity='0';}
+    else{canvas.style.opacity='1';}
+    localStorage.setItem('gyh_anim_mode',m);
+  }
+  function setIntensity(v){
+    intensity=v;
+    localStorage.setItem('gyh_anim_intensity',v);
+  }
+  function init(){
+    const savedMode=localStorage.getItem('gyh_anim_mode')||'orbs';
+    const savedInt=parseFloat(localStorage.getItem('gyh_anim_intensity')||'0.7');
+    mode=savedMode;intensity=savedInt;
+    resize();
+    window.addEventListener('resize',resize);
+    raf=requestAnimationFrame(loop);
+  }
+  function refreshColors(){
+    // Re-init orbs/particles to pick up new theme colors smoothly
+    if(mode==='orbs')initOrbs();
+  }
+  return{init,setMode,setIntensity,refreshColors,get mode(){return mode;},get intensity(){return intensity;}};
+})();
+
+/* ══════════════════════════════════════════════════════════════
+   THEME & APPEARANCE SYSTEM (ENHANCED)
+══════════════════════════════════════════════════════════════ */
 const THEMES=[
   {id:'dark',name:'Dark',bg:'#0b0b0b',surface:'#1c1c1c',accent:'#d4ff00',dots:['#0b0b0b','#1c1c1c','#d4ff00']},
   {id:'light',name:'Light',bg:'#f4f4f0',surface:'#ffffff',accent:'#5a9e00',dots:['#f4f4f0','#e0e0e0','#5a9e00']},
@@ -627,25 +917,47 @@ const BG_OPTIONS=[
   {id:'gradient',name:'Gradient',previewClass:'bg-gradient'},
   {id:'mesh',name:'Mesh',previewClass:'bg-mesh'},
 ];
+const ANIM_MODES=[
+  {id:'orbs',name:'Orbs',icon:'🔮'},
+  {id:'particles',name:'Particles',icon:'✨'},
+  {id:'waves',name:'Waves',icon:'🌊'},
+  {id:'aurora',name:'Aurora',icon:'🌌'},
+  {id:'none',name:'Off',icon:'⚫'},
+];
+
 function initTheme(){
   const t=localStorage.getItem('gyh_theme')||'dark';
   const bg=localStorage.getItem('gyh_bg')||'none';
   applyTheme(t,false);
   applyBg(bg,false);
+  BGCanvas.init();
 }
+
 function applyTheme(id,save=true){
+  // Add ripple transition class
+  document.body.classList.add('theme-transitioning');
+  setTimeout(()=>document.body.classList.remove('theme-transitioning'),500);
+
   THEMES.forEach(t=>document.body.classList.remove('theme-'+t.id));
   if(id!=='dark') document.body.classList.add('theme-'+id);
   if(save) localStorage.setItem('gyh_theme',id);
+
+  // Refresh animated BG colors after CSS vars settle
+  setTimeout(()=>BGCanvas.refreshColors(),50);
 }
+
 function applyBg(id,save=true){
   BG_OPTIONS.forEach(b=>document.body.classList.remove('bg-'+b.id));
   if(id&&id!=='none') document.body.classList.add('bg-'+id);
   if(save) localStorage.setItem('gyh_bg',id);
 }
+
 function openSettingsModal(){
   const currentTheme=localStorage.getItem('gyh_theme')||'dark';
   const currentBg=localStorage.getItem('gyh_bg')||'none';
+  const currentAnim=BGCanvas.mode;
+  const currentInt=BGCanvas.intensity;
+
   document.getElementById('settings-content').innerHTML=`
     <div style="margin-bottom:6px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Color Theme</div>
     <div class="theme-grid" id="theme-picker">
@@ -659,6 +971,23 @@ function openSettingsModal(){
           <div class="theme-swatch-name" style="color:var(--text)">${t.name}</div>
         </div>`).join('')}
     </div>
+
+    <div style="margin-bottom:6px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">✨ Animated Background</div>
+    <div class="anim-mode-grid" id="anim-mode-picker">
+      ${ANIM_MODES.map(m=>`
+        <div class="anim-mode-btn ${currentAnim===m.id?'active':''}" onclick="selectAnimMode('${m.id}')" id="amode-${m.id}">
+          <span class="anim-mode-btn-icon">${m.icon}</span>
+          <div class="anim-mode-btn-name" style="color:var(--text)">${m.name}</div>
+        </div>`).join('')}
+    </div>
+    <div class="anim-slider-wrap">
+      <label>Intensity</label>
+      <input type="range" class="anim-slider" id="anim-intensity-slider"
+             min="0.1" max="1.0" step="0.05" value="${currentInt}"
+             oninput="selectAnimIntensity(this.value)">
+      <span id="anim-intensity-val" style="font-size:12px;font-weight:700;color:var(--accent);min-width:36px;text-align:right">${Math.round(currentInt*100)}%</span>
+    </div>
+
     <div style="margin-bottom:6px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)">Background Pattern</div>
     <div class="bg-grid-picker" id="bg-picker">
       ${BG_OPTIONS.map(b=>`
@@ -668,11 +997,24 @@ function openSettingsModal(){
         </div>`).join('')}
     </div>
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--muted)">
-      💡 Theme and background are saved to your browser and persist across sessions.
+      💡 All settings are saved to your browser. Animated backgrounds are GPU-accelerated.
     </div>
     <div class="mo-foot"><button class="btn btn-g" onclick="closeSettings()">Close</button></div>`;
   document.getElementById('m-settings').classList.add('open');
 }
+
+function selectAnimMode(id){
+  BGCanvas.setMode(id);
+  document.querySelectorAll('.anim-mode-btn').forEach(el=>el.classList.remove('active'));
+  const btn=document.getElementById('amode-'+id);if(btn)btn.classList.add('active');
+  toast(`Animation: ${ANIM_MODES.find(m=>m.id===id)?.name||id}`,'info');
+}
+function selectAnimIntensity(v){
+  BGCanvas.setIntensity(parseFloat(v));
+  const lbl=document.getElementById('anim-intensity-val');
+  if(lbl)lbl.textContent=Math.round(v*100)+'%';
+}
+
 function bgPreviewSvg(id){
   const svgs={
     none:`<div style="width:100%;height:100%;background:var(--bg);border-radius:4px"></div>`,
@@ -697,61 +1039,91 @@ function selectBg(id){
   toast(`Background: ${BG_OPTIONS.find(b=>b.id===id)?.name||id}`,'info');
 }
 function closeSettings(){document.getElementById('m-settings').classList.remove('open');}
-
-// ══════════════════════════════════════════════════════════════
-// DATE FILTER HELPERS
-// ══════════════════════════════════════════════════════════════
-function getTodayStr(){return new Date().toISOString().split('T')[0];}
-function getDateRange(preset){
-  const now=new Date(),today=getTodayStr();
-  if(preset==='today')return{from:today,to:today};
-  if(preset==='yesterday'){const d=new Date(now);d.setDate(d.getDate()-1);const s=d.toISOString().split('T')[0];return{from:s,to:s};}
-  if(preset==='week'){const d=new Date(now);d.setDate(d.getDate()-6);return{from:d.toISOString().split('T')[0],to:today};}
-  if(preset==='month'){const d=new Date(now);d.setDate(1);return{from:d.toISOString().split('T')[0],to:today};}
-  if(preset==='lastmonth'){const s=new Date(now.getFullYear(),now.getMonth()-1,1);const e=new Date(now.getFullYear(),now.getMonth(),0);return{from:s.toISOString().split('T')[0],to:e.toISOString().split('T')[0]};}
-  if(preset==='year'){return{from:`${now.getFullYear()}-01-01`,to:today};}
-  return{from:today,to:today};
-}
-function renderDateFilterBar(fromId,toId,onFilter,extraClass=''){
-  const today=getTodayStr();
-  return`<div class="date-filter-bar ${extraClass}">
-    <label>📅 Date Range:</label>
-    <input class="fi" type="date" id="${fromId}" value="${today}" style="max-width:150px;padding:7px 10px;font-size:12px">
-    <span style="color:var(--muted);font-size:12px">to</span>
-    <input class="fi" type="date" id="${toId}" value="${today}" style="max-width:150px;padding:7px 10px;font-size:12px">
-    <button class="btn btn-p btn-sm" onclick="${onFilter}">Filter</button>
-    <div class="date-range-quick">
-      ${[['today','Today'],['yesterday','Yesterday'],['week','7 Days'],['month','This Month'],['lastmonth','Last Month'],['year','This Year']].map(([p,l])=>`<button class="dq-btn" onclick="applyQuickRange('${p}','${fromId}','${toId}',${onFilter})">${l}</button>`).join('')}
+</style>
+</head>
+<body>
+<div id="loader">
+  <img src="logo.png" class="ld-logo" alt="" onerror="this.style.display='none'">
+  <div class="ld-name">GYM AT YOUR HOME</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+</div>
+<div id="toasts"></div>
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-header">
+    <div style="font-weight:700;font-size:14px">🔔 Notifications</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-g btn-sm" onclick="markAllNotifsRead()">Mark all read</button>
+      <button class="btn btn-g btn-sm" onclick="closeNotifPanel()">✕</button>
     </div>
-    <button class="btn btn-g btn-sm" onclick="clearDateFilter('${fromId}','${toId}',${onFilter})">✕ Clear</button>
-  </div>`;
-}
-function applyQuickRange(preset,fromId,toId,cb){
-  const {from,to}=getDateRange(preset);
-  const fromEl=document.getElementById(fromId),toEl=document.getElementById(toId);
-  if(fromEl)fromEl.value=from;if(toEl)toEl.value=to;
-  document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
-  event.target.classList.add('active');
-  if(typeof cb==='function')cb();
-}
-function clearDateFilter(fromId,toId,cb){
-  const fromEl=document.getElementById(fromId),toEl=document.getElementById(toId);
-  if(fromEl)fromEl.value='';if(toEl)toEl.value='';
-  document.querySelectorAll('.dq-btn').forEach(b=>b.classList.remove('active'));
-  if(typeof cb==='function')cb();
-}
-function filterByDateRange(data,dateField,fromVal,toVal){
-  return data.filter(item=>{
-    const d=item[dateField];if(!d)return!fromVal&&!toVal;
-    if(fromVal&&d<fromVal)return false;
-    if(toVal&&d>toVal)return false;
-    return true;
-  });
-}
-
-// ══════════════════════════════════════════════════════════════
-// CORE UTILITIES (unchanged from original)
-// ══════════════════════════════════════════════════════════════
+  </div>
+  <div class="notif-list" id="notif-list"></div>
+</div>
+<div id="login-page" style="display:flex">
+  <div class="lc">
+    <div class="lc-logo">
+      <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+      <div class="lc-brand">GYM AT YOUR HOME<small>Management Platform</small></div>
+    </div>
+    <h2>WELCOME BACK</h2>
+    <p>Sign in to access your dashboard</p>
+    <div id="la" class="alert alert-err"></div>
+    <div id="ls" class="alert alert-ok"></div>
+    <div class="fg"><label>Email Address</label><input class="fi" type="email" id="l-email" placeholder="you@example.com" autocomplete="email"></div>
+    <div class="fg"><label>Password</label><div class="pw-wrap"><input class="fi" type="password" id="l-pwd" placeholder="Your password" autocomplete="current-password"><button class="pw-toggle" type="button" onclick="togglePwd('l-pwd',this)">👁</button></div></div>
+    <div class="fg"><label>Your Role</label><select class="fs" id="l-role"><option value="">— Select your role —</option><option value="admin">Admin</option><option value="coordinatorhead">Client Coordinator Head</option><option value="coordinator">Client Coordinator</option><option value="trainer">Trainer</option><option value="client">Client</option></select></div>
+    <button class="btn btn-p btn-w" id="l-btn" onclick="doLogin()">SIGN IN</button>
+    <div style="text-align:center;margin-top:14px"><a style="color:var(--accent);font-size:13px;cursor:pointer" onclick="showForgot()">Forgot password? Reset via email →</a></div>
+  </div>
+</div>
+<div id="app">
+  <div id="mob-ov" onclick="closeSB()"></div>
+  <div class="layout">
+    <nav class="sidebar" id="sidebar">
+      <div class="sb-head">
+        <img src="logo.png" class="sb-logo" alt="" onerror="this.style.display='none'">
+        <div class="sb-brand">GYM AT YOUR HOME<small>Management Platform</small></div>
+      </div>
+      <div class="sb-user" id="sb-user"></div>
+      <div class="sb-nav" id="sb-nav"></div>
+      <div class="sb-foot">
+        <button class="btn btn-g btn-sm" style="flex:1" onclick="showChangePwd()">🔑 Password</button>
+        <button class="btn btn-d btn-sm" onclick="doLogout()">Exit</button>
+      </div>
+    </nav>
+    <div class="main">
+      <div class="topbar">
+        <button class="mob-menu" onclick="toggleSB()">☰</button>
+        <div class="tb-title" id="tb-title">DASHBOARD</div>
+        <div class="tb-date" id="tb-date"></div>
+        <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+        <button class="notif-btn" id="notif-btn" onclick="toggleNotifPanel()">🔔<span class="ndot" id="notif-dot" style="display:none"></span></button>
+      </div>
+      <div class="page" id="page"></div>
+    </div>
+  </div>
+</div>
+<div class="mo" id="m1"><div class="mb" id="m1b"><div class="mo-hd"><div class="mo-title" id="m1t"></div><button class="mo-x" onclick="closeM1()">✕</button></div><div id="m1c"></div></div></div>
+<div class="mo" id="m2"><div class="mb mb-lg" id="m2b"><div class="mo-hd"><div class="mo-title" id="m2t"></div><button class="mo-x" onclick="closeM2()">✕</button></div><div id="m2c"></div></div></div>
+<div class="mo" id="m3"><div class="mb mb-xl" id="m3b"><div class="mo-hd"><div class="mo-title" id="m3t"></div><button class="mo-x" onclick="closeM3()">✕</button></div><div id="m3c"></div></div></div>
+<script>
+'use strict';
+const PLANS=['Silver','Gold','Platinum','Platinum Plus','Couple','Corporate Fitness'];
+const SESSION_TYPES=['Batch Session','One on One','Corporate Fitness','Couple Training','Strength Training','Cardio','HIIT','Yoga','CrossFit','Pilates','Zumba','Rehabilitation','General Fitness'];
+const COUNTRIES=['Afghanistan','Albania','Algeria','Argentina','Australia','Austria','Bahrain','Bangladesh','Belgium','Brazil','Canada','Chile','China','Colombia','Croatia','Czech Republic','Denmark','Egypt','Ethiopia','Finland','France','Germany','Ghana','Greece','Hungary','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Japan','Jordan','Kenya','Kuwait','Lebanon','Malaysia','Mexico','Morocco','Netherlands','New Zealand','Nigeria','Norway','Oman','Pakistan','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Saudi Arabia','Singapore','South Africa','South Korea','Spain','Sri Lanka','Sweden','Switzerland','Thailand','Turkey','UAE','Uganda','Ukraine','United Kingdom','United States','Vietnam','Zimbabwe'];
+const RATING_CRITERIA=[
+  {id:'punctuality',label:'Punctuality',icon:'⏰',desc:'On time for sessions'},
+  {id:'technique',label:'Technique',icon:'💪',desc:'Correct form & guidance'},
+  {id:'communication',label:'Communication',icon:'🗣',desc:'Clear & motivating'},
+  {id:'clientProgress',label:'Client Progress',icon:'📈',desc:'Results & improvement'},
+  {id:'professionalism',label:'Professionalism',icon:'🎯',desc:'Conduct & attitude'},
+];
+const LEAVE_REASONS=['Personal Emergency','Medical Leave','Family Emergency','Planned Vacation','Other'];
+let CU=null,CR=null,CH={};
+let _chatUnsub=null,_notifUnsub=null,_notifCheckTimer=null,_midnightTimer=null;
+let _notifications=[];
+const TC_RESET_KEY='gyh_tc_last_reset';
+const REMINDED_KEY='gyh_reminded_sessions';
+function getTodayStr(){return new Date().toISOString().split('T')[0];}
 async function doTcDailyReset(){
   const today=getTodayStr(),last=localStorage.getItem(TC_RESET_KEY);
   if(last===today)return;
@@ -865,6 +1237,9 @@ function attachClientAC(inputId,hiddenId,clientList,onSelectCb){const inp=docume
 function attachUserAC(inputId,hiddenId,userList,onSelectCb){const inp=document.getElementById(inputId);if(!inp)return;const items=userList.map(u=>({id:u.id,label:u.name||u.email||'',sub:u.role||''}));createAutocomplete(inp,items,{minChars:0,onSelect(it){const hid=document.getElementById(hiddenId);if(hid)hid.value=it.id;if(onSelectCb)onSelectCb(it);}});}
 function acCountryField(id,preVal=''){return`<div style="position:relative"><input class="fi" id="${id}" placeholder="Type country…" value="${preVal}" autocomplete="off"></div>`;}
 function initCountryAC(id){const inp=document.getElementById(id);if(!inp)return;const items=COUNTRIES.map(c=>({id:c,label:c}));createAutocomplete(inp,items,{minChars:0});}
+function initTheme(){const saved=localStorage.getItem('gyh_theme')||'dark';applyTheme(saved);}
+function applyTheme(t){document.body.classList.toggle('light-theme',t==='light');const btn=document.getElementById('theme-btn');if(btn)btn.textContent=t==='light'?'🌙':'☀️';localStorage.setItem('gyh_theme',t);}
+function toggleTheme(){const isLight=document.body.classList.contains('light-theme');applyTheme(isLight?'dark':'light');}
 const $=id=>document.getElementById(id);
 function toast(msg,type='info'){const t=document.createElement('div');t.className=`toast toast-${type==='success'?'ok':type==='error'?'err':type==='warn'?'warn':'info'}`;t.innerHTML=`<span>${type==='success'?'✅':type==='error'?'❌':type==='warn'?'⚠️':'ℹ️'}</span><span>${msg}</span>`;$('toasts').appendChild(t);setTimeout(()=>t.remove(),4000);}
 function openM1(title,html){$('m1t').textContent=title;$('m1c').innerHTML=html;$('m1').classList.add('open')}
@@ -975,49 +1350,35 @@ function navTo(id){
 async function myleaves(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const myUid=auth().currentUser.uid;
-  let allData=await fsGetAll('leaves',fn().where('requestedById','==',myUid));
-  allData.sort((a,b)=>(b.fromDate||'').localeCompare(a.fromDate||''));
-  function renderMyLeaves(data){
-    $('page').innerHTML=`
-      <div class="card" style="background:var(--blue-dim);border-color:rgba(77,159,255,.3);margin-bottom:18px">
-        <div style="display:flex;align-items:center;gap:12px">
-          <span style="font-size:28px">🏖</span>
-          <div><div style="font-weight:700;color:var(--blue)">My Leave Requests</div><div style="font-size:12px;color:var(--muted)">Submit and track your leave applications.</div></div>
-          <button class="btn btn-p btn-sm" style="margin-left:auto" onclick="openRequestLeave()">+ Request Leave</button>
-        </div>
+  const data=await fsGetAll('leaves',fn().where('requestedById','==',myUid));
+  data.sort((a,b)=>(b.fromDate||'').localeCompare(a.fromDate||''));
+  $('page').innerHTML=`
+    <div class="card" style="background:var(--blue-dim);border-color:rgba(77,159,255,.3);margin-bottom:18px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:28px">🏖</span>
+        <div><div style="font-weight:700;color:var(--blue)">My Leave Requests</div><div style="font-size:12px;color:var(--muted)">Submit and track your leave applications.</div></div>
+        <button class="btn btn-p btn-sm" style="margin-left:auto" onclick="openRequestLeave()">+ Request Leave</button>
       </div>
-      ${renderDateFilterBar('lv-from-f','lv-to-f','filterMyLeaves()')}
-      <div class="stats-grid" style="margin-bottom:18px">
-        <div class="sc sc-y"><div class="sc-ico">⏳</div><div class="sc-lbl">Pending</div><div class="sc-val">${data.filter(l=>l.status==='pending').length}</div></div>
-        <div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Approved</div><div class="sc-val">${data.filter(l=>l.status==='approved').length}</div></div>
-        <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Rejected</div><div class="sc-val">${data.filter(l=>l.status==='rejected').length}</div></div>
-      </div>
-      <div class="card" style="padding:0"><div class="tbl-wrap" id="myleaves-tbl">
-        ${renderMyLeavesTable(data)}
-      </div></div>`;
-    window._myLeavesAll=allData;
-  }
-  renderMyLeaves(allData);
-  window.filterMyLeaves=function(){
-    const from=document.getElementById('lv-from-f')?.value||'';
-    const to=document.getElementById('lv-to-f')?.value||'';
-    const filtered=filterByDateRange(allData,'fromDate',from,to);
-    document.getElementById('myleaves-tbl').innerHTML=renderMyLeavesTable(filtered);
-  };
-}
-function renderMyLeavesTable(data){
-  if(!data.length)return emptyState('🏖','No leave requests','','','');
-  return`<table><thead><tr><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Notes</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>
-  ${data.map(l=>{const days=Math.ceil((new Date(l.toDate)-new Date(l.fromDate))/(1000*60*60*24))+1;const canCancel=l.status==='pending';return`<tr>
-    <td style="font-size:12px">${l.fromDate||'—'}</td><td style="font-size:12px">${l.toDate||'—'}</td>
-    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${days}</td>
-    <td><span class="badge b-b">${l.reason||'—'}</span></td>
-    <td style="font-size:12px;max-width:160px">${l.notes||'—'}</td>
-    <td>${statusBadge(l.status||'pending')}</td>
-    <td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td>
-    <td>${canCancel?`<button class="btn btn-d btn-sm" onclick="cancelLeave('${l.id}')">Cancel</button>`:'—'}</td>
-  </tr>`;}).join('')}
-  </tbody></table>`;
+    </div>
+    <div class="stats-grid" style="margin-bottom:18px">
+      <div class="sc sc-y"><div class="sc-ico">⏳</div><div class="sc-lbl">Pending</div><div class="sc-val">${data.filter(l=>l.status==='pending').length}</div></div>
+      <div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Approved</div><div class="sc-val">${data.filter(l=>l.status==='approved').length}</div></div>
+      <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Rejected</div><div class="sc-val">${data.filter(l=>l.status==='rejected').length}</div></div>
+    </div>
+    <div class="card" style="padding:0"><div class="tbl-wrap">
+      ${data.length===0?emptyState('🏖','No leave requests yet','Submit your first leave request.','+Request Leave','openRequestLeave()'):
+      `<table><thead><tr><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Notes</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>
+      ${data.map(l=>{const days=Math.ceil((new Date(l.toDate)-new Date(l.fromDate))/(1000*60*60*24))+1;const canCancel=l.status==='pending';return`<tr>
+        <td style="font-size:12px">${l.fromDate||'—'}</td><td style="font-size:12px">${l.toDate||'—'}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${days}</td>
+        <td><span class="badge b-b">${l.reason||'—'}</span></td>
+        <td style="font-size:12px;max-width:160px">${l.notes||'—'}</td>
+        <td>${statusBadge(l.status||'pending')}</td>
+        <td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td>
+        <td>${canCancel?`<button class="btn btn-d btn-sm" onclick="cancelLeave('${l.id}')">Cancel</button>`:'—'}</td>
+      </tr>`;}).join('')}
+      </tbody></table>`}
+    </div></div>`;
 }
 function openRequestLeave(){
   const today=getTodayStr();
@@ -1046,64 +1407,49 @@ async function submitLeaveRequest(){
 async function cancelLeave(id){if(!confirm('Cancel this leave request?'))return;try{await fsDel('leaves',id);toast('Cancelled','success');myleaves();}catch(e){toast('Error','error');}}
 async function leavemgmt(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
-  let allData=await fsGetAll('leaves');
-  allData.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-  window._leaveMgmtAll=allData;
-  function renderPage(data){
-    const pending=data.filter(l=>l.status==='pending'),approved=data.filter(l=>l.status==='approved'),rejected=data.filter(l=>l.status==='rejected');
-    const today=getTodayStr(),activeToday=approved.filter(l=>l.fromDate<=today&&l.toDate>=today);
-    function userRoleBadge(role){return role==='trainer'?'<span class="badge b-g">🧑‍🏫 Trainer</span>':role==='coordinator'?'<span class="badge b-b">🧑‍💼 Coordinator</span>':role==='coordinatorhead'?'<span class="badge b-o">👑 Coord. Head</span>':'<span class="badge b-gray">—</span>';}
-    $('page').innerHTML=`
-      <div class="stats-grid" style="margin-bottom:18px">
-        <div class="sc sc-y"><div class="sc-ico">⏳</div><div class="sc-lbl">Pending</div><div class="sc-val">${pending.length}</div><div class="sc-sub">Needs review</div></div>
-        <div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Approved</div><div class="sc-val">${approved.length}</div></div>
-        <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Rejected</div><div class="sc-val">${rejected.length}</div></div>
-        <div class="sc sc-o"><div class="sc-ico">🏖</div><div class="sc-lbl">On Leave Today</div><div class="sc-val">${activeToday.length}</div></div>
-      </div>
-      ${activeToday.length?`<div class="card" style="background:var(--orange-dim);border-color:rgba(255,140,0,.3);margin-bottom:18px">
-        <div style="font-weight:700;color:var(--orange);margin-bottom:10px">🏖 Staff On Leave Today (${today})</div>
-        ${activeToday.map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,140,0,.15)"><span style="font-size:18px">${l.requestedByRole==='trainer'?'🧑‍🏫':'🧑‍💼'}</span><div><div style="font-weight:600;font-size:13px">${l.requestedByName||'—'}</div><div style="font-size:11px;color:var(--muted)">${l.requestedByRole} · Leave: ${l.fromDate} to ${l.toDate} · ${l.reason}</div></div></div>`).join('')}
-      </div>`:''}
-      ${pending.length?`<div class="card" style="border-color:rgba(255,187,0,.4);margin-bottom:18px">
-        <div class="card-hd"><div class="card-title" style="color:var(--yellow)">⏳ Pending Requests (${pending.length})</div></div>
-        ${pending.map(l=>`<div class="leave-card leave-status-pending"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div>
-          <div style="font-weight:700;font-size:14px">${l.requestedByName||'—'} ${userRoleBadge(l.requestedByRole)}</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:4px">📅 ${l.fromDate} → ${l.toDate} <strong style="color:var(--text)">(${l.days} day${l.days!==1?'s':''})</strong></div>
-          <div style="font-size:12px;margin-top:4px"><span class="badge b-b">${l.reason}</span></div>
-          ${l.notes?`<div style="font-size:12px;color:var(--muted);margin-top:4px">📝 ${l.notes}</div>`:''}
-        </div><div style="display:flex;flex-direction:column;gap:6px;min-width:180px">
-          <button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅ Approve</button>
-          <button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌ Reject</button>
-        </div></div></div>`).join('')}
-      </div>`:''}
-      ${renderDateFilterBar('lvm-from-f','lvm-to-f','filterLeaveMgmt()')}
-      <div class="card" style="padding:0"><div class="card-hd" style="padding:14px 18px"><div class="card-title">All Leave History</div></div><div class="tbl-wrap" id="leavemgmt-tbl">
-        ${renderLeaveMgmtTable(data)}
-      </div></div>`;
-    window.filterLeaveMgmt=function(){
-      const from=document.getElementById('lvm-from-f')?.value||'';
-      const to=document.getElementById('lvm-to-f')?.value||'';
-      const filtered=filterByDateRange(window._leaveMgmtAll,'fromDate',from,to);
-      document.getElementById('leavemgmt-tbl').innerHTML=renderLeaveMgmtTable(filtered);
-    };
-  }
-  renderPage(allData);
-}
-function renderLeaveMgmtTable(data){
+  const[data,users]=await Promise.all([fsGetAll('leaves'),fsGetAll('users')]);
+  data.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  const pending=data.filter(l=>l.status==='pending'),approved=data.filter(l=>l.status==='approved'),rejected=data.filter(l=>l.status==='rejected');
+  const today=getTodayStr(),activeToday=approved.filter(l=>l.fromDate<=today&&l.toDate>=today);
   function userRoleBadge(role){return role==='trainer'?'<span class="badge b-g">🧑‍🏫 Trainer</span>':role==='coordinator'?'<span class="badge b-b">🧑‍💼 Coordinator</span>':role==='coordinatorhead'?'<span class="badge b-o">👑 Coord. Head</span>':'<span class="badge b-gray">—</span>';}
-  if(!data.length)return emptyState('🏖','No leave requests','','','');
-  return`<table><thead><tr><th>Staff</th><th>Role</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>
-  ${data.map(l=>`<tr><td><strong>${l.requestedByName||'—'}</strong></td><td>${userRoleBadge(l.requestedByRole)}</td>
-    <td style="font-size:12px">${l.fromDate||'—'}</td><td style="font-size:12px">${l.toDate||'—'}</td>
-    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${l.days||'—'}</td>
-    <td><span class="badge b-b">${l.reason||'—'}</span></td>
-    <td>${statusBadge(l.status||'pending')}</td>
-    <td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td>
-    <td><div class="td-actions">
-      ${l.status==='pending'?`<button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅</button><button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌</button>`:''}
-      <button class="btn btn-d btn-sm" onclick="delLeave('${l.id}')">Del</button>
-    </div></td>
-  </tr>`).join('')}</tbody></table>`;
+  $('page').innerHTML=`
+    <div class="stats-grid" style="margin-bottom:18px">
+      <div class="sc sc-y"><div class="sc-ico">⏳</div><div class="sc-lbl">Pending</div><div class="sc-val">${pending.length}</div><div class="sc-sub">Needs review</div></div>
+      <div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Approved</div><div class="sc-val">${approved.length}</div></div>
+      <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Rejected</div><div class="sc-val">${rejected.length}</div></div>
+      <div class="sc sc-o"><div class="sc-ico">🏖</div><div class="sc-lbl">On Leave Today</div><div class="sc-val">${activeToday.length}</div></div>
+    </div>
+    ${activeToday.length?`<div class="card" style="background:var(--orange-dim);border-color:rgba(255,140,0,.3);margin-bottom:18px">
+      <div style="font-weight:700;color:var(--orange);margin-bottom:10px">🏖 Staff On Leave Today (${today})</div>
+      ${activeToday.map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,140,0,.15)"><span style="font-size:18px">${l.requestedByRole==='trainer'?'🧑‍🏫':'🧑‍💼'}</span><div><div style="font-weight:600;font-size:13px">${l.requestedByName||'—'}</div><div style="font-size:11px;color:var(--muted)">${l.requestedByRole} · Leave: ${l.fromDate} to ${l.toDate} · ${l.reason}</div></div></div>`).join('')}
+    </div>`:''}
+    ${pending.length?`<div class="card" style="border-color:rgba(255,187,0,.4);margin-bottom:18px">
+      <div class="card-hd"><div class="card-title" style="color:var(--yellow)">⏳ Pending Requests (${pending.length})</div></div>
+      ${pending.map(l=>`<div class="leave-card leave-status-pending"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div>
+        <div style="font-weight:700;font-size:14px">${l.requestedByName||'—'} ${userRoleBadge(l.requestedByRole)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">📅 ${l.fromDate} → ${l.toDate} <strong style="color:var(--text)">(${l.days} day${l.days!==1?'s':''})</strong></div>
+        <div style="font-size:12px;margin-top:4px"><span class="badge b-b">${l.reason}</span></div>
+        ${l.notes?`<div style="font-size:12px;color:var(--muted);margin-top:4px">📝 ${l.notes}</div>`:''}
+      </div><div style="display:flex;flex-direction:column;gap:6px;min-width:180px">
+        <button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅ Approve</button>
+        <button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌ Reject</button>
+      </div></div></div>`).join('')}
+    </div>`:''}
+    <div class="card" style="padding:0"><div class="card-hd" style="padding:14px 18px"><div class="card-title">All Leave History</div></div><div class="tbl-wrap">
+      ${data.length===0?emptyState('🏖','No leave requests','','',''):
+      `<table><thead><tr><th>Staff</th><th>Role</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>
+      ${data.map(l=>`<tr><td><strong>${l.requestedByName||'—'}</strong></td><td>${userRoleBadge(l.requestedByRole)}</td>
+        <td style="font-size:12px">${l.fromDate||'—'}</td><td style="font-size:12px">${l.toDate||'—'}</td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${l.days||'—'}</td>
+        <td><span class="badge b-b">${l.reason||'—'}</span></td>
+        <td>${statusBadge(l.status||'pending')}</td>
+        <td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td>
+        <td><div class="td-actions">
+          ${l.status==='pending'?`<button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅</button><button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌</button>`:''}
+          <button class="btn btn-d btn-sm" onclick="delLeave('${l.id}')">Del</button>
+        </div></td>
+      </tr>`).join('')}</tbody></table>`}
+    </div></div>`;
 }
 function openReviewLeave(leaveId,decision,staffName,staffRole,fromDate,toDate){
   const isApprove=decision==='approved';
@@ -1183,32 +1529,16 @@ async function markSessionStatus(id,status,skipRatePrompt=false){
 async function missedreasons(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const myUid=auth().currentUser.uid;
-  let allData=await fsGetAll('missedreasons');
-  if(CR==='coordinator'){allData=allData.filter(r=>r.reportedBy===myUid);}
-  allData.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  window._missedReasonsAll=allData;
+  let data=await fsGetAll('missedreasons');
+  if(CR==='coordinator'){data=data.filter(r=>r.reportedBy===myUid);}
+  data.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   let pendingHtml='';
   if(CR==='coordinator'||CR==='coordinatorhead'||CR==='admin'){
     const allReqs=await fsGetAll('missedreasonrequests',fn().where('resolved','==',false));
     const mine=CR==='coordinator'?allReqs.filter(r=>r.assignedCoordIds&&r.assignedCoordIds.includes(myUid)):allReqs;
     if(mine.length){pendingHtml=`<div class="missed-banner" style="animation:none"><div class="missed-banner-header"><div class="missed-banner-title"><span style="font-size:20px">🚨</span> ${mine.length} Pending — Reason Required</div><span class="badge b-r">${mine.length} unresolved</span></div>${mine.map(r=>`<div class="missed-banner-item"><div class="missed-banner-info"><div class="missed-banner-client">🏃 ${r.clientName||'—'}</div><div class="missed-banner-meta">Trainer: ${r.trainerName||'—'} | ${r.date||'—'} at ${to12h(r.time)} | By: ${r.markedByName||'—'}</div></div><button class="btn btn-d btn-sm" onclick="showMissedReasonPopup('${r.sessionId||''}','${(r.clientName||'').replace(/'/g,"\\'")}','${(r.trainerName||'').replace(/'/g,"\\'")}','${r.date||''}','${r.time||''}','${r.id}')">⚠️ Enter Reason</button></div>`).join('')}</div>`;}
   }
-  $('page').innerHTML=`${pendingHtml}
-    <div class="card" style="background:var(--red-dim);border-color:rgba(255,68,68,.3);margin-bottom:18px"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">⚠️</span><div><div style="font-weight:700;color:var(--red)">Missed Session Reports</div><div style="font-size:12px;color:var(--muted)">Reasons entered by coordinators for missed sessions</div></div></div></div>
-    ${renderDateFilterBar('mr-from-f','mr-to-f','filterMissedReasons()')}
-    <div class="card" style="padding:0"><div class="tbl-wrap" id="missed-tbl">${renderMissedReasonsTable(allData)}</div></div>`;
-  window.filterMissedReasons=function(){
-    const from=document.getElementById('mr-from-f')?.value||'';
-    const to=document.getElementById('mr-to-f')?.value||'';
-    const filtered=filterByDateRange(window._missedReasonsAll,'date',from,to);
-    document.getElementById('missed-tbl').innerHTML=renderMissedReasonsTable(filtered);
-  };
-}
-function renderMissedReasonsTable(data){
-  if(!data.length)return emptyState('⚠️','No reports yet','Missed session reasons will appear here.','','');
-  return`<table><thead><tr><th>Date</th><th>Client</th><th>Trainer</th><th>Time</th><th>Reason</th><th>Notes</th><th>Reported By</th>${CR==='admin'||CR==='coordinatorhead'?'<th>Actions</th>':''}</tr></thead><tbody>
-  ${data.map(r=>`<tr><td style="font-size:12px">${r.date||'—'}</td><td><strong>${r.clientName||'—'}</strong></td><td style="font-size:12px">${r.trainerName||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(r.time)}</td><td><span class="badge b-r">${r.reason||'—'}</span></td><td style="font-size:12px;max-width:180px">${r.notes||'—'}</td><td style="font-size:12px">${r.reportedByName||'—'}<div style="font-size:10px;color:var(--muted)">${r.reportedByRole||''}</div></td>${CR==='admin'||CR==='coordinatorhead'?`<td><button class="btn btn-d btn-sm" onclick="delMissedReason('${r.id}')">Delete</button></td>`:''}</tr>`).join('')}
-  </tbody></table>`;
+  $('page').innerHTML=`${pendingHtml}<div class="card" style="background:var(--red-dim);border-color:rgba(255,68,68,.3);margin-bottom:18px"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">⚠️</span><div><div style="font-weight:700;color:var(--red)">Missed Session Reports</div><div style="font-size:12px;color:var(--muted)">Reasons entered by coordinators for missed sessions</div></div></div></div><div class="card" style="padding:0"><div class="tbl-wrap">${data.length===0?emptyState('⚠️','No reports yet','Missed session reasons will appear here.','',''):`<table><thead><tr><th>Date</th><th>Client</th><th>Trainer</th><th>Time</th><th>Reason</th><th>Notes</th><th>Reported By</th>${CR==='admin'||CR==='coordinatorhead'?'<th>Actions</th>':''}</tr></thead><tbody>${data.map(r=>`<tr><td style="font-size:12px">${r.date||'—'}</td><td><strong>${r.clientName||'—'}</strong></td><td style="font-size:12px">${r.trainerName||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(r.time)}</td><td><span class="badge b-r">${r.reason||'—'}</span></td><td style="font-size:12px;max-width:180px">${r.notes||'—'}</td><td style="font-size:12px">${r.reportedByName||'—'}<div style="font-size:10px;color:var(--muted)">${r.reportedByRole||''}</div></td>${CR==='admin'||CR==='coordinatorhead'?`<td><button class="btn btn-d btn-sm" onclick="delMissedReason('${r.id}')">Delete</button></td>`:''}</tr>`).join('')}</tbody></table>`}</div></div>`;
 }
 async function delMissedReason(id){if(!confirm('Delete?'))return;try{await fsDel('missedreasons',id);toast('Deleted','success');missedreasons()}catch(e){toast('Error','error')}}
 
@@ -1332,7 +1662,7 @@ function buildLeaderboard(trainers,allRatings,allClients){return trainers.map(t=
 function renderLeaderboard(ranked){if(!ranked.length)return emptyState('🏆','No trainer ratings yet','Rate trainers after sessions.','','');const medals=['🥇','🥈','🥉'];const rankClasses=['gold','silver','bronze','other'];const starColors={5:'var(--accent)',4:'#88cc00',3:'var(--yellow)',2:'#ff7700',1:'#ff4444',0:'var(--muted)'};return`<div>${ranked.map((t,i)=>{const ini=(t.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);const col=starColors[Math.round(t.avg)]||'var(--muted)';const bestCrit=RATING_CRITERIA.filter(c=>t.criteriaAvg[c.id]>0).sort((a,b)=>t.criteriaAvg[b.id]-t.criteriaAvg[a.id])[0];return`<div class="lb-row"><div class="lb-rank ${rankClasses[i]||'other'}">${i+1}</div><div class="lb-medal">${medals[i]||''}</div><div class="lb-avatar" style="background:var(--green-dim);color:var(--green)">${ini}</div><div class="lb-info"><div class="lb-name">${t.name||'—'}</div><div class="lb-meta">${t.clientCount} client${t.clientCount!==1?'s':''} · ${t.totalRatings} rating${t.totalRatings!==1?'s':''}${bestCrit?` · Best: ${bestCrit.icon}${bestCrit.label}`:''}</div><div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${t.avg/5*100}%"></div></div></div><div class="lb-score"><div class="lb-stars">${'★'.repeat(Math.round(t.avg))}${'☆'.repeat(5-Math.round(t.avg))}</div><div class="lb-num" style="color:${col}">${t.avg.toFixed(1)}</div><div class="lb-cnt">/ 5.0</div></div></div>`;}).join('')}</div>`;}
 
 // ══════════════════════════════════════════════════════════════
-// TRAINER RATINGS (with date filter)
+// TRAINER RATINGS
 // ══════════════════════════════════════════════════════════════
 async function trainerratings(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
@@ -1341,7 +1671,6 @@ async function trainerratings(){
   const[allTrainers,ratings,sessions]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('trainerratings'),fsGetAll('sessions')]);
   const trainers=CR==='coordinator'&&allowedTrainerIds?allTrainers.filter(t=>allowedTrainerIds.includes(t.id)):allTrainers;
   const myUid=auth().currentUser.uid;const ranked=buildLeaderboard(trainers,ratings,[]);
-  window._trainerRatingsAll=ratings;
   $('page').innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
       <div><div style="font-weight:700;font-size:16px">⭐ Trainer Performance & Ratings</div>${CR==='coordinator'?`<div style="font-size:12px;color:var(--muted);margin-top:3px">Showing trainers assigned to your clients only</div>`:''}</div>
@@ -1350,24 +1679,7 @@ async function trainerratings(){
     <div class="card" style="margin-bottom:18px"><div class="card-hd"><div class="card-title">🏆 Trainer Leaderboard</div></div>${renderLeaderboard(ranked)}</div>
     <div class="staff-grid" style="margin-bottom:24px">${trainers.length===0?emptyState('🧑‍🏫','No trainers assigned to your clients','','',''):trainers.map(t=>{const tRatings=ratings.filter(r=>r.trainerId===t.id);const avg=tRatings.length?avgRating(tRatings):0;const myRatings=tRatings.filter(r=>r.ratedById===myUid);const ini=(t.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);const starCol=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';const critBreakdown=RATING_CRITERIA.map(c=>{const vals=tRatings.filter(r=>r.criteria&&r.criteria[c.id]).map(r=>r.criteria[c.id]);const a=vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0;return{...c,avg:a};});return`<div class="staff-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="staff-avatar" style="background:var(--green-dim);color:var(--green)">${ini}</div><div><div style="font-weight:700;font-size:14px">${t.name||'—'}</div></div></div><div style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:22px;font-weight:700;color:${starCol}">${avg.toFixed(1)}</span><span style="font-size:18px">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span></div><div style="font-size:12px;color:var(--muted)">${tRatings.length} total · ${myRatings.length} by you</div></div><div style="margin-bottom:10px">${critBreakdown.map(c=>`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="font-size:12px;min-width:90px;color:var(--muted)">${c.icon}${c.label}</span><div style="flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden"><div style="height:100%;background:var(--yellow);width:${c.avg/5*100}%;border-radius:2px"></div></div><span style="font-size:11px;font-weight:700;min-width:24px;text-align:right">${c.avg>0?c.avg.toFixed(1):'—'}</span></div>`).join('')}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-p btn-sm" onclick="openRateTrainer('${t.id}','${(t.name||'').replace(/'/g,"\\'")}')">Rate Session</button><button class="btn btn-g btn-sm" onclick="viewTrainerRatings('${t.id}','${(t.name||'').replace(/'/g,"\\'")}')">View All</button></div></div>`;}).join('')}
     </div>
-    ${renderDateFilterBar('tr-from-f','tr-to-f','filterTrainerRatings()')}
-    <div class="card"><div class="card-hd"><div class="card-title">Recent Ratings</div></div><div class="tbl-wrap" id="trainer-ratings-tbl">
-      ${renderTrainerRatingsTable(ratings.filter(r=>CR==='coordinator'&&allowedTrainerIds?allowedTrainerIds.includes(r.trainerId):true))}
-    </div></div>`;
-  window.filterTrainerRatings=function(){
-    const from=document.getElementById('tr-from-f')?.value||'';
-    const to=document.getElementById('tr-to-f')?.value||'';
-    const base=(window._trainerRatingsAll||[]).filter(r=>CR==='coordinator'&&window._coordAllowedTrainerIds?window._coordAllowedTrainerIds.includes(r.trainerId):true);
-    const filtered=filterByDateRange(base,'sessionDate',from,to);
-    document.getElementById('trainer-ratings-tbl').innerHTML=renderTrainerRatingsTable(filtered);
-  };
-}
-function renderTrainerRatingsTable(ratings){
-  if(!ratings.length)return emptyState('⭐','No ratings yet','','','');
-  const sorted=[...ratings].sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,30);
-  return`<table><thead><tr><th>Date</th><th>Trainer</th><th>Session</th><th>Rating</th><th>Comment</th><th>Rated By</th>${CR==='admin'||CR==='coordinatorhead'?'<th>Actions</th>':''}</tr></thead><tbody>
-  ${sorted.map(r=>{const stars='★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0));const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';return`<tr><td style="font-size:12px">${r.sessionDate||fmtDate(r.createdAt)}</td><td><strong>${r.trainerName||'—'}</strong></td><td style="font-size:12px">${r.sessionType||'—'}</td><td><span style="color:${col};font-size:16px;font-weight:700">${stars}</span></td><td style="font-size:12px;max-width:200px">${r.comment||'—'}</td><td style="font-size:12px">${r.ratedByName||'—'}</td>${CR==='admin'||CR==='coordinatorhead'?`<td><div class="td-actions"><button class="btn btn-d btn-sm" onclick="delRating('${r.id}')">Delete</button></div></td>`:''}</tr>`;}).join('')}
-  </tbody></table>`;
+    <div class="card"><div class="card-hd"><div class="card-title">Recent Ratings</div></div>${ratings.length===0?emptyState('⭐','No ratings yet','','',''):`<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Trainer</th><th>Session</th><th>Rating</th><th>Comment</th><th>Rated By</th>${CR==='admin'||CR==='coordinatorhead'?'<th>Actions</th>':''}</tr></thead><tbody>${[...ratings].filter(r=>CR==='coordinator'&&allowedTrainerIds?allowedTrainerIds.includes(r.trainerId):true).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,30).map(r=>{const stars='★'.repeat(r.rating||0)+'☆'.repeat(5-(r.rating||0));const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][r.rating||0]||'#888';return`<tr><td style="font-size:12px">${r.sessionDate||fmtDate(r.createdAt)}</td><td><strong>${r.trainerName||'—'}</strong></td><td style="font-size:12px">${r.sessionType||'—'}</td><td><span style="color:${col};font-size:16px;font-weight:700">${stars}</span></td><td style="font-size:12px;max-width:200px">${r.comment||'—'}</td><td style="font-size:12px">${r.ratedByName||'—'}</td>${CR==='admin'||CR==='coordinatorhead'?`<td><div class="td-actions"><button class="btn btn-d btn-sm" onclick="delRating('${r.id}')">Delete</button></div></td>`:''}</tr>`;}).join('')}</tbody></table></div>`}</div>`;
 }
 async function openRateTrainer(preTrainerId='',preTrainerName=''){
   const[allTrainers,sessions]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('sessions',fn().where('status','==','completed'))]);
@@ -1391,13 +1703,12 @@ async function viewTrainerRatings(trainerId,trainerName){
 async function delRating(id){if(!confirm('Delete?'))return;try{await fsDel('trainerratings',id);toast('Deleted','success');trainerratings()}catch(e){toast('Error','error')}}
 
 // ══════════════════════════════════════════════════════════════
-// SESSIONS (with date filter)
+// SESSIONS
 // ══════════════════════════════════════════════════════════════
 async function sessions(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   let coordClientIds=null;
   if(CR==='coordinator'){const myUid=auth().currentUser.uid;const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));coordClientIds=myClients.map(c=>c.id);}
-  let _allSessions=null;
   async function loadSTab(tab){
     document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const tabEl=document.querySelector(`.tab[data-stab="${tab}"]`);if(tabEl)tabEl.classList.add('active');
     $('sess-list').innerHTML=`<div style="padding:30px;text-align:center;color:var(--muted)"><div class="spin" style="width:22px;height:22px;margin:0 auto"></div></div>`;
@@ -1409,20 +1720,9 @@ async function sessions(){
     else if(tab==='upcoming')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()>today.getTime()});
     else if(tab==='past')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()<today.getTime()});
     data.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
-    _allSessions=data;window._sessionsTabAll=data;window._currentSessTab=tab;
-    renderSessionsSection(data,tab);
+    $('sess-list').innerHTML=renderSessionsTable(data,tab);
   }
-  function renderSessionsSection(data,tab){
-    const filterBar=renderDateFilterBar('sess-from-f','sess-to-f','filterSessionsTable()');
-    $('sess-list').innerHTML=filterBar+`<div id="sess-tbl">${renderSessionsTable(data,tab)}</div>`;
-    window.filterSessionsTable=function(){
-      const from=document.getElementById('sess-from-f')?.value||'';
-      const to=document.getElementById('sess-to-f')?.value||'';
-      const filtered=filterByDateRange(window._sessionsTabAll||[],'date',from,to);
-      document.getElementById('sess-tbl').innerHTML=renderSessionsTable(filtered,window._currentSessTab||'all');
-    };
-  }
-  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px"><div class="tabs" style="margin:0;border:none">${['today','upcoming','past','all'].map(t=>`<div class="tab ${t==='today'?'active':''}" data-stab="${t}" onclick="window._sTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</div>`).join('')}</div>${CR!=='client'?`<button class="btn btn-p" onclick="openAddSession()">+ Schedule Session</button>`:''}</div><div class="card" style="padding:0"><div id="sess-list"></div></div>`;
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px"><div class="tabs" style="margin:0;border:none">${['today','upcoming','past','all'].map(t=>`<div class="tab ${t==='today'?'active':''}" data-stab="${t}" onclick="window._sTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</div>`).join('')}</div>${CR!=='client'?`<button class="btn btn-p" onclick="openAddSession()">+ Schedule Session</button>`:''}</div><div class="card" style="padding:0"><div class="tbl-wrap" id="sess-list"></div></div>`;
   window._sTab=loadSTab;loadSTab('today');
 }
 function renderSessionsTable(data,tab){
@@ -1438,39 +1738,167 @@ async function saveSession(existingId=''){const clientId=$('sf-client-id').value
 async function delSession(id){if(!confirm('Delete?'))return;try{await fsDel('sessions',id);toast('Deleted','success');sessions()}catch(e){toast('Error: '+e.message,'error')}}
 
 // ══════════════════════════════════════════════════════════════
-// ATTENDANCE (with date filter)
+// TIME CHART
 // ══════════════════════════════════════════════════════════════
+async function timechart(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  const[clients,sessions,tcEntries]=await Promise.all([fsGetAll('clients',fn().where('active','==',true)),fsGetAll('sessions'),fsGetAll('timechart')]);
+  const tcMap={};tcEntries.forEach(e=>{tcMap[e.clientId]=e;});const today=new Date().toISOString().split('T')[0];const todaySessionsMap={};sessions.filter(s=>s.date===today).forEach(s=>{if(s.clientId)todaySessionsMap[s.clientId]=s.status;});const canDelete=(CR==='admin'||CR==='coordinatorhead');
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px"><div><div style="font-size:13px;color:var(--muted)">Persistent daily schedule — entries remain until deleted.</div></div><div style="display:flex;gap:8px;flex-wrap:wrap">${CR==='admin'?`<button class="btn btn-g btn-sm" onclick="exportPDF()">📥 Export PDF</button>`:''}<button class="btn btn-p" onclick="openAddTcEntry()">+ Add Entry</button></div></div>
+    <div class="card" style="padding:0;overflow-x:auto"><div style="min-width:1000px"><div class="tc-row tc-head" style="border-radius:12px 12px 0 0"><div>Client</div><div>Trainer</div><div>Time</div><div>Start Date</div><div>Type</div><div>Today's Status</div><div>Day #</div><div>Remarks</div><div>Actions</div></div><div id="tc-body">${clients.length===0?`<div style="padding:30px;text-align:center;color:var(--muted)">No clients found.</div>`:''}${clients.map(c=>{const tc=tcMap[c.id]||{};const liveStatus=todaySessionsMap[c.id]||tc.todayStatus||'not-started';const startDate=c.startDate||tc.startDate||'';const dayNum=startDate?Math.floor((new Date()-new Date(startDate))/(1000*60*60*24))+1:'-';return renderTcRow(c,tc,liveStatus,dayNum,canDelete);}).join('')}</div></div></div>`;
+  window._tcClients=clients;window._tcEntries=tcEntries;window._tcMap=tcMap;
+}
+function renderTcRow(c,tc,liveStatus,dayNum,canDelete){const statusColor={onair:'var(--green)','not-started':'var(--muted)',completed:'var(--accent)',missed:'var(--red)'}[liveStatus]||'var(--muted)';return`<div class="tc-row" id="tcrow-${c.id}"><div><div style="font-weight:600;font-size:12px">${c.name||'—'}</div>${c.plan==='Couple'&&c.partnerName?`<div style="font-size:10px;color:var(--pink)">👫 +${c.partnerName}</div>`:''}</div><div style="font-size:12px;color:var(--muted)">${tc.trainerName||c.trainerName||'—'}</div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${tc.sessionTime?to12h(tc.sessionTime):'—'}</div><div style="font-size:11px;color:var(--muted)">${c.startDate||tc.startDate||'—'}</div><div style="font-size:11px">${tc.sessionType||c.goal||'—'}</div><div><span style="font-size:12px;font-weight:600;color:${statusColor}">${liveStatus.replace('-',' ')}</span></div><div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)">${dayNum}</div><div style="font-size:11px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${tc.remarks||''}">${tc.remarks||'—'}</div><div><div class="td-actions"><button class="btn btn-g btn-sm" onclick="openEditTcEntry('${c.id}')">Edit</button><button class="btn btn-g btn-sm" onclick="openTcStatus('${c.id}','${(c.name||'').replace(/'/g,"\\'")}')">Status</button>${canDelete&&tc.id?`<button class="btn btn-d btn-sm" onclick="delTcEntry('${tc.id}','${c.id}')">Delete</button>`:''}</div></div></div>`;}
+async function openAddTcEntry(){const clients=window._tcClients||await fsGetAll('clients',fn().where('active','==',true));openM1('ADD TIME CHART ENTRY',`<div class="fg"><label class="fl">Client *</label><input class="fi" id="tc-client-inp" placeholder="Type client name…" autocomplete="off"><input type="hidden" id="tc-client-id"></div><div class="fr"><div class="fg"><label class="fl">Session Time *</label><input class="fi" id="tc-time" type="time"></div><div class="fg"><label class="fl">Session Type</label><select class="fs" id="tc-stype">${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div></div><div class="fg"><label class="fl">Remarks</label><textarea class="fta" id="tc-remarks" placeholder="Any notes…" style="min-height:60px"></textarea></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTcEntry('')">Save</button></div>`);attachClientAC('tc-client-inp','tc-client-id',clients);}
+async function openEditTcEntry(clientId){const clients=window._tcClients||await fsGetAll('clients',fn().where('active','==',true));const c=clients.find(x=>x.id===clientId)||{};const tc=(window._tcMap||{})[clientId]||{};const tcId=tc.id||'';openM1('EDIT TIME CHART ENTRY',`<div style="background:var(--accent-dim);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-weight:600;font-size:13px">${c.name||'Client'}</div><div class="fr"><div class="fg"><label class="fl">Session Time *</label><input class="fi" id="tc-time" type="time" value="${tc.sessionTime||''}"></div><div class="fg"><label class="fl">Session Type</label><select class="fs" id="tc-stype">${SESSION_TYPES.map(t=>`<option ${tc.sessionType===t?'selected':''}>${t}</option>`).join('')}</select></div></div><div class="fg"><label class="fl">Remarks</label><textarea class="fta" id="tc-remarks" style="min-height:60px">${tc.remarks||''}</textarea></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTcEntry('${tcId}','${clientId}')">Update</button></div>`);}
+async function saveTcEntry(existingId='',fixedClientId=''){let clientId=fixedClientId||document.getElementById('tc-client-id')?.value||'';let clientName='';if(!fixedClientId){clientName=document.getElementById('tc-client-inp')?.value||'';}else{const c=(window._tcClients||[]).find(x=>x.id===fixedClientId);clientName=c?.name||'';}if(!clientId&&!clientName){toast('Select a client','error');return}const sessionTime=document.getElementById('tc-time')?.value||'';const sessionType=document.getElementById('tc-stype')?.value||'';const remarks=document.getElementById('tc-remarks')?.value||'';const client=(window._tcClients||[]).find(x=>x.id===clientId);const data={clientId,clientName:clientName||client?.name||'',trainerName:client?.trainerName||'',trainerId:client?.trainerId||'',sessionTime,sessionType,remarks};try{if(existingId){await fsUpdate('timechart',existingId,data);toast('Updated!','success');}else{const existing=(window._tcMap||{})[clientId];if(existing){await fsUpdate('timechart',existing.id,data);}else{await fsAdd('timechart',data);}toast('Entry saved!','success');}closeM1();timechart();}catch(e){toast('Error: '+e.message,'error');}}
+async function delTcEntry(tcId,clientId){if(!confirm('Delete this time chart entry permanently?'))return;try{await fsDel('timechart',tcId);toast('Deleted','success');timechart();}catch(e){toast('Error: '+e.message,'error');}}
+async function openTcStatus(clientId,clientName){openM1(`UPDATE STATUS: ${clientName.toUpperCase()}`,`<p style="color:var(--muted);font-size:13px;margin-bottom:14px">Update today's session status for this client.</p><div class="fg"><label class="fl">Today's Status</label><select class="fs" id="tc-st-sel"><option value="not-started">⏳ Not Started</option><option value="onair">🟢 On Air</option><option value="completed">✅ Completed</option><option value="missed">❌ Missed</option></select></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTcStatus('${clientId}')">Update</button></div>`);}
+async function saveTcStatus(clientId){const status=document.getElementById('tc-st-sel')?.value||'not-started';const tc=(window._tcMap||{})[clientId];if(tc){await fsUpdate('timechart',tc.id,{todayStatus:status,lastStatusUpdate:new Date().toISOString().split('T')[0]});}else{const c=(window._tcClients||[]).find(x=>x.id===clientId)||{};await fsAdd('timechart',{clientId,clientName:c.name||'',trainerName:c.trainerName||'',trainerId:c.trainerId||'',todayStatus:status,lastStatusUpdate:new Date().toISOString().split('T')[0]});}closeM1();toast('Status updated!','success');timechart();}
+
+// ══════════════════════════════════════════════════════════════
+// PDF EXPORT
+// ══════════════════════════════════════════════════════════════
+async function exportPDF(){
+  toast('Generating PDF…','info');
+  const now=new Date();const monthName=now.toLocaleString('en-IN',{month:'long'});const year=now.getFullYear();
+  const[clients,sessions,attendance,followups,trainers]=await Promise.all([fsGetAll('clients',fn().where('active','==',true)),fsGetAll('sessions'),fsGetAll('attendance'),fsGetAll('followups'),fsGetAll('users',fn().where('role','==','trainer'))]);
+  const month=now.getMonth();const monthSessions=sessions.filter(s=>s.date&&new Date(s.date).getMonth()===month&&new Date(s.date).getFullYear()===year);
+  try{
+    const{jsPDF}=window.jspdf;const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});const pageW=doc.internal.pageSize.getWidth();
+    doc.setFillColor(20,20,20);doc.rect(0,0,pageW,22,'F');doc.setTextColor(212,255,0);doc.setFontSize(18);doc.setFont('helvetica','bold');doc.text('GYM AT YOUR HOME',pageW/2,10,{align:'center'});doc.setFontSize(10);doc.setTextColor(200,200,200);doc.text(`Monthly Report — ${monthName} ${year}  |  Generated: ${now.toLocaleString('en-IN')}`,pageW/2,17,{align:'center'});
+    doc.setTextColor(30,30,30);doc.setFontSize(13);doc.setFont('helvetica','bold');doc.text('Summary',14,30);
+    const completed=monthSessions.filter(s=>s.status==='completed').length;const missed=monthSessions.filter(s=>s.status==='missed').length;
+    doc.autoTable({startY:33,head:[['Metric','Value']],body:[['Active Clients',clients.length],['Total Sessions This Month',monthSessions.length],['Completed Sessions',completed],['Missed Sessions',missed],['Total Trainers',trainers.length],['Total Follow-ups',followups.length]],theme:'grid',headStyles:{fillColor:[212,255,0],textColor:[0,0,0],fontStyle:'bold'},styles:{fontSize:10},margin:{left:14,right:14}});
+    doc.addPage();doc.autoTable({startY:22,head:[['Name','Phone','Plan','Trainer','Coordinator','Goal','Start Date','Sessions/Wk','Status']],body:clients.map(c=>[c.name||'—',c.phone||'—',c.plan||'—',c.trainerName||'—',c.coordinatorName||'—',c.goal||'—',c.startDate||'—',c.sessionsPerWeek||'—',c.active?'Active':'Inactive']),theme:'striped',headStyles:{fillColor:[40,40,40],textColor:[212,255,0]},styles:{fontSize:8},margin:{left:10,right:10}});
+    doc.save(`GYH_Report_${monthName}_${year}.pdf`);toast(`PDF exported!`,'success');
+  }catch(e){toast('PDF error: '+e.message,'error');}
+}
+
+// ══════════════════════════════════════════════════════════════
+// CERTIFICATES
+// ══════════════════════════════════════════════════════════════
+async function certificates(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  const myUid=auth().currentUser.uid;const certs=await fsGetAll('certificates',fn().where('trainerId','==',myUid));certs.sort((a,b)=>(b.issueYear||0)-(a.issueYear||0));
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px"><div></div><button class="btn btn-p" onclick="openAddCert()">+ Add Certificate</button></div><div id="cert-list">${certs.length===0?emptyState('🎓','No certificates yet','Add your fitness certifications.','+Add Certificate','openAddCert()'):certs.map(c=>renderCertCard(c)).join('')}</div>`;
+}
+function renderCertCard(c){return`<div class="cert-card"><div class="cert-icon">🎓</div><div class="cert-body"><div class="cert-name">${c.name||'—'}</div><div class="cert-meta">🏛 ${c.issuer||'—'} ${c.issueYear?`• ${c.issueYear}`:''}${c.expiryYear?` – ${c.expiryYear}`:''}</div>${c.credentialId?`<div class="cert-meta">🔑 ID: ${c.credentialId}</div>`:''}</div><div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0"><button class="btn btn-g btn-sm" onclick="openEditCert('${c.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delCert('${c.id}')">Delete</button></div></div>`;}
+function openAddCert(){openM1('ADD CERTIFICATE',certForm())}
+async function openEditCert(id){const c=await fsGet('certificates',id);if(!c){toast('Not found','error');return}openM1('EDIT CERTIFICATE',certForm(c))}
+function certForm(c={}){return`<div class="fg"><label class="fl">Certificate Name *</label><input class="fi" id="cf2-name" value="${c.name||''}" placeholder="e.g. Certified Personal Trainer (CPT)"></div><div class="fg"><label class="fl">Issuing Organization *</label><input class="fi" id="cf2-issuer" value="${c.issuer||''}" placeholder="e.g. NASM, ACE"></div><div class="fr"><div class="fg"><label class="fl">Issue Year</label><input class="fi" id="cf2-year" type="number" value="${c.issueYear||''}"></div><div class="fg"><label class="fl">Expiry Year</label><input class="fi" id="cf2-expiry" type="number" value="${c.expiryYear||''}"></div></div><div class="fg"><label class="fl">Credential ID</label><input class="fi" id="cf2-cid" value="${c.credentialId||''}"></div><div class="fg"><label class="fl">Certificate URL</label><input class="fi" id="cf2-url" type="url" value="${c.url||''}"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveCert('${c.id||''}')">Save</button></div>`;}
+async function saveCert(existingId=''){const name=$('cf2-name').value.trim(),issuer=$('cf2-issuer').value.trim();if(!name||!issuer){toast('Name and issuer required','error');return}const myUid=auth().currentUser.uid;const data={name,issuer,issueYear:Number($('cf2-year').value)||null,expiryYear:Number($('cf2-expiry').value)||null,credentialId:$('cf2-cid').value.trim(),url:$('cf2-url').value.trim(),trainerId:myUid,trainerName:CU.name||''};try{if(existingId){await fsUpdate('certificates',existingId,data);toast('Updated!','success')}else{await fsAdd('certificates',data);toast('Added!','success')}closeM1();certificates();}catch(e){toast('Error: '+e.message,'error')}}
+async function delCert(id){if(!confirm('Delete?'))return;try{await fsDel('certificates',id);toast('Deleted','success');certificates()}catch(e){toast('Error','error')}}
+
+// ══════════════════════════════════════════════════════════════
+// CLIENTS
+// ══════════════════════════════════════════════════════════════
+async function clients(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  let data;
+  if(CR==='trainer')data=await fsGetAll('clients',fn().where('trainerId','==',auth().currentUser.uid));
+  else if(CR==='coordinator'){const myUid=auth().currentUser.uid;data=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));}
+  else data=await fsGetAll('clients');
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap"><input class="fi" id="cl-search" placeholder="🔍 Search by name or phone…" oninput="filterClients()" style="max-width:280px;margin:0">${CR!=='trainer'&&CR!=='client'?`<button class="btn btn-p" onclick="openAddClient()">+ Add Client</button>`:''}</div><div class="card" style="padding:0"><div class="tbl-wrap" id="cl-table">${renderClientsTable(data)}</div></div>`;
+  window._clientsData=data;
+}
+function renderClientsTable(data){if(!data.length)return emptyState('🏃','No clients yet',CR==='coordinator'?'No clients assigned to you yet.':'Add your first client.',CR!=='trainer'&&CR!=='client'&&CR!=='coordinator'?'+ Add Client':'',CR!=='trainer'&&CR!=='client'&&CR!=='coordinator'?'openAddClient()':'');return`<table><thead><tr><th>Name</th><th>Partner</th><th>Phone</th><th>Plan</th><th>Trainer</th><th>Coordinator</th><th>Goal</th><th>Status</th><th>Actions</th></tr></thead><tbody>${data.map(c=>`<tr><td><strong>${c.name||'—'}</strong>${c.plan==='Couple'?'<span class="badge b-pk" style="margin-left:5px;font-size:10px">👫 Couple</span>':''}</td><td style="font-size:12px">${c.plan==='Couple'?(c.partnerName||'<span style="color:var(--muted2)">—</span>'):'<span style="color:var(--muted2)">N/A</span>'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px">${c.phone||'—'}</td><td>${planBadge(c.plan)}</td><td style="font-size:12px">${c.trainerName||'—'}</td><td style="font-size:12px">${c.coordinatorName?`<span class="badge b-b">🧑‍💼 ${c.coordinatorName}</span>`:'<span style="color:var(--muted2)">—</span>'}</td><td style="font-size:12px">${c.goal||'—'}</td><td>${c.active?`<span class="badge b-g">Active</span>`:`<span class="badge b-r">Inactive</span>`}</td><td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="viewClient('${c.id}')">View</button>${CR!=='trainer'&&CR!=='client'?`<button class="btn btn-g btn-sm" onclick="openEditClient('${c.id}')">Edit</button>${CR!=='coordinator'?`<button class="btn btn-d btn-sm" onclick="delClient('${c.id}')">Delete</button>`:''}`:''}</div></td></tr>`).join('')}</tbody></table>`;}
+function filterClients(){const v=$('cl-search').value.toLowerCase();const filtered=(window._clientsData||[]).filter(c=>(c.name||'').toLowerCase().includes(v)||(c.phone||'').includes(v)||(c.partnerName||'').toLowerCase().includes(v));$('cl-table').innerHTML=renderClientsTable(filtered)}
+async function openAddClient(){const html=await clientForm();openM2('ADD CLIENT',html);initClientFormAC()}
+async function openEditClient(id){const c=await fsGet('clients',id);if(!c){toast('Client not found','error');return}const html=await clientForm(c);openM2('EDIT CLIENT',html);initClientFormAC(c)}
+function initClientFormAC(c={}){initCountryAC('cf-country');const planSel=$('cf-plan');if(planSel){planSel.addEventListener('change',()=>{const coupleWrap=$('couple-wrap');if(coupleWrap)coupleWrap.style.display=planSel.value==='Couple'?'block':'none';});}const trainerInp=document.getElementById('cf-trainer-inp');if(trainerInp){fsGetAll('users',fn().where('role','==','trainer')).then(trainers=>{const items=trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''}));createAutocomplete(trainerInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('cf-trainer-id');if(hid)hid.value=it.id;}});});}const coordInp=document.getElementById('cf-coord-inp');if(coordInp){fsGetAll('users',fn().where('role','==','coordinator')).then(coords=>{const items=coords.map(c=>({id:c.id,label:c.name||c.email,sub:'Coordinator'}));createAutocomplete(coordInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('cf-coord-id');if(hid)hid.value=it.id;}});});}}
+async function clientForm(c={}){const isCouple=c.plan==='Couple';return`<div class="fr"><div><label class="fl">Full Name (Primary) *</label><input class="fi" id="cf-name" value="${c.name||''}" placeholder="Client full name"></div><div><label class="fl">Phone *</label><input class="fi" id="cf-phone" value="${c.phone||''}" placeholder="10-digit number"></div></div><div class="fr"><div><label class="fl">Email</label><input class="fi" id="cf-email" type="email" value="${c.email||''}"></div><div><label class="fl">Age</label><input class="fi" id="cf-age" type="number" value="${c.age||''}"></div></div><div class="fr"><div><label class="fl">Plan *</label><select class="fs" id="cf-plan" onchange="toggleCouplePlan(this)"><option value="">— Select —</option>${PLANS.map(p=>`<option ${c.plan===p?'selected':''}>${p}</option>`).join('')}</select></div><div><label class="fl">Country</label>${acCountryField('cf-country',c.country||'')}</div></div><div id="couple-wrap" style="display:${isCouple?'block':'none'};background:var(--pink-dim);border:1px solid var(--pink);border-radius:10px;padding:14px;margin-bottom:14px"><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--pink);margin-bottom:10px">👫 Couple Plan — Partner Details</div><div class="fr"><div><label class="fl">Partner Full Name *</label><input class="fi" id="cf-partner-name" value="${c.partnerName||''}" placeholder="Partner's full name"></div><div><label class="fl">Partner Phone</label><input class="fi" id="cf-partner-phone" value="${c.partnerPhone||''}" placeholder="Partner's number"></div></div><div class="fr"><div><label class="fl">Partner Age</label><input class="fi" id="cf-partner-age" type="number" value="${c.partnerAge||''}"></div><div><label class="fl">Partner Gender</label><select class="fs" id="cf-partner-gender"><option value="">— Select —</option>${['Male','Female','Other'].map(g=>`<option ${c.partnerGender===g?'selected':''}>${g}</option>`).join('')}</select></div></div></div><div class="fr"><div><label class="fl">Assign Trainer</label><input class="fi" id="cf-trainer-inp" placeholder="Type trainer name…" value="${c.trainerName||''}" autocomplete="off"><input type="hidden" id="cf-trainer-id" value="${c.trainerId||''}"></div><div><label class="fl">Assign Coordinator</label><input class="fi" id="cf-coord-inp" placeholder="Type coordinator name…" value="${c.coordinatorName||''}" autocomplete="off"><input type="hidden" id="cf-coord-id" value="${c.coordinatorId||''}"></div></div><div class="fr"><div><label class="fl">Gender</label><select class="fs" id="cf-gender"><option value="">— Select —</option>${['Male','Female','Other'].map(g=>`<option ${c.gender===g?'selected':''}>${g}</option>`).join('')}</select></div><div><label class="fl">Trainer Gender Pref.</label><select class="fs" id="cf-tgender"><option value="">No preference</option><option value="Male" ${c.trainerGenderPref==='Male'?'selected':''}>Male Trainer</option><option value="Female" ${c.trainerGenderPref==='Female'?'selected':''}>Female Trainer</option></select></div></div><div class="fr"><div><label class="fl">Fitness Goal</label><select class="fs" id="cf-goal"><option value="">— Select —</option>${['Weight Loss','Fat Loss','Muscle Gain','Toning','Strength','General Fitness','Rehabilitation','Couple Fitness','Corporate Fitness'].map(g=>`<option ${c.goal===g?'selected':''}>${g}</option>`).join('')}</select></div><div><label class="fl">Sessions Per Week</label><input class="fi" id="cf-spw" type="number" value="${c.sessionsPerWeek||''}" min="1" max="14"></div></div><div class="fr"><div><label class="fl">Current Weight (kg)</label><input class="fi" id="cf-weight" type="number" value="${c.weight||''}"></div><div><label class="fl">Height (cm)</label><input class="fi" id="cf-height" type="number" value="${c.height||''}"></div></div><div class="fr"><div><label class="fl">Start Date</label><input class="fi" id="cf-start" type="date" value="${c.startDate||''}"></div><div><label class="fl">End Date</label><input class="fi" id="cf-end" type="date" value="${c.endDate||''}"></div></div><div class="fr"><div><label class="fl">City</label><input class="fi" id="cf-city" value="${c.city||''}"></div><div><label class="fl">Company (if Corporate)</label><input class="fi" id="cf-company" value="${c.company||''}"></div></div><div style="margin-bottom:14px"><label class="fl">Medical Conditions / Notes</label><textarea class="fta" id="cf-med">${c.medical||''}</textarea></div><div class="fr" style="margin-bottom:14px"><div><label class="fl">Status</label><select class="fs" id="cf-active"><option value="true" ${c.active!==false?'selected':''}>Active</option><option value="false" ${c.active===false?'selected':''}>Inactive</option></select></div></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveClient('${c.id||''}')">Save Client</button></div>`;}
+function toggleCouplePlan(sel){const wrap=$('couple-wrap');if(wrap)wrap.style.display=sel.value==='Couple'?'block':'none';}
+async function saveClient(existingId=''){const name=$('cf-name').value.trim(),phone=$('cf-phone').value.trim();if(!name||!phone){toast('Name and phone are required','error');return}const plan=$('cf-plan').value;const trainerId=document.getElementById('cf-trainer-id')?.value||'';const trainerName=($('cf-trainer-inp')?.value||'').replace(/\s*\([^)]*\)\s*$/,'').trim()||'';const coordinatorId=document.getElementById('cf-coord-id')?.value||'';const coordinatorName=$('cf-coord-inp')?.value.trim()||'';const country=$('cf-country')?.value.trim()||'';const data={name,phone,email:$('cf-email').value.trim(),plan,trainerId,trainerName,coordinatorId,coordinatorName,gender:$('cf-gender').value,trainerGenderPref:$('cf-tgender').value,goal:$('cf-goal').value,weight:$('cf-weight').value,height:$('cf-height').value,startDate:$('cf-start').value,endDate:$('cf-end').value,medical:$('cf-med').value,active:$('cf-active').value==='true',sessionsPerWeek:$('cf-spw').value,city:$('cf-city').value.trim(),company:$('cf-company').value.trim(),country,age:Number($('cf-age')?.value)||null,addedBy:auth().currentUser.uid};if(plan==='Couple'){data.partnerName=document.getElementById('cf-partner-name')?.value.trim()||'';data.partnerPhone=document.getElementById('cf-partner-phone')?.value.trim()||'';data.partnerAge=Number(document.getElementById('cf-partner-age')?.value)||null;data.partnerGender=document.getElementById('cf-partner-gender')?.value||'';}else{data.partnerName='';data.partnerPhone='';data.partnerAge=null;data.partnerGender='';}try{if(existingId){await fsUpdate('clients',existingId,data);toast('Client updated!','success')}else{await fsAdd('clients',data);toast('Client added!','success')}closeM2();clients();}catch(e){toast('Error: '+e.message,'error')}}
+async function viewClient(id){const c=await fsGet('clients',id);if(!c){toast('Not found','error');return}const[sessions,attendance,trainerRatings,certs]=await Promise.all([fsGetAll('sessions',fn().where('clientId','==',id)),fsGetAll('attendance',fn().where('clientId','==',id)),c.trainerId?fsGetAll('trainerratings',fn().where('trainerId','==',c.trainerId)):[],c.trainerId?fsGetAll('certificates',fn().where('trainerId','==',c.trainerId)):[]]);const present=attendance.filter(a=>a.status==='present').length;const rate=attendance.length?Math.round(present/attendance.length*100):0;const trainerAvg=trainerRatings.length?avgRating(trainerRatings).toFixed(1):'-';openM2(`CLIENT: ${(c.name||'').toUpperCase()}`,`<div class="fr" style="margin-bottom:14px"><div class="sc sc-a" style="margin:0;padding:14px"><div class="sc-lbl">Plan</div><div style="font-size:22px;font-weight:700">${c.plan||'—'}</div></div><div class="sc sc-g" style="margin:0;padding:14px"><div class="sc-lbl">Attendance</div><div style="font-size:22px;font-weight:700">${rate}%</div></div></div><div class="detail-section"><div class="detail-section-title">Personal Info</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px"><div><span style="color:var(--muted)">Phone:</span> ${c.phone||'—'}</div><div><span style="color:var(--muted)">Email:</span> ${c.email||'—'}</div><div><span style="color:var(--muted)">Age:</span> ${c.age?c.age+' years':'—'}</div><div><span style="color:var(--muted)">Country:</span> ${c.country||'—'}</div></div></div><div class="detail-section"><div class="detail-section-title">Fitness Plan</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px"><div><span style="color:var(--muted)">Trainer:</span> ${c.trainerName||'—'} ${trainerAvg!=='-'?`<span style="color:#ffbb00">⭐${trainerAvg}</span>`:''}</div><div><span style="color:var(--muted)">Coordinator:</span> ${c.coordinatorName||'—'}</div><div><span style="color:var(--muted)">Goal:</span> ${c.goal||'—'}</div><div><span style="color:var(--muted)">Start:</span> ${c.startDate||'—'}</div></div></div><div class="mo-foot">${CR!=='trainer'&&CR!=='client'?`<button class="btn btn-g" onclick="closeM2();openEditClient('${id}')">Edit</button>`:''}<button class="btn btn-g" onclick="closeM2()">Close</button></div>`);}
+async function delClient(id){if(!confirm('Delete this client?'))return;try{await fsDel('clients',id);toast('Client deleted','success');clients()}catch(e){toast('Error: '+e.message,'error')}}
+// ══════ USERS ══════
+async function users(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  async function loadTab(role){const q=role==='all'?[]:[fn().where('role','==',role)];const data=await fsGetAll('users',...q);document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const tab=document.querySelector(`.tab[data-role="${role}"]`);if(tab)tab.classList.add('active');$('users-tbl').innerHTML=renderUsersTable(data);window._usersData=data;}
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px"><div class="tabs" style="margin:0;border:none">${['all','admin','coordinatorhead','coordinator','trainer','client'].map(r=>`<div class="tab ${r==='all'?'active':''}" data-role="${r}" onclick="window._uTab('${r}')">${r==='all'?'All':r==='coordinatorhead'?'Coord. Head':r.charAt(0).toUpperCase()+r.slice(1)}s</div>`).join('')}</div><button class="btn btn-p" onclick="openAddUser()">+ Add User</button></div><div class="card" style="padding:0"><div class="tbl-wrap" id="users-tbl"><div style="padding:30px;text-align:center;color:var(--muted)"><div class="spin" style="width:22px;height:22px;margin:0 auto"></div></div></div></div>`;
+  window._uTab=loadTab;loadTab('all');
+}
+function renderUsersTable(data){if(!data.length)return emptyState('👥','No users found','','+ Add User','openAddUser()');return`<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody>${data.map(u=>`<tr><td><strong>${u.name||'—'}</strong></td><td style="font-size:12px">${u.email||'—'}</td><td><span class="badge ${u.role==='admin'?'b-p':u.role==='coordinatorhead'?'b-o':u.role==='coordinator'?'b-b':u.role==='trainer'?'b-g':'b-y'}">${u.role||'—'}</span></td><td>${u.active!==false?`<span class="badge b-g">Active</span>`:`<span class="badge b-r">Inactive</span>`}</td><td style="font-size:12px">${fmtDate(u.createdAt)}</td><td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="openEditUser('${u.id}')">Edit</button>${u.id!==auth().currentUser.uid?`<button class="btn btn-d btn-sm" onclick="delUser('${u.id}')">Delete</button>`:'<span style="font-size:11px;color:var(--muted)">(you)</span>'}</div></td></tr>`).join('')}</tbody></table>`;}
+function openAddUser(){openM1('ADD USER',`<div class="fg"><label class="fl">Full Name *</label><input class="fi" id="uf-name" placeholder="Full name"></div><div class="fr"><div class="fg"><label class="fl">Role *</label><select class="fs" id="uf-role"><option value="">— Select —</option>${['admin','coordinatorhead','coordinator','trainer','client'].map(r=>`<option>${r}</option>`).join('')}</select></div><div class="fg"><label class="fl">Gender</label><select class="fs" id="uf-gender"><option value="">— Select —</option><option>Male</option><option>Female</option><option>Other</option></select></div></div><div class="fg"><label class="fl">Phone</label><input class="fi" id="uf-phone" placeholder="Phone number"></div><div class="fg"><label class="fl">Email *</label><input class="fi" id="uf-email" type="email" placeholder="user@example.com"></div><div class="fg"><label class="fl">Password *</label><div class="pw-wrap"><input class="fi" id="uf-pwd" type="password" placeholder="Min 6 characters"><button class="pw-toggle" type="button" onclick="togglePwd('uf-pwd',this)">👁</button></div></div><div id="uf-err" class="alert alert-err"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="createUser()">Create User</button></div>`);}
+async function createUser(){const name=$('uf-name').value.trim(),role=$('uf-role').value,email=$('uf-email').value.trim(),pwd=$('uf-pwd').value,errEl=$('uf-err');errEl.classList.remove('show');if(!name||!role||!email||!pwd){errEl.textContent='All fields are required.';errEl.classList.add('show');return}if(pwd.length<6){errEl.textContent='Password must be at least 6 characters.';errEl.classList.add('show');return}try{const cred=await fn().createUserWithEmailAndPassword(window.FB.auth2,email,pwd);const newUid=cred.user.uid;await fn().signOut(window.FB.auth2);await fn().setDoc(fn().doc(db(),'users',newUid),{name,email,role,gender:$('uf-gender').value,phone:$('uf-phone').value.trim(),active:true,createdAt:fn().serverTimestamp()});closeM1();toast(`User "${name}" created!`,'success');users();}catch(e){errEl.textContent=e.message.includes('email-already-in-use')?'This email is already registered.':e.message.replace('Firebase:','').replace(/\(auth.*\)/,'').trim();errEl.classList.add('show')}}
+async function openEditUser(id){const u=await fsGet('users',id);if(!u){toast('User not found','error');return}openM1('EDIT USER',`<div class="fg"><label class="fl">Full Name *</label><input class="fi" id="ue-name" value="${u.name||''}"></div><div class="fr"><div class="fg"><label class="fl">Role *</label><select class="fs" id="ue-role">${['admin','coordinatorhead','coordinator','trainer','client'].map(r=>`<option ${u.role===r?'selected':''}>${r}</option>`).join('')}</select></div><div class="fg"><label class="fl">Gender</label><select class="fs" id="ue-gender"><option value="">— Select —</option>${['Male','Female','Other'].map(g=>`<option ${u.gender===g?'selected':''}>${g}</option>`).join('')}</select></div></div><div class="fg"><label class="fl">Phone</label><input class="fi" id="ue-phone" value="${u.phone||''}"></div><div class="fg"><label class="fl">Status</label><select class="fs" id="ue-active"><option value="true" ${u.active!==false?'selected':''}>Active</option><option value="false" ${u.active===false?'selected':''}>Inactive</option></select></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveEditUser('${id}')">Save</button></div>`);}
+async function saveEditUser(id){const name=$('ue-name').value.trim(),role=$('ue-role').value;if(!name){toast('Name required','error');return}try{await fsUpdate('users',id,{name,role,gender:$('ue-gender').value,phone:$('ue-phone').value.trim(),active:$('ue-active').value==='true'});closeM1();toast('User updated!','success');users()}catch(e){toast('Error: '+e.message,'error')}}
+async function delUser(id){if(!confirm('Delete this user?'))return;try{await fsDel('users',id);toast('User deleted','success');users()}catch(e){toast('Error: '+e.message,'error')}}
+
+// ══════ TRAINERS ══════
+async function trainers(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  const[data,clientData,allRatings,allCerts]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('clients',fn().where('active','==',true)),fsGetAll('trainerratings'),fsGetAll('certificates')]);
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><span style="color:var(--muted);font-size:13px">${data.length} trainer${data.length!==1?'s':''} registered</span>${CR==='admin'||CR==='coordinatorhead'?`<button class="btn btn-p" onclick="openAddUser()">+ Add Trainer</button>`:''}</div>
+    <div class="card" style="padding:0"><div class="tbl-wrap">${data.length===0?emptyState('🧑‍🏫','No trainers yet','','',''):`<table><thead><tr><th>Trainer</th><th>Gender</th><th>Phone</th><th>Clients</th><th>Rating</th><th>Certs</th><th>Status</th><th>Actions</th></tr></thead><tbody>${data.map(t=>{const mc=clientData.filter(c=>c.trainerId===t.id).length;const tRatings=allRatings.filter(r=>r.trainerId===t.id);const avg=tRatings.length?avgRating(tRatings):0;const tCerts=allCerts.filter(c=>c.trainerId===t.id);const starCol=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';return`<tr><td><strong>${t.name||'—'}</strong><div style="font-size:11px;color:var(--muted)">${t.email||''}</div></td><td style="font-size:12px">${t.gender||'—'}</td><td style="font-size:12px;font-family:'JetBrains Mono',monospace">${t.phone||'—'}</td><td>${mc}</td><td>${tRatings.length?`<span style="color:${starCol}">★ ${avg.toFixed(1)}</span> <span style="font-size:11px;color:var(--muted)">(${tRatings.length})</span>`:'<span style="color:var(--muted2)">—</span>'}</td><td>${tCerts.length?`<span class="badge b-a">🎓 ${tCerts.length}</span>`:'<span style="color:var(--muted2)">0</span>'}</td><td>${t.active!==false?`<span class="badge b-g">Active</span>`:`<span class="badge b-r">Inactive</span>`}</td><td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="viewTrainerProfile('${t.id}','${(t.name||'').replace(/'/g,"\\'")}')">Profile</button>${CR==='admin'||CR==='coordinatorhead'?`<button class="btn btn-g btn-sm" onclick="openEditUser('${t.id}')">Edit</button>`:''}</div></td></tr>`;}).join('')}</tbody></table>`}</div></div>`;
+}
+async function viewTrainerProfile(trainerId,trainerName){const[tUser,tRatings,tCerts,tClients]=await Promise.all([fsGet('users',trainerId),fsGetAll('trainerratings',fn().where('trainerId','==',trainerId)),fsGetAll('certificates',fn().where('trainerId','==',trainerId)),fsGetAll('clients',fn().where('trainerId','==',trainerId),fn().where('active','==',true))]);const avg=tRatings.length?avgRating(tRatings):0;const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';const critBreakdown=RATING_CRITERIA.map(c=>{const vals=tRatings.filter(r=>r.criteria&&r.criteria[c.id]).map(r=>r.criteria[c.id]);const a=vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0;return{...c,avg:a};});openM2(`TRAINER: ${trainerName.toUpperCase()}`,`<div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px"><div class="staff-avatar" style="width:60px;height:60px;font-size:24px;background:var(--green-dim);color:var(--green)">${(trainerName||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div><div><div style="font-size:18px;font-weight:700">${tUser?.name||'—'}</div><div style="font-size:13px;color:var(--muted)">${tUser?.gender||''} · ${tUser?.phone||'—'}</div><div style="margin-top:6px"><span style="font-size:24px;font-weight:700;color:${col}">${avg.toFixed(1)}</span><span style="font-size:18px;color:${col};margin-left:4px">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span></div></div></div><div class="fr" style="margin-bottom:14px"><div class="sc sc-b" style="margin:0;padding:12px"><div class="sc-lbl">Clients</div><div style="font-size:28px;font-weight:700">${tClients.length}</div></div><div class="sc sc-a" style="margin:0;padding:12px"><div class="sc-lbl">Certificates</div><div style="font-size:28px;font-weight:700">${tCerts.length}</div></div><div class="sc sc-y" style="margin:0;padding:12px"><div class="sc-lbl">Ratings</div><div style="font-size:28px;font-weight:700">${tRatings.length}</div></div></div><div class="detail-section"><div class="detail-section-title">Performance Criteria</div><div class="rating-criteria-grid">${critBreakdown.map(c=>`<div class="criteria-card"><div class="criteria-label">${c.icon} ${c.label}</div><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div style="flex:1"><div class="pb"><div class="pb-fill" style="width:${c.avg/5*100}%;background:var(--yellow)"></div></div></div><div style="font-weight:700;font-size:13px;color:var(--yellow)">${c.avg>0?c.avg.toFixed(1):'—'}</div></div></div>`).join('')}</div></div>${tCerts.length>0?`<div class="detail-section"><div class="detail-section-title">🎓 Certificates</div>${tCerts.map(c=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><strong>${c.name}</strong> · ${c.issuer}${c.issueYear?` · ${c.issueYear}`:''}</div>`).join('')}</div>`:''}<div class="mo-foot">${CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-p" onclick="closeM2();openRateTrainer('${trainerId}','${trainerName.replace(/'/g,"\\'")}')">+ Rate Session</button>`:''}<button class="btn btn-g" onclick="closeM2()">Close</button></div>`);}
+
+// ══════ COORDINATORS ══════
+async function coordinators(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  const[coordData,headData,followups,ratings,clients]=await Promise.all([fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','coordinatorhead')),fsGetAll('followups'),fsGetAll('trainerratings'),fsGetAll('clients',fn().where('active','==',true))]);
+  const allStaff=[...headData.map(u=>({...u,_label:'Coordinator Head'})),...coordData.map(u=>({...u,_label:'Coordinator'}))];
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px"><div style="display:flex;gap:10px"><div class="sc sc-o" style="margin:0;padding:12px 18px"><div class="sc-lbl">Heads</div><div class="sc-val" style="font-size:28px">${headData.length}</div></div><div class="sc sc-b" style="margin:0;padding:12px 18px"><div class="sc-lbl">Coordinators</div><div class="sc-val" style="font-size:28px">${coordData.length}</div></div></div>${CR==='admin'?`<button class="btn btn-p" onclick="openAddUser()">+ Add Staff</button>`:''}</div>
+    <div class="staff-grid">${allStaff.map(u=>{const rc=roleColor(u.role);const myFU=followups.filter(f=>f.assignedTo===u.id||f.assignedToId===u.id);const pendingFU=myFU.filter(f=>!f.done&&f.status!=='completed').length;const doneFU=myFU.filter(f=>f.done||f.status==='completed').length;const myRatings=ratings.filter(r=>r.ratedById===u.id);const myClients=clients.filter(c=>c.coordinatorId===u.id);const ini=(u.name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);return`<div class="staff-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="staff-avatar" style="background:${rc}20;color:${rc}">${ini}</div><div><div style="font-weight:700;font-size:14px">${u.name||'—'}</div><span class="badge ${u.role==='coordinatorhead'?'b-o':'b-b'}" style="font-size:10px">${u._label}</span></div></div><div style="font-size:12px;color:var(--muted);display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px"><div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700">${myClients.length}</div><div style="font-size:10px;text-transform:uppercase">Clients</div></div><div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:${pendingFU>0?'var(--red)':'var(--green)'}">${pendingFU}</div><div style="font-size:10px;text-transform:uppercase">Pending FU</div></div><div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--green)">${doneFU}</div><div style="font-size:10px;text-transform:uppercase">Done FU</div></div><div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--yellow)">${myRatings.length}</div><div style="font-size:10px;text-transform:uppercase">Ratings</div></div></div>${u.phone?`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">📱 ${u.phone}</div>`:''}<div style="display:flex;gap:6px;flex-wrap:wrap">${CR==='admin'||CR==='coordinatorhead'?`<button class="btn btn-g btn-sm" onclick="openEditUser('${u.id}')">Edit</button><button class="btn btn-p btn-sm" onclick="assignFollowupToCoord('${u.id}','${(u.name||u.email).replace(/'/g,"\\'")}')">Assign Task</button>`:''}</div></div>`;}).join('')}${allStaff.length===0?emptyState('🧑‍💼','No coordinator staff','','',''):''}`;
+}
+async function assignFollowupToCoord(coordId,coordName){const cls=await fsGetAll('clients',fn().where('active','==',true));openM1(`ASSIGN TASK TO ${coordName.toUpperCase()}`,`<div class="fg"><label class="fl">Client *</label><input class="fi" id="aft-client-inp" placeholder="Type client name…" autocomplete="off"><input type="hidden" id="aft-client-id"></div><div class="fr"><div class="fg"><label class="fl">Type *</label><select class="fs" id="aft-type"><option value="">— Select —</option>${['Motivation','Renewal','Progress Check','Diet Review','Payment Reminder','General Check-in'].map(t=>`<option>${t}</option>`).join('')}</select></div><div class="fg"><label class="fl">Priority</label><select class="fs" id="aft-priority"><option>High</option><option>Medium</option><option>Low</option></select></div></div><div class="fg"><label class="fl">Remarks</label><textarea class="fta" id="aft-remark" placeholder="Task details…"></textarea></div><div class="fg"><label class="fl">Due Date</label><input class="fi" id="aft-due" type="date" value="${new Date().toISOString().split('T')[0]}"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveAssignedFollowup('${coordId}','${coordName}')">Assign</button></div>`);attachClientAC('aft-client-inp','aft-client-id',cls);}
+async function saveAssignedFollowup(coordId,coordName){const clientId=$('aft-client-id').value||$('aft-client-inp')?.dataset.selectedId||'';const clientName=$('aft-client-inp')?.value||'';const type=$('aft-type').value;if(!clientId||!type){toast('Client and type required','error');return}try{await fsAdd('followups',{clientId,clientName,type,priority:$('aft-priority').value,remark:$('aft-remark').value,dueDate:$('aft-due').value,done:false,assignedTo:coordId,assignedToName:coordName,assignedToId:coordId,createdBy:auth().currentUser.uid,status:'pending'});closeM1();toast('Task assigned!','success');}catch(e){toast('Error: '+e.message,'error')}}
+
+// ══════ COORDINATOR ATTENDANCE ══════
+async function coordinatorattendance(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  const data=await fsGetAll('coordinatorattendance');data.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.time||'').localeCompare(a.time||''));
+  const present=data.filter(a=>a.status==='present').length,absent=data.filter(a=>a.status==='absent').length,late=data.filter(a=>a.status==='late').length;
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><div></div><button class="btn btn-p" onclick="openMarkCoordAttend()">+ Mark Coordinator Attendance</button></div><div class="stats-grid" style="margin-bottom:18px"><div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Present</div><div class="sc-val">${present}</div></div><div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Absent</div><div class="sc-val">${absent}</div></div><div class="sc sc-y"><div class="sc-ico">⏰</div><div class="sc-lbl">Late</div><div class="sc-val">${late}</div></div><div class="sc sc-a"><div class="sc-ico">📊</div><div class="sc-lbl">Rate</div><div class="sc-val">${data.length?Math.round(present/data.length*100):0}%</div></div></div><div class="card" style="padding:0"><div class="tbl-wrap">${data.length===0?emptyState('🗓','No records','Mark coordinator attendance to track it here.','+ Mark Attendance','openMarkCoordAttend()'):`<table><thead><tr><th>Date</th><th>Time</th><th>Coordinator</th><th>Role</th><th>Status</th><th>Note</th><th>Marked By</th><th>Actions</th></tr></thead><tbody>${data.map(a=>`<tr><td style="font-size:12px">${a.date||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(a.time)||'—'}</td><td><strong>${a.coordName||'—'}</strong></td><td style="font-size:12px"><span class="badge ${a.coordRole==='coordinatorhead'?'b-o':'b-b'}">${a.coordRole==='coordinatorhead'?'Head':'Coordinator'}</span></td><td>${statusBadge(a.status)}</td><td style="font-size:12px">${a.note||'—'}</td><td style="font-size:12px">${a.markedByName||'—'}</td><td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="openEditCoordAttend('${a.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delCoordAttend('${a.id}')">Delete</button></div></td></tr>`).join('')}</tbody></table>`}</div></div>`;
+}
+async function openMarkCoordAttend(){const[coords,heads]=await Promise.all([fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','coordinatorhead'))]);const allCoords=[...heads.map(u=>({...u,_label:'Coordinator Head'})),...coords.map(u=>({...u,_label:'Coordinator'}))];openM1('MARK COORDINATOR ATTENDANCE',`<div class="fg"><label class="fl">Coordinator *</label><select class="fs" id="ca-coord"><option value="">— Select —</option>${allCoords.map(u=>`<option value="${u.id}" data-role="${u.role}" data-name="${u.name||u.email}">${u.name||u.email} (${u._label})</option>`).join('')}</select></div><div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" id="ca-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div><div class="fg"><label class="fl">Time</label><input class="fi" id="ca-time" type="time" value="${new Date().toTimeString().slice(0,5)}"></div></div><div class="fg"><label class="fl">Status *</label><select class="fs" id="ca-status"><option value="present">✅ Present</option><option value="absent">❌ Absent</option><option value="late">⏰ Late</option></select></div><div class="fg"><label class="fl">Note (optional)</label><input class="fi" id="ca-note" placeholder="Any remarks…"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveCoordAttend('')">Save</button></div>`);}
+async function openEditCoordAttend(id){const a=await fsGet('coordinatorattendance',id);if(!a){toast('Not found','error');return}const[coords,heads]=await Promise.all([fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','coordinatorhead'))]);const allCoords=[...heads.map(u=>({...u,_label:'Coordinator Head'})),...coords.map(u=>({...u,_label:'Coordinator'}))];openM1('EDIT COORDINATOR ATTENDANCE',`<div class="fg"><label class="fl">Coordinator *</label><select class="fs" id="ca-coord"><option value="">— Select —</option>${allCoords.map(u=>`<option value="${u.id}" data-role="${u.role}" data-name="${u.name||u.email}" ${u.id===a.coordId?'selected':''}>${u.name||u.email} (${u._label})</option>`).join('')}</select></div><div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" id="ca-date" type="date" value="${a.date||''}"></div><div class="fg"><label class="fl">Time</label><input class="fi" id="ca-time" type="time" value="${a.time||''}"></div></div><div class="fg"><label class="fl">Status *</label><select class="fs" id="ca-status"><option value="present" ${a.status==='present'?'selected':''}>✅ Present</option><option value="absent" ${a.status==='absent'?'selected':''}>❌ Absent</option><option value="late" ${a.status==='late'?'selected':''}>⏰ Late</option></select></div><div class="fg"><label class="fl">Note</label><input class="fi" id="ca-note" value="${a.note||''}"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveCoordAttend('${id}')">Update</button></div>`);}
+async function saveCoordAttend(existingId=''){const sel=$('ca-coord');const coordId=sel.value;const opt=sel.options[sel.selectedIndex];const coordName=opt?.dataset.name||'';const coordRole=opt?.dataset.role||'';const date=$('ca-date').value,status=$('ca-status').value,time=$('ca-time').value;if(!coordId||!date){toast('Select coordinator and date','error');return}const data={coordId,coordName,coordRole,date,time,status,note:$('ca-note').value,markedBy:auth().currentUser.uid,markedByName:CU.name||''};try{if(existingId){await fsUpdate('coordinatorattendance',existingId,data);toast('Updated!','success')}else{await fsAdd('coordinatorattendance',data);toast('Marked!','success')}closeM1();coordinatorattendance();}catch(e){toast('Error: '+e.message,'error')}}
+async function delCoordAttend(id){if(!confirm('Delete?'))return;try{await fsDel('coordinatorattendance',id);toast('Deleted','success');coordinatorattendance()}catch(e){toast('Error','error')}}
+
+// ══════ TRAINER ATTENDANCE ══════
+async function trainerattendance(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  const data=await fsGetAll('trainerattendance');data.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||(b.time||'').localeCompare(a.time||''));
+  const present=data.filter(a=>a.status==='present').length,absent=data.filter(a=>a.status==='absent').length,late=data.filter(a=>a.status==='late').length;
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><div></div><button class="btn btn-p" onclick="openMarkTrainerAttend()">+ Mark Trainer Attendance</button></div><div class="stats-grid" style="margin-bottom:18px"><div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Present</div><div class="sc-val">${present}</div></div><div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Absent</div><div class="sc-val">${absent}</div></div><div class="sc sc-y"><div class="sc-ico">⏰</div><div class="sc-lbl">Late</div><div class="sc-val">${late}</div></div><div class="sc sc-a"><div class="sc-ico">📊</div><div class="sc-lbl">Rate</div><div class="sc-val">${data.length?Math.round(present/data.length*100):0}%</div></div></div><div class="card" style="padding:0"><div class="tbl-wrap">${data.length===0?emptyState('✅','No records','Mark trainer attendance to track it here.','+ Mark Attendance','openMarkTrainerAttend()'):`<table><thead><tr><th>Date</th><th>Time</th><th>Trainer</th><th>Status</th><th>Note</th><th>Marked By</th><th>Actions</th></tr></thead><tbody>${data.map(a=>`<tr><td style="font-size:12px">${a.date||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(a.time)||'—'}</td><td><strong>${a.trainerName||'—'}</strong></td><td>${statusBadge(a.status)}</td><td style="font-size:12px">${a.note||'—'}</td><td style="font-size:12px">${a.markedByName||'—'}</td><td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="openEditTrainerAttend('${a.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delTrainerAttend('${a.id}')">Delete</button></div></td></tr>`).join('')}</tbody></table>`}</div></div>`;
+}
+async function openMarkTrainerAttend(){const trainers=await fsGetAll('users',fn().where('role','==','trainer'));openM1('MARK TRAINER ATTENDANCE',`<div class="fg"><label class="fl">Trainer *</label><input class="fi" id="ta-trainer-inp" placeholder="Type trainer name…" autocomplete="off"><input type="hidden" id="ta-trainer-id"></div><div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" id="ta-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div><div class="fg"><label class="fl">Time</label><input class="fi" id="ta-time" type="time" value="${new Date().toTimeString().slice(0,5)}"></div></div><div class="fg"><label class="fl">Status *</label><select class="fs" id="ta-status"><option value="present">✅ Present</option><option value="absent">❌ Absent</option><option value="late">⏰ Late</option></select></div><div class="fg"><label class="fl">Note</label><input class="fi" id="ta-note" placeholder="Any remarks…"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTrainerAttend('')">Save</button></div>`);attachUserAC('ta-trainer-inp','ta-trainer-id',trainers);}
+async function openEditTrainerAttend(id){const a=await fsGet('trainerattendance',id);if(!a){toast('Not found','error');return}const trainers=await fsGetAll('users',fn().where('role','==','trainer'));openM1('EDIT TRAINER ATTENDANCE',`<div class="fg"><label class="fl">Trainer *</label><input class="fi" id="ta-trainer-inp" placeholder="Type trainer name…" value="${a.trainerName||''}" autocomplete="off"><input type="hidden" id="ta-trainer-id" value="${a.trainerId||''}"></div><div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" id="ta-date" type="date" value="${a.date||''}"></div><div class="fg"><label class="fl">Time</label><input class="fi" id="ta-time" type="time" value="${a.time||''}"></div></div><div class="fg"><label class="fl">Status *</label><select class="fs" id="ta-status"><option value="present" ${a.status==='present'?'selected':''}>✅ Present</option><option value="absent" ${a.status==='absent'?'selected':''}>❌ Absent</option><option value="late" ${a.status==='late'?'selected':''}>⏰ Late</option></select></div><div class="fg"><label class="fl">Note</label><input class="fi" id="ta-note" value="${a.note||''}"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveTrainerAttend('${id}')">Update</button></div>`);attachUserAC('ta-trainer-inp','ta-trainer-id',trainers);}
+async function saveTrainerAttend(existingId=''){const trainerId=$('ta-trainer-id').value||$('ta-trainer-inp')?.dataset.selectedId||'';const trainerName=$('ta-trainer-inp')?.value||'';const date=$('ta-date').value,status=$('ta-status').value,time=$('ta-time').value;if(!trainerName||!date){toast('Select trainer and date','error');return}const data={trainerId,trainerName,date,time,status,note:$('ta-note').value,markedBy:auth().currentUser.uid,markedByName:CU.name||''};try{if(existingId){await fsUpdate('trainerattendance',existingId,data);toast('Updated!','success')}else{await fsAdd('trainerattendance',data);toast('Marked!','success')}closeM1();trainerattendance();}catch(e){toast('Error: '+e.message,'error')}}
+async function delTrainerAttend(id){if(!confirm('Delete?'))return;try{await fsDel('trainerattendance',id);toast('Deleted','success');trainerattendance()}catch(e){toast('Error: '+e.message,'error')}}
+
+// ══════ ATTENDANCE ══════
 async function attendance(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   let q=[];if(CR==='client')q=[fn().where('clientId','==',auth().currentUser.uid)];
-  let allData=await fsGetAll('attendance',...q);allData.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  window._attendanceAll=allData;
-  function renderPage(data){
-    const present=data.filter(a=>a.status==='present').length,absent=data.filter(a=>a.status==='absent').length,late=data.filter(a=>a.status==='late').length;
-    $('page').innerHTML=`
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><div></div>${CR!=='client'?`<button class="btn btn-p" onclick="openMarkAttendance()">+ Mark Attendance</button>`:''}</div>
-      <div class="stats-grid"><div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Present</div><div class="sc-val">${present}</div></div><div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Absent</div><div class="sc-val">${absent}</div></div><div class="sc sc-y"><div class="sc-ico">⏰</div><div class="sc-lbl">Late</div><div class="sc-val">${late}</div></div><div class="sc sc-a"><div class="sc-ico">📊</div><div class="sc-lbl">Rate</div><div class="sc-val">${data.length?Math.round(present/data.length*100):0}%</div></div></div>
-      ${renderDateFilterBar('att-from-f','att-to-f','filterAttendance()')}
-      <div class="card" style="padding:0"><div class="tbl-wrap" id="attendance-tbl">${renderAttendanceTable(data)}</div></div>`;
-    window.filterAttendance=function(){
-      const from=document.getElementById('att-from-f')?.value||'';
-      const to=document.getElementById('att-to-f')?.value||'';
-      const filtered=filterByDateRange(window._attendanceAll,'date',from,to);
-      document.getElementById('attendance-tbl').innerHTML=renderAttendanceTable(filtered);
-    };
-  }
-  renderPage(allData);
-}
-function renderAttendanceTable(data){
-  if(!data.length)return emptyState('✅','No records','Attendance will appear here.',CR!=='client'?'+ Mark Attendance':'',CR!=='client'?'openMarkAttendance()':'');
-  return`<table><thead><tr><th>Date</th><th>Client</th><th>Trainer</th><th>Session</th><th>Status</th><th>Reason</th>${CR!=='client'?'<th>Actions</th>':''}</tr></thead><tbody>
-  ${data.map(a=>`<tr><td style="font-size:12px">${a.date||'—'}</td><td><strong>${a.clientName||'—'}</strong></td><td style="font-size:12px">${a.trainerName||'—'}</td><td style="font-size:12px">${a.sessionType||'—'}</td><td>${statusBadge(a.status)}</td><td style="font-size:12px">${a.reason||'—'}</td>${CR!=='client'?`<td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="openEditAttend('${a.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delAttend('${a.id}')">Delete</button></div></td>`:''}</tr>`).join('')}
-  </tbody></table>`;
+  const data=await fsGetAll('attendance',...q);data.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const present=data.filter(a=>a.status==='present').length,absent=data.filter(a=>a.status==='absent').length,late=data.filter(a=>a.status==='late').length;
+  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><div></div>${CR!=='client'?`<button class="btn btn-p" onclick="openMarkAttendance()">+ Mark Attendance</button>`:''}</div><div class="stats-grid"><div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Present</div><div class="sc-val">${present}</div></div><div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Absent</div><div class="sc-val">${absent}</div></div><div class="sc sc-y"><div class="sc-ico">⏰</div><div class="sc-lbl">Late</div><div class="sc-val">${late}</div></div><div class="sc sc-a"><div class="sc-ico">📊</div><div class="sc-lbl">Rate</div><div class="sc-val">${data.length?Math.round(present/data.length*100):0}%</div></div></div><div class="card" style="padding:0"><div class="tbl-wrap">${data.length===0?emptyState('✅','No records','Attendance will appear here.',CR!=='client'?'+ Mark Attendance':'',CR!=='client'?'openMarkAttendance()':''):`<table><thead><tr><th>Date</th><th>Client</th><th>Trainer</th><th>Session</th><th>Status</th><th>Reason</th>${CR!=='client'?'<th>Actions</th>':''}</tr></thead><tbody>${data.map(a=>`<tr><td style="font-size:12px">${a.date||'—'}</td><td><strong>${a.clientName||'—'}</strong></td><td style="font-size:12px">${a.trainerName||'—'}</td><td style="font-size:12px">${a.sessionType||'—'}</td><td>${statusBadge(a.status)}</td><td style="font-size:12px">${a.reason||'—'}</td>${CR!=='client'?`<td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="openEditAttend('${a.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delAttend('${a.id}')">Delete</button></div></td>`:''}</tr>`).join('')}</tbody></table>`}</div></div>`;
 }
 async function openMarkAttendance(){const cls=await fsGetAll('clients',fn().where('active','==',true));openM1('MARK ATTENDANCE',`<div class="fg"><label class="fl">Client *</label><input class="fi" id="at-client-inp" placeholder="Type client name…" autocomplete="off"><input type="hidden" id="at-client-id"></div><div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" id="at-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div><div class="fg"><label class="fl">Status *</label><select class="fs" id="at-status"><option value="present">✅ Present</option><option value="absent">❌ Absent</option><option value="late">⏰ Late</option></select></div></div><div class="fg"><label class="fl">Session Type</label><select class="fs" id="at-type"><option value="">— Select —</option>${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div><div class="fg"><label class="fl">Reason</label><input class="fi" id="at-reason" placeholder="Optional reason"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveAttendance('')">Save</button></div>`);attachClientAC('at-client-inp','at-client-id',cls);}
 async function openEditAttend(id){const a=await fsGet('attendance',id);if(!a){toast('Not found','error');return}const cls=await fsGetAll('clients',fn().where('active','==',true));openM1('EDIT ATTENDANCE',`<div class="fg"><label class="fl">Client *</label><input class="fi" id="at-client-inp" placeholder="Type client name…" value="${a.clientName||''}" autocomplete="off"><input type="hidden" id="at-client-id" value="${a.clientId||''}"></div><div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" id="at-date" type="date" value="${a.date||''}"></div><div class="fg"><label class="fl">Status *</label><select class="fs" id="at-status"><option value="present" ${a.status==='present'?'selected':''}>✅ Present</option><option value="absent" ${a.status==='absent'?'selected':''}>❌ Absent</option><option value="late" ${a.status==='late'?'selected':''}>⏰ Late</option></select></div></div><div class="fg"><label class="fl">Reason</label><input class="fi" id="at-reason" value="${a.reason||''}"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveAttendance('${id}')">Update</button></div>`);attachClientAC('at-client-inp','at-client-id',cls);}
 async function saveAttendance(existingId=''){const clientId=$('at-client-id').value||$('at-client-inp')?.dataset.selectedId||'';const clientName=$('at-client-inp')?.value||'';const date=$('at-date').value,status=$('at-status').value;if(!clientName||!date||!status){toast('Fill required fields','error');return}const clientDoc=clientId?await fsGet('clients',clientId):null;const data={clientId,clientName,trainerId:clientDoc?.trainerId||'',trainerName:clientDoc?.trainerName||'',date,status,sessionType:document.getElementById('at-type')?.value||'',reason:$('at-reason').value,markedBy:auth().currentUser.uid};try{if(existingId){await fsUpdate('attendance',existingId,data);toast('Updated!','success')}else{await fsAdd('attendance',data);toast('Marked!','success')}closeM1();attendance();}catch(e){toast('Error: '+e.message,'error')}}
 async function delAttend(id){if(!confirm('Delete?'))return;try{await fsDel('attendance',id);toast('Deleted','success');attendance()}catch(e){toast('Error: '+e.message,'error')}}
+
+// ══════ ANALYTICS ══════
+async function analytics(){
+  $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
+  const[sessData,attendData,payData,clientData]=await Promise.all([fsGetAll('sessions'),fsGetAll('attendance'),fsGetAll('payments'),fsGetAll('clients',fn().where('active','==',true))]);
+  const monthlyRev={};payData.filter(p=>p.status==='paid'&&p.date).forEach(p=>{const m=p.date.substring(0,7);monthlyRev[m]=(monthlyRev[m]||0)+Number(p.amount||0)});
+  const revLabels=Object.keys(monthlyRev).sort().slice(-6),revVals=revLabels.map(m=>monthlyRev[m]);
+  const statusCount={onair:0,completed:0,missed:0,'not-started':0};sessData.forEach(s=>{if(statusCount[s.status]!==undefined)statusCount[s.status]++});
+  const present=attendData.filter(a=>a.status==='present').length,absent=attendData.filter(a=>a.status==='absent').length,late=attendData.filter(a=>a.status==='late').length;
+  const plans={};PLANS.forEach(p=>plans[p]=0);clientData.forEach(c=>{if(plans[c.plan]!==undefined)plans[c.plan]++});
+  $('page').innerHTML=`
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">${CR==='admin'?`<button class="btn btn-g btn-sm" onclick="exportPDF()">📥 Export Monthly Report</button>`:''}</div>
+    <div class="stats-grid"><div class="sc sc-a"><div class="sc-ico">🏃</div><div class="sc-lbl">Clients</div><div class="sc-val">${clientData.length}</div></div><div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Done</div><div class="sc-val">${statusCount.completed}</div></div><div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Missed</div><div class="sc-val">${statusCount.missed}</div></div><div class="sc sc-y"><div class="sc-ico">📊</div><div class="sc-lbl">Attendance</div><div class="sc-val">${attendData.length?Math.round(present/attendData.length*100):0}%</div></div></div>
+    <div class="two-col"><div class="card"><div class="card-hd"><div class="card-title">Monthly Revenue (₹)</div></div><div class="chart-box">${revLabels.length?`<canvas id="ch-rev"></canvas>`:emptyState('📈','No revenue data yet','','','')}</div></div><div class="card"><div class="card-hd"><div class="card-title">Session Status</div></div><div class="chart-box"><canvas id="ch-sess-st"></canvas></div></div></div>
+    <div class="two-col"><div class="card"><div class="card-hd"><div class="card-title">Attendance Summary</div></div><div class="chart-box"><canvas id="ch-attend"></canvas></div></div><div class="card"><div class="card-hd"><div class="card-title">Client Plans</div></div><div class="chart-box"><canvas id="ch-plans"></canvas></div></div></div>`;
+  setTimeout(()=>{if(revLabels.length&&$('ch-rev'))CH.r=new Chart($('ch-rev'),{type:'bar',data:{labels:revLabels,datasets:[{label:'Revenue ₹',data:revVals,backgroundColor:'rgba(212,255,0,.5)',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:'rgba(128,128,128,.1)'}},y:{grid:{color:'rgba(128,128,128,.1)'},beginAtZero:true}}}});if($('ch-sess-st'))CH.ss=new Chart($('ch-sess-st'),{type:'doughnut',data:{labels:['Completed','On Air','Missed','Pending'],datasets:[{data:[statusCount.completed,statusCount.onair,statusCount.missed,statusCount['not-started']],backgroundColor:['#d4ff00','#00e676','#ff4444','#555'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});if($('ch-attend'))CH.at=new Chart($('ch-attend'),{type:'doughnut',data:{labels:['Present','Absent','Late'],datasets:[{data:[present,absent,late],backgroundColor:['#00e676','#ff4444','#ffbb00'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});if($('ch-plans'))CH.pl=new Chart($('ch-plans'),{type:'doughnut',data:{labels:PLANS,datasets:[{data:PLANS.map(p=>plans[p]),backgroundColor:['#aaa','#ffbb00','#aa66ff','#00e676','#4d9fff'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right'}}}});},100);
+}
 
 // ── FOLLOW-UPS ────────────────────────────────────────────────
 async function followups(){
