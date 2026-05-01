@@ -1416,65 +1416,285 @@ async function adminViewChat(chatId){
   }catch(e){const c=$('admin-chat-msgs');if(c)c.innerHTML=`<div style="color:var(--red);font-size:13px">⚠️ ${e.message}</div>`}
 }
 
-// ── TIME SLOTS ────────────────────────────────────────────────
+// ── TIME SLOTS (UPDATED — replace the existing slots() function and helpers) ──────
+
 async function slots(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const isAdmin=(CR==='admin'||CR==='coordinator'||CR==='coordinatorhead');
-  const slotDocs=await fsGetAll('slots');
-  const fixedSlots=[{id:'s1',time:'6:00 – 7:00 AM',period:'Morning',trainerGenderHint:''},{id:'s2',time:'7:00 – 8:00 AM',period:'Morning',trainerGenderHint:'Female'},{id:'s3',time:'8:00 – 9:00 AM',period:'Morning',trainerGenderHint:''},{id:'s4',time:'9:00 – 10:00 AM',period:'Morning',trainerGenderHint:'Female'},{id:'s5',time:'4:30 – 5:30 PM',period:'Evening',trainerGenderHint:'Female'},{id:'s6',time:'5:30 – 6:30 PM',period:'Evening',trainerGenderHint:''},{id:'s7',time:'6:30 – 7:30 PM',period:'Evening',trainerGenderHint:'Female'},{id:'s8',time:'7:30 – 8:30 PM',period:'Evening',trainerGenderHint:''}];
-  function renderSlotSection(title,slotList){
-    return`<div class="card"><div class="card-hd"><div class="card-title">${title}</div></div>
-      <div class="slot-grid">${slotList.map(s=>{const doc=slotDocs.find(d=>d.slotId===s.id)||{};const cap=Number(doc.maxCapacity)||10;const enrolledCount=Number(doc.enrolledCount)||0;const isFull=enrolledCount>=cap;return`<div class="slot-card ${isFull?'full':''}"><div class="slot-time">${s.time}</div><div class="slot-trainer">👤 ${doc.trainerName||'TBD'} ${doc.trainerGender?`(${doc.trainerGender})`:''}</div>${s.trainerGenderHint?`<div class="slot-tag slot-tag-f">♀ ${s.trainerGenderHint}</div>`:''}<div class="slot-cap" style="color:${isFull?'var(--red)':'var(--muted)'}">${enrolledCount}/${cap} ${isFull?'<span class="badge b-r">Full</span>':'<span class="badge b-g">Open</span>'}</div>${isAdmin?`<div style="margin-top:10px"><button class="btn btn-g btn-sm btn-w" onclick="manageSlot('${s.id}','${s.time}')">⚙ Manage</button></div>`:''}${CR==='client'?`<div style="margin-top:10px">${isFull?`<button class="btn btn-g btn-sm btn-w" disabled>Full</button>`:`<button class="btn btn-p btn-sm btn-w" onclick="enrollSlotClient('${s.id}','${s.time}')">Book</button>`}</div>`:''}</div>`;}).join('')}
-      </div></div>`;
+  const myUid=auth().currentUser.uid;
+
+  // Load slots + all active clients (to resolve names from enrolledClients UIDs)
+  const [slotDocs, allClients, allUsers] = await Promise.all([
+    fsGetAll('slots'),
+    fsGetAll('clients', fn().where('active','==',true)),
+    fsGetAll('users')
+  ]);
+
+  const fixedSlots=[
+    {id:'s1',time:'6:00 – 7:00 AM',  period:'Morning', trainerGenderHint:''},
+    {id:'s2',time:'7:00 – 8:00 AM',  period:'Morning', trainerGenderHint:'Female'},
+    {id:'s3',time:'8:00 – 9:00 AM',  period:'Morning', trainerGenderHint:''},
+    {id:'s4',time:'9:00 – 10:00 AM', period:'Morning', trainerGenderHint:'Female'},
+    {id:'s5',time:'4:30 – 5:30 PM',  period:'Evening', trainerGenderHint:'Female'},
+    {id:'s6',time:'5:30 – 6:30 PM',  period:'Evening', trainerGenderHint:''},
+    {id:'s7',time:'6:30 – 7:30 PM',  period:'Evening', trainerGenderHint:'Female'},
+    {id:'s8',time:'7:30 – 8:30 PM',  period:'Evening', trainerGenderHint:''}
+  ];
+
+  // Helper: resolve a UID → display name (checks clients first, then users)
+  function resolveName(uid){
+    const c = allClients.find(x=>x.id===uid);
+    if(c) return c.name||'—';
+    const u = allUsers.find(x=>x.id===uid);
+    if(u) return u.name||u.email||'—';
+    return uid.slice(0,8)+'…';
   }
+
+  function renderSlotSection(title, slotList){
+    return `<div class="card">
+      <div class="card-hd"><div class="card-title">${title}</div></div>
+      <div class="slot-grid">
+        ${slotList.map(s=>{
+          const doc  = slotDocs.find(d=>d.slotId===s.id || d.id===s.id) || {};
+          const cap  = Number(doc.maxCapacity)||10;
+          const enrolled = doc.enrolledClients||[];
+          const count = Math.max(Number(doc.enrolledCount)||0, enrolled.length);
+          const isFull = count>=cap;
+          const isBooked = enrolled.includes(myUid); // client's own booking
+
+          // Build enrolled names list for admin/coord view
+          const enrolledNamesHtml = (isAdmin && enrolled.length > 0)
+            ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+                <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px">
+                  👥 Booked Clients (${enrolled.length})
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto">
+                  ${enrolled.map(uid=>{
+                    const name = resolveName(uid);
+                    const ini  = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+                    return `<div style="display:flex;align-items:center;gap:7px;padding:4px 7px;background:var(--bg);border:1px solid var(--border);border-radius:7px">
+                      <div style="width:22px;height:22px;border-radius:50%;background:var(--accent-dim);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${ini}</div>
+                      <span style="font-size:12px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>
+                      ${isAdmin ? `<button onclick="adminRemoveFromSlot('${s.id}','${uid}','${name.replace(/'/g,"\\'")}',event)" style="background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);border-radius:5px;padding:2px 7px;color:var(--red);font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0">✕</button>` : ''}
+                    </div>`;
+                  }).join('')}
+                </div>
+              </div>`
+            : (isAdmin && enrolled.length===0)
+              ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--muted2);text-align:center">No bookings yet</div>`
+              : '';
+
+          // Client: show their own booking status
+          const clientBookingHtml = (!isAdmin && CR==='client')
+            ? `<div style="margin-top:10px">
+                ${isBooked
+                  ? `<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;padding:6px 10px;background:var(--accent-dim);border:1px solid rgba(212,255,0,.2);border-radius:7px">
+                      <span style="color:var(--accent);font-size:13px">✅</span>
+                      <span style="font-size:12px;font-weight:600;color:var(--accent)">You've booked this slot</span>
+                    </div>
+                    <button class="btn btn-d btn-sm btn-w" onclick="unenrollSlotClient('${s.id}','${s.time}')">✕ Unbook</button>`
+                  : isFull
+                    ? `<button class="btn btn-g btn-sm btn-w" disabled style="opacity:.5;cursor:not-allowed">Slot Full</button>`
+                    : `<button class="btn btn-p btn-sm btn-w" onclick="enrollSlotClient('${s.id}','${s.time}')">+ Book This Slot</button>`
+                }
+              </div>`
+            : '';
+
+          return `<div class="slot-card ${isFull&&!isBooked?'full':''}" style="${isBooked?'border-color:var(--accent);background:var(--accent-dim)':''}">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <div class="slot-time">${s.time}</div>
+              ${isFull ? `<span class="badge b-r" style="font-size:10px">Full</span>` : `<span class="badge b-g" style="font-size:10px">Open</span>`}
+            </div>
+            <div class="slot-trainer">👤 ${doc.trainerName||'TBD'}${doc.trainerGender?` (${doc.trainerGender})`:''}</div>
+            ${s.trainerGenderHint ? `<div class="slot-tag slot-tag-f">♀ ${s.trainerGenderHint}</div>` : ''}
+            <div class="slot-cap" style="margin-top:6px">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">
+                <span>${count} enrolled</span><span>${Math.max(cap-count,0)} left</span>
+              </div>
+              <div class="pb"><div class="pb-fill" style="width:${Math.min(count/cap*100,100)}%;background:${count/cap>=0.8?'var(--red)':'var(--accent)'}"></div></div>
+            </div>
+            ${enrolledNamesHtml}
+            ${clientBookingHtml}
+            ${isAdmin ? `<div style="margin-top:10px"><button class="btn btn-g btn-sm btn-w" onclick="manageSlot('${s.id}','${s.time}')">⚙ Manage Slot</button></div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
   $('page').innerHTML=`
     <div class="card" style="background:var(--accent-dim);border-color:rgba(212,255,0,.3);margin-bottom:18px">
-      <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <span style="font-size:28px">🕐</span>
-        <div><div style="font-weight:700;color:var(--accent)">Fixed Daily Schedule — Silver & Gold Plans</div><div style="font-size:12px;color:var(--muted)">${isAdmin?'Manage slots below to assign trainers.':'Choose your preferred time slot.'}</div></div>
-        ${isAdmin?`<button class="btn btn-p btn-sm" style="margin-left:auto" onclick="setupDefaultSlots()">Setup Defaults</button>`:''}
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;color:var(--accent)">Fixed Daily Schedule — Silver & Gold Plans</div>
+          <div style="font-size:12px;color:var(--muted)">${isAdmin?'Manage slots · see all booked clients · remove bookings.':'Choose your preferred time slot. Your booking shows in green.'}</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${isAdmin ? `<button class="btn btn-g btn-sm" onclick="setupDefaultSlots()">⚙ Setup Defaults</button>` : ''}
+          <button class="btn btn-p btn-sm" onclick="slots()">↻ Refresh</button>
+        </div>
       </div>
     </div>
-    ${renderSlotSection('🌅 Morning Slots',fixedSlots.filter(s=>s.period==='Morning'))}
-    ${renderSlotSection('🌇 Evening Slots',fixedSlots.filter(s=>s.period==='Evening'))}`;
-}
-async function enrollSlotClient(slotId,slotTime){
-  const myUid=auth().currentUser.uid;
-  try{
-    const slotRef=fn().doc(db(),'slots',slotId);const slotSnap=await fn().getDoc(slotRef);
-    if(slotSnap.exists()){const d=slotSnap.data();const enrolled=d.enrolledClients||[];const cap=Number(d.maxCapacity)||10;if(enrolled.includes(myUid)){toast('Already enrolled','info');return}if(enrolled.length>=cap){toast('Slot is full','error');return}await fn().updateDoc(slotRef,{enrolledClients:[...enrolled,myUid],enrolledCount:enrolled.length+1})}
-    else{await fn().setDoc(slotRef,{slotId,slotTime,enrolledClients:[myUid],enrolledCount:1,maxCapacity:10,trainerId:'',trainerName:'',trainerGender:''})}
-    toast('Slot booked! ✅','success');slots();
-  }catch(e){toast('Error: '+e.message,'error')}
-}
-async function manageSlot(slotId,slotTime){
-  const trainers=await fsGetAll('users',fn().where('role','==','trainer'));
-  let slotDoc={};try{const snap=await fn().getDoc(fn().doc(db(),'slots',slotId));if(snap.exists())slotDoc=snap.data()}catch(e){}
-  openM1(`MANAGE SLOT: ${slotTime}`,`
-    <div class="fg"><label class="fl">Assign Trainer *</label><select class="fs" id="ms-trainer"><option value="">— Select trainer —</option>${trainers.map(t=>`<option value="${t.id}" data-gender="${t.gender||''}" ${slotDoc.trainerId===t.id?'selected':''}>${t.name||t.email} (${t.gender||'Any'})</option>`).join('')}</select></div>
-    <div class="fg"><label class="fl">Max Capacity</label><input class="fi" id="ms-cap" type="number" value="${slotDoc.maxCapacity||10}" min="1" max="30"></div>
-    <div style="background:var(--bg);border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--muted)">Currently enrolled: <strong>${slotDoc.enrolledCount||0}</strong></div>
-    <div id="ms-err" class="alert alert-err"></div>
-    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveSlotConfig('${slotId}','${slotTime}')">Save Slot</button></div>`);
-}
-async function saveSlotConfig(slotId,slotTime){
-  const trainerSel=$('ms-trainer');if(!trainerSel){toast('Form error','error');return}
-  const trainerId=trainerSel.value;const selectedOpt=trainerSel.options[trainerSel.selectedIndex];
-  const trainerName=trainerId?selectedOpt.text.replace(/\s*\([^)]*\)\s*$/,'').trim():'';
-  const trainerGender=trainerId?selectedOpt.dataset.gender||'':'';const cap=Number($('ms-cap').value)||10;
-  try{
-    const slotRef=fn().doc(db(),'slots',slotId);const snap=await fn().getDoc(slotRef);
-    if(snap.exists()){await fn().updateDoc(slotRef,{trainerId,trainerName,trainerGender,maxCapacity:cap,slotTime,updatedAt:fn().serverTimestamp()})}
-    else{await fn().setDoc(slotRef,{slotId,trainerId,trainerName,trainerGender,maxCapacity:cap,slotTime,enrolledClients:[],enrolledCount:0,createdAt:fn().serverTimestamp()})}
-    closeM1();toast('Slot saved!','success');slots();
-  }catch(e){const errEl=$('ms-err');if(errEl){errEl.textContent='Error: '+e.message;errEl.classList.add('show')}}
-}
-async function setupDefaultSlots(){
-  const slotIds=['s1','s2','s3','s4','s5','s6','s7','s8'];
-  const times=['6:00 – 7:00 AM','7:00 – 8:00 AM','8:00 – 9:00 AM','9:00 – 10:00 AM','4:30 – 5:30 PM','5:30 – 6:30 PM','6:30 – 7:30 PM','7:30 – 8:30 PM'];
-  try{for(let i=0;i<slotIds.length;i++){const ref=fn().doc(db(),'slots',slotIds[i]);const snap=await fn().getDoc(ref);if(!snap.exists())await fn().setDoc(ref,{slotId:slotIds[i],slotTime:times[i],maxCapacity:10,enrolledClients:[],enrolledCount:0,trainerId:'',trainerName:'',trainerGender:'',createdAt:fn().serverTimestamp()})}toast('Default slots created!','success');slots()}catch(e){toast('Error: '+e.message,'error')}
+
+    ${isAdmin ? `
+    <!-- ADMIN SUMMARY STATS -->
+    <div class="stats-grid" style="margin-bottom:18px">
+      <div class="sc sc-a"><div class="sc-ico">🕐</div><div class="sc-lbl">Total Slots</div><div class="sc-val">${fixedSlots.length}</div></div>
+      <div class="sc sc-g"><div class="sc-ico">👥</div><div class="sc-lbl">Total Enrolled</div>
+        <div class="sc-val">${fixedSlots.reduce((sum,s)=>{const d=slotDocs.find(x=>x.slotId===s.id||x.id===s.id)||{};return sum+Math.max(Number(d.enrolledCount)||0,(d.enrolledClients||[]).length);},0)}</div>
+      </div>
+      <div class="sc sc-r"><div class="sc-ico">🔴</div><div class="sc-lbl">Full Slots</div>
+        <div class="sc-val">${fixedSlots.filter(s=>{const d=slotDocs.find(x=>x.slotId===s.id||x.id===s.id)||{};const cnt=Math.max(Number(d.enrolledCount)||0,(d.enrolledClients||[]).length);return cnt>=(Number(d.maxCapacity)||10);}).length}</div>
+      </div>
+      <div class="sc sc-b"><div class="sc-ico">✅</div><div class="sc-lbl">Open Slots</div>
+        <div class="sc-val">${fixedSlots.filter(s=>{const d=slotDocs.find(x=>x.slotId===s.id||x.id===s.id)||{};const cnt=Math.max(Number(d.enrolledCount)||0,(d.enrolledClients||[]).length);return cnt<(Number(d.maxCapacity)||10);}).length}</div>
+      </div>
+    </div>` : ''}
+
+    ${renderSlotSection('🌅 Morning Slots', fixedSlots.filter(s=>s.period==='Morning'))}
+    ${renderSlotSection('🌇 Evening Slots', fixedSlots.filter(s=>s.period==='Evening'))}`;
 }
 
+// ── ENROLL (CLIENT) ─────────────────────────────────────────
+async function enrollSlotClient(slotId, slotTime){
+  const myUid = auth().currentUser.uid;
+  try{
+    const slotRef = fn().doc(db(),'slots',slotId);
+    const snap    = await fn().getDoc(slotRef);
+    if(snap.exists()){
+      const d = snap.data();
+      const enrolled = d.enrolledClients||[];
+      const cap = Number(d.maxCapacity)||10;
+      if(enrolled.includes(myUid)){ toast('Already booked!','info'); return; }
+      if(enrolled.length>=cap){ toast('Slot is full!','error'); return; }
+      await fn().updateDoc(slotRef,{
+        enrolledClients: [...enrolled, myUid],
+        enrolledCount: enrolled.length+1,
+        updatedAt: fn().serverTimestamp()
+      });
+    } else {
+      await fn().setDoc(slotRef,{
+        slotId, slotTime,
+        enrolledClients:[myUid], enrolledCount:1, maxCapacity:10,
+        trainerId:'', trainerName:'', trainerGender:'',
+        createdAt: fn().serverTimestamp()
+      });
+    }
+    toast(`✅ Booked: ${slotTime}`,'success');
+    slots();
+  }catch(e){ toast('Error: '+e.message,'error'); }
+}
+
+// ── UNENROLL (CLIENT) ───────────────────────────────────────
+async function unenrollSlotClient(slotId, slotTime){
+  if(!confirm(`Unbook "${slotTime}"?`)) return;
+  const myUid = auth().currentUser.uid;
+  try{
+    const slotRef  = fn().doc(db(),'slots',slotId);
+    const snap     = await fn().getDoc(slotRef);
+    if(!snap.exists()){ toast('Slot not found','error'); return; }
+    const d        = snap.data();
+    const enrolled = (d.enrolledClients||[]).filter(id=>id!==myUid);
+    await fn().updateDoc(slotRef,{
+      enrolledClients: enrolled,
+      enrolledCount: enrolled.length,
+      updatedAt: fn().serverTimestamp()
+    });
+    toast(`Unbooked: ${slotTime}`,'info');
+    slots();
+  }catch(e){ toast('Error: '+e.message,'error'); }
+}
+
+// ── ADMIN REMOVE CLIENT FROM SLOT ──────────────────────────
+async function adminRemoveFromSlot(slotId, uid, clientName, event){
+  event && event.stopPropagation();
+  if(!confirm(`Remove "${clientName}" from this slot?`)) return;
+  try{
+    const slotRef  = fn().doc(db(),'slots',slotId);
+    const snap     = await fn().getDoc(slotRef);
+    if(!snap.exists()) return;
+    const d        = snap.data();
+    const enrolled = (d.enrolledClients||[]).filter(id=>id!==uid);
+    await fn().updateDoc(slotRef,{
+      enrolledClients: enrolled,
+      enrolledCount: enrolled.length,
+      updatedAt: fn().serverTimestamp()
+    });
+    toast(`Removed ${clientName} from slot`,'success');
+    slots();
+  }catch(e){ toast('Error: '+e.message,'error'); }
+}
+
+// ── MANAGE SLOT (ADMIN) — unchanged but kept complete ───────
+async function manageSlot(slotId, slotTime){
+  const trainers = await fsGetAll('users',fn().where('role','==','trainer'));
+  let slotDoc = {};
+  try{
+    const snap = await fn().getDoc(fn().doc(db(),'slots',slotId));
+    if(snap.exists()) slotDoc = snap.data();
+  }catch(e){}
+  const enrolled = slotDoc.enrolledClients||[];
+  openM1(`MANAGE SLOT: ${slotTime}`,`
+    <div class="fg"><label class="fl">Assign Trainer</label>
+      <select class="fs" id="ms-trainer">
+        <option value="">— Select trainer —</option>
+        ${trainers.map(t=>`<option value="${t.id}" data-gender="${t.gender||''}" ${slotDoc.trainerId===t.id?'selected':''}>${t.name||t.email} (${t.gender||'Any'})</option>`).join('')}
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Max Capacity</label>
+      <input class="fi" id="ms-cap" type="number" value="${slotDoc.maxCapacity||10}" min="1" max="50">
+    </div>
+    <div style="background:var(--bg);border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--muted)">
+      Currently enrolled: <strong style="color:var(--accent)">${enrolled.length}</strong> / ${slotDoc.maxCapacity||10}
+    </div>
+    <div id="ms-err" class="alert alert-err"></div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
+      <button class="btn btn-p" onclick="saveSlotConfig('${slotId}','${slotTime}')">Save Slot</button>
+    </div>`);
+}
+
+async function saveSlotConfig(slotId, slotTime){
+  const trainerSel = $('ms-trainer');
+  if(!trainerSel){ toast('Form error','error'); return; }
+  const trainerId   = trainerSel.value;
+  const selectedOpt = trainerSel.options[trainerSel.selectedIndex];
+  const trainerName = trainerId ? selectedOpt.text.replace(/\s*\([^)]*\)\s*$/,'').trim() : '';
+  const trainerGender = trainerId ? selectedOpt.dataset.gender||'' : '';
+  const cap = Number($('ms-cap').value)||10;
+  try{
+    const slotRef = fn().doc(db(),'slots',slotId);
+    const snap    = await fn().getDoc(slotRef);
+    if(snap.exists()){
+      await fn().updateDoc(slotRef,{ trainerId, trainerName, trainerGender, maxCapacity:cap, slotTime, updatedAt:fn().serverTimestamp() });
+    } else {
+      await fn().setDoc(slotRef,{ slotId, trainerId, trainerName, trainerGender, maxCapacity:cap, slotTime, enrolledClients:[], enrolledCount:0, createdAt:fn().serverTimestamp() });
+    }
+    closeM1(); toast('Slot saved!','success'); slots();
+  }catch(e){
+    const errEl = $('ms-err');
+    if(errEl){ errEl.textContent='Error: '+e.message; errEl.classList.add('show'); }
+  }
+}
+
+async function setupDefaultSlots(){
+  const slotIds = ['s1','s2','s3','s4','s5','s6','s7','s8'];
+  const times   = ['6:00 – 7:00 AM','7:00 – 8:00 AM','8:00 – 9:00 AM','9:00 – 10:00 AM','4:30 – 5:30 PM','5:30 – 6:30 PM','6:30 – 7:30 PM','7:30 – 8:30 PM'];
+  try{
+    for(let i=0;i<slotIds.length;i++){
+      const ref  = fn().doc(db(),'slots',slotIds[i]);
+      const snap = await fn().getDoc(ref);
+      if(!snap.exists()) await fn().setDoc(ref,{
+        slotId:slotIds[i], slotTime:times[i],
+        maxCapacity:10, enrolledClients:[], enrolledCount:0,
+        trainerId:'', trainerName:'', trainerGender:'',
+        createdAt:fn().serverTimestamp()
+      });
+    }
+    toast('Default slots set up!','success'); slots();
+  }catch(e){ toast('Error: '+e.message,'error'); }
+}
 // ── BATCHES ───────────────────────────────────────────────────
 async function batches(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
