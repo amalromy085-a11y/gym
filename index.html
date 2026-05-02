@@ -624,8 +624,85 @@ async function doLogout(){
   $('l-email').value='';$('l-pwd').value='';$('l-role').value='';$('l-btn').textContent='SIGN IN';$('l-btn').disabled=false;
   toast('Signed out','info');
 }
-function showForgot(){openM1('RESET PASSWORD',`<p style="color:var(--muted);font-size:13px;margin-bottom:14px">Enter your email to receive a reset link.</p><label class="fl">Email</label><input class="fi" id="re-email" type="email" placeholder="you@example.com" style="margin-bottom:14px"><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="sendReset()">Send Reset Link</button></div>`)}
-async function sendReset(){const e=$('re-email').value.trim();if(!e){toast('Enter your email','error');return}try{await fn().sendPasswordResetEmail(auth(),e);closeM1();$('ls').textContent='Reset email sent!';$('ls').classList.add('show');setTimeout(()=>$('ls').classList.remove('show'),6000)}catch(err){toast(err.message,'error')}}
+// ── REPLACE these two functions in your code ──────────────────
+
+function showForgot(){
+  openM1('RESET PASSWORD',`
+    <p style="color:var(--muted);font-size:13px;margin-bottom:14px">
+      Enter your registered email address. A reset link will be sent to your inbox.
+    </p>
+    <div class="fg">
+      <label class="fl">Email Address</label>
+      <input class="fi" id="re-email" type="email" placeholder="you@example.com"
+             style="margin-bottom:6px"
+             onkeydown="if(event.key==='Enter')sendReset()">
+    </div>
+    <div style="background:var(--yellow-dim);border:1px solid rgba(255,187,0,.3);
+                border-radius:8px;padding:10px 14px;font-size:12px;
+                color:var(--yellow);margin-bottom:14px">
+      ⚠️ Check your <strong>Spam / Junk</strong> folder if you don't see the email within a minute.
+      The email is sent from Firebase (noreply@…firebaseapp.com).
+    </div>
+    <div id="re-err" class="alert alert-err"></div>
+    <div id="re-ok"  class="alert alert-ok"></div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
+      <button class="btn btn-p" id="re-btn" onclick="sendReset()">Send Reset Link</button>
+    </div>`);
+}
+
+async function sendReset(){
+  const emailInput = document.getElementById('re-email');
+  const errEl      = document.getElementById('re-err');
+  const okEl       = document.getElementById('re-ok');
+  const btn        = document.getElementById('re-btn');
+  if(!emailInput || !errEl || !okEl || !btn) return;
+
+  const e = emailInput.value.trim();
+  errEl.classList.remove('show');
+  okEl.classList.remove('show');
+
+  if(!e){ errEl.textContent='Please enter your email address.'; errEl.classList.add('show'); return; }
+
+  // basic email format check
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){
+    errEl.textContent='Please enter a valid email address.'; errEl.classList.add('show'); return;
+  }
+
+  btn.innerHTML='<span class="spin"></span> Sending…';
+  btn.disabled=true;
+
+  try{
+    // Always use the PRIMARY auth instance (window.FB.auth), NOT auth2
+    await fn().sendPasswordResetEmail(window.FB.auth, e);
+
+    okEl.textContent='✅ Reset email sent! Check your inbox (and spam folder).';
+    okEl.classList.add('show');
+    btn.textContent='Sent ✓';
+    // close modal after 3 seconds
+    setTimeout(()=>closeM1(), 3000);
+
+  }catch(err){
+    btn.textContent='Send Reset Link';
+    btn.disabled=false;
+
+    const code = err.code || '';
+    let msg;
+    if(code==='auth/user-not-found')
+      msg='No account found with this email address.';
+    else if(code==='auth/invalid-email')
+      msg='Invalid email address format.';
+    else if(code==='auth/too-many-requests')
+      msg='Too many attempts. Please wait a few minutes and try again.';
+    else if(code==='auth/network-request-failed')
+      msg='Network error. Please check your internet connection.';
+    else
+      msg=(err.message||'Unknown error').replace('Firebase:','').replace(/\(auth.*\)/,'').trim();
+
+    errEl.textContent=msg;
+    errEl.classList.add('show');
+  }
+}
 function showChangePwd(){openM1('CHANGE PASSWORD',`<div class="fg"><label class="fl">Current Password</label><input class="fi" id="cp-cur" type="password" placeholder="Current password"></div><div class="fg"><label class="fl">New Password</label><div class="pw-wrap"><input class="fi" id="cp-new" type="password" placeholder="Min 6 characters"><button class="pw-toggle" type="button" onclick="togglePwd('cp-new',this)">👁</button></div></div><div class="fg" style="margin-bottom:0"><label class="fl">Confirm New Password</label><input class="fi" id="cp-cfm" type="password" placeholder="Repeat new password"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="doChangePwd()">Update Password</button></div>`)}
 async function doChangePwd(){const cur=$('cp-cur').value,np=$('cp-new').value,cfm=$('cp-cfm').value;if(!cur||!np||!cfm){toast('Fill all fields','error');return}if(np.length<6){toast('Min 6 characters','error');return}if(np!==cfm){toast('Passwords do not match','error');return}try{const user=auth().currentUser;const cred=fn().EmailAuthProvider.credential(user.email,cur);await fn().reauthenticateWithCredential(user,cred);await fn().updatePassword(user,np);closeM1();toast('Password updated!','success')}catch(e){const m=e.message||'';toast(m.includes('wrong-password')||m.includes('invalid-credential')?'Current password incorrect.':m,'error')}}
 function startApp(){
