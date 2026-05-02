@@ -528,109 +528,20 @@ function showMissedReasonPopup(sessionId,clientName,trainerName,date,time,reqId=
 }
 function toggleMRPOtherReason(){const sel=document.getElementById('mrp-reason-sel');const wrap=document.getElementById('mrp-other-wrap');if(wrap)wrap.style.display=(sel&&sel.value==='Other')?'block':'none';}
 function dismissMissedReasonPopup(){const o=document.getElementById('missed-reason-overlay');if(o)o.remove();}
-async function submitMissedReasonPopup(sessionId, clientName, trainerName, date, time, reqId = '') {
-  const reasonSel = document.getElementById('mrp-reason-sel');
-  const reason = reasonSel ? reasonSel.value : '';
-  if (!reason) { toast('Please select a reason', 'error'); return; }
-
-  const finalReason = reason === 'Other'
-    ? (document.getElementById('mrp-other')?.value.trim() || 'Other')
-    : reason;
-  const notes = document.getElementById('mrp-notes')?.value.trim() || '';
-
-  const btn = document.querySelector('#missed-reason-overlay .btn-d');
-  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
-
-  try {
-    // 1. Save the missed reason report
-    await fsAdd('missedreasons', {
-      sessionId, clientName, trainerName, date, time,
-      reason: finalReason, notes,
-      reportedBy: auth().currentUser.uid,
-      reportedByName: CU.name || '',
-      reportedByRole: CR
-    });
-
-    // 2. Mark the request as resolved (if there was one)
-    if (reqId) {
-      try {
-        await fsUpdate('missedreasonrequests', reqId, {
-          resolved: true,
-          resolvedBy: auth().currentUser.uid,
-          resolvedByName: CU.name || ''
-        });
-      } catch (e) {}
-    }
-
-    // 3. Notify all admins via notification + chat message
-    const admins = await fsGetAll('users', fn().where('role', '==', 'admin'));
-    const myUid  = auth().currentUser.uid;
-
-    const notifBody =
-      `Reason: "${finalReason}"` +
-      (notes ? ` | Notes: "${notes}"` : '') +
-      `\nClient: ${clientName || '—'} | Trainer: ${trainerName || '—'}` +
-      ` | ${date || '—'} at ${to12h(time)}` +
-      `\nReported by: ${CU.name || ''} (${CR})`;
-
-    // In-app notifications for admins
-    await createNotifForUsers(
-      {
-        key: `missed_reason_submitted_${sessionId}_${Date.now()}`,
-        title: '📋 Missed Session — Reason Submitted',
-        body: notifBody,
-        type: 'missed_reason_submitted',
-        sessionId
-      },
-      admins.map(a => a.id)
-    );
-
-    // Chat message to each admin from the reporter
-    const chatMsg =
-      `📋 MISSED SESSION REASON SUBMITTED\n` +
-      `Client: ${clientName || '—'}\n` +
-      `Trainer: ${trainerName || '—'}\n` +
-      `Date/Time: ${date || '—'} at ${to12h(time)}\n` +
-      `Reason: ${finalReason}\n` +
-      (notes ? `Notes: ${notes}\n` : '') +
-      `Reported by: ${CU.name || ''} (${CR})`;
-
-    await Promise.all(
-      admins
-        .filter(a => a.id !== myUid)
-        .map(async admin => {
-          const chatId = getChatId(myUid, admin.id);
-          try {
-            await fn().addDoc(fn().collection(db(), `chats/${chatId}/messages`), {
-              senderId:   myUid,
-              senderName: CU.name || CU.email || '',
-              message:    chatMsg,
-              timestamp:  fn().serverTimestamp(),
-              read:       false,
-              type:       'missed_reason_report'
-            });
-            await fn().setDoc(fn().doc(db(), 'chats', chatId), {
-              participants:    [myUid, admin.id],
-              lastMessage:     `📋 Missed reason: ${clientName}`,
-              lastMessageTime: fn().serverTimestamp(),
-              lastSenderId:    myUid
-            }, { merge: true });
-          } catch (e) {}
-        })
-    );
-
-    dismissMissedReasonPopup();
-    toast('Reason submitted ✅ — Admins notified', 'success');
-
-    if (document.querySelector('.ni.active')?.id === 'ni-dash') {
-      setTimeout(() => dash(), 300);
-    }
-
-  } catch (e) {
-    toast('Error: ' + e.message, 'error');
-    if (btn) { btn.textContent = '⚠️ Submit Reason'; btn.disabled = false; }
-  }
-}function openDotsMenu(menuId){document.querySelectorAll('.dots-dropdown').forEach(d=>{if(d.id!==menuId)d.classList.remove('open');});const dd=document.getElementById(menuId);if(dd)dd.classList.toggle('open');}
+async function submitMissedReasonPopup(sessionId,clientName,trainerName,date,time,reqId=''){
+  const reasonSel=document.getElementById('mrp-reason-sel');const reason=reasonSel?reasonSel.value:'';
+  if(!reason){toast('Please select a reason','error');return}
+  const finalReason=reason==='Other'?(document.getElementById('mrp-other')?.value.trim()||'Other'):reason;
+  const notes=document.getElementById('mrp-notes')?.value.trim()||'';
+  const btn=document.querySelector('#missed-reason-overlay .btn-d');if(btn){btn.textContent='Saving…';btn.disabled=true;}
+  try{
+    await fsAdd('missedreasons',{sessionId,clientName,trainerName,date,time,reason:finalReason,notes,reportedBy:auth().currentUser.uid,reportedByName:CU.name||'',reportedByRole:CR});
+    if(reqId){try{await fsUpdate('missedreasonrequests',reqId,{resolved:true,resolvedBy:auth().currentUser.uid,resolvedByName:CU.name||''});}catch(e){}}
+    dismissMissedReasonPopup();toast('Reason submitted ✅','success');
+    if(document.querySelector('.ni.active')?.id==='ni-dash'){setTimeout(()=>dash(),300);}
+  }catch(e){toast('Error: '+e.message,'error');if(btn){btn.textContent='⚠️ Submit Reason';btn.disabled=false;}}
+}
+function openDotsMenu(menuId){document.querySelectorAll('.dots-dropdown').forEach(d=>{if(d.id!==menuId)d.classList.remove('open');});const dd=document.getElementById(menuId);if(dd)dd.classList.toggle('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('.dots-menu-wrap')){document.querySelectorAll('.dots-dropdown').forEach(d=>d.classList.remove('open'));}});
 function toggleCollapsible(id){const hd=document.getElementById('col-hd-'+id);const body=document.getElementById('col-body-'+id);if(!hd||!body)return;const isOpen=body.classList.contains('open');hd.classList.toggle('open',!isOpen);body.classList.toggle('open',!isOpen);}
 function getTcVisibleSessions(tcEntries,clients,todayStr){
@@ -766,41 +677,102 @@ function navTo(id){
 }
 
 // ══════════════════════════════════════════════════════════════
-// LEAVE MANAGEMENT
+// LEAVE MANAGEMENT — replace everything from
+// "async function myleaves()" down to "async function delLeave"
 // ══════════════════════════════════════════════════════════════
+
 async function myleaves(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const myUid=auth().currentUser.uid;
   const data=await fsGetAll('leaves',fn().where('requestedById','==',myUid));
   data.sort((a,b)=>(b.fromDate||'').localeCompare(a.fromDate||''));
+  window._myLeaveData=data;
+
   $('page').innerHTML=`
     <div class="card" style="background:var(--blue-dim);border-color:rgba(77,159,255,.3);margin-bottom:18px">
       <div style="display:flex;align-items:center;gap:12px">
         <span style="font-size:28px">🏖</span>
-        <div><div style="font-weight:700;color:var(--blue)">My Leave Requests</div><div style="font-size:12px;color:var(--muted)">Submit and track your leave applications.</div></div>
+        <div>
+          <div style="font-weight:700;color:var(--blue)">My Leave Requests</div>
+          <div style="font-size:12px;color:var(--muted)">Submit and track your leave applications.</div>
+        </div>
         <button class="btn btn-p btn-sm" style="margin-left:auto" onclick="openRequestLeave()">+ Request Leave</button>
       </div>
     </div>
+
     <div class="stats-grid" style="margin-bottom:18px">
       <div class="sc sc-y"><div class="sc-ico">⏳</div><div class="sc-lbl">Pending</div><div class="sc-val">${data.filter(l=>l.status==='pending').length}</div></div>
       <div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Approved</div><div class="sc-val">${data.filter(l=>l.status==='approved').length}</div></div>
       <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Rejected</div><div class="sc-val">${data.filter(l=>l.status==='rejected').length}</div></div>
     </div>
-    <div class="card" style="padding:0"><div class="tbl-wrap">
-      ${data.length===0?emptyState('🏖','No leave requests yet','Submit your first leave request.','+Request Leave','openRequestLeave()'):
-      `<table><thead><tr><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Notes</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>
-      ${data.map(l=>{const days=Math.ceil((new Date(l.toDate)-new Date(l.fromDate))/(1000*60*60*24))+1;const canCancel=l.status==='pending';return`<tr>
-        <td style="font-size:12px">${l.fromDate||'—'}</td><td style="font-size:12px">${l.toDate||'—'}</td>
-        <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${days}</td>
-        <td><span class="badge b-b">${l.reason||'—'}</span></td>
-        <td style="font-size:12px;max-width:160px">${l.notes||'—'}</td>
-        <td>${statusBadge(l.status||'pending')}</td>
-        <td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td>
-        <td>${canCancel?`<button class="btn btn-d btn-sm" onclick="cancelLeave('${l.id}')">Cancel</button>`:'—'}</td>
-      </tr>`;}).join('')}
-      </tbody></table>`}
-    </div></div>`;
+
+    <!-- Filter bar -->
+    <div class="card" style="padding:12px 16px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">From</span>
+          <input class="fi" type="date" id="mlv-from" style="max-width:148px;margin:0;padding:8px 10px;font-size:12px" onchange="filterMyLeaves()">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">To</span>
+          <input class="fi" type="date" id="mlv-to" style="max-width:148px;margin:0;padding:8px 10px;font-size:12px" onchange="filterMyLeaves()">
+        </div>
+        <select class="fs" id="mlv-status" style="max-width:148px;padding:8px 10px;font-size:12px" onchange="filterMyLeaves()">
+          <option value="">All Statuses</option>
+          <option value="pending">⏳ Pending</option>
+          <option value="approved">✅ Approved</option>
+          <option value="rejected">❌ Rejected</option>
+        </select>
+        <button class="btn btn-g btn-sm" onclick="
+          $('mlv-from').value='';
+          $('mlv-to').value='';
+          $('mlv-status').value='';
+          filterMyLeaves()
+        ">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0">
+      <div class="tbl-wrap" id="mlv-table">
+        ${renderMyLeavesTable(data)}
+      </div>
+    </div>`;
 }
+
+function renderMyLeavesTable(data){
+  if(!data.length) return emptyState('🏖','No leave requests yet','Submit your first leave request.','+Request Leave','openRequestLeave()');
+  return`<table><thead><tr>
+    <th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Notes</th><th>Status</th><th>Reviewed By</th><th>Actions</th>
+  </tr></thead><tbody>
+  ${data.map(l=>{
+    const days=Math.ceil((new Date(l.toDate)-new Date(l.fromDate))/(1000*60*60*24))+1;
+    const canCancel=l.status==='pending';
+    return`<tr>
+      <td style="font-size:12px">${l.fromDate||'—'}</td>
+      <td style="font-size:12px">${l.toDate||'—'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${days}</td>
+      <td><span class="badge b-b">${l.reason||'—'}</span></td>
+      <td style="font-size:12px;max-width:160px">${l.notes||'—'}</td>
+      <td>${statusBadge(l.status||'pending')}</td>
+      <td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td>
+      <td>${canCancel?`<button class="btn btn-d btn-sm" onclick="cancelLeave('${l.id}')">Cancel</button>`:'—'}</td>
+    </tr>`;
+  }).join('')}
+  </tbody></table>`;
+}
+
+function filterMyLeaves(){
+  const from=$('mlv-from')?.value;
+  const to=$('mlv-to')?.value;
+  const status=$('mlv-status')?.value||'';
+  let data=window._myLeaveData||[];
+  if(from)data=data.filter(l=>(l.fromDate||'')>=from);
+  if(to)data=data.filter(l=>(l.fromDate||'')<=to);
+  if(status)data=data.filter(l=>l.status===status);
+  const tbl=$('mlv-table');
+  if(tbl)tbl.innerHTML=renderMyLeavesTable(data);
+}
+
 function openRequestLeave(){
   const today=getTodayStr();
   openM1('REQUEST LEAVE',`
@@ -808,13 +780,29 @@ function openRequestLeave(){
       <div class="fg"><label class="fl">From Date *</label><input class="fi" id="lv-from" type="date" value="${today}" min="${today}"></div>
       <div class="fg"><label class="fl">To Date *</label><input class="fi" id="lv-to" type="date" value="${today}" min="${today}"></div>
     </div>
-    <div class="fg"><label class="fl">Reason *</label><select class="fs" id="lv-reason"><option value="">— Select reason —</option>${LEAVE_REASONS.map(r=>`<option>${r}</option>`).join('')}</select></div>
-    <div class="fg"><label class="fl">Additional Notes</label><textarea class="fta" id="lv-notes" placeholder="Any details for the approver…" style="min-height:70px"></textarea></div>
-    <div style="background:var(--yellow-dim);border:1px solid rgba(255,187,0,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--yellow);margin-bottom:14px">⚠️ Leave requests are reviewed by Admin or Coordinator Head.</div>
-    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="submitLeaveRequest()">Submit Request</button></div>`);
+    <div class="fg"><label class="fl">Reason *</label>
+      <select class="fs" id="lv-reason">
+        <option value="">— Select reason —</option>
+        ${LEAVE_REASONS.map(r=>`<option>${r}</option>`).join('')}
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Additional Notes</label>
+      <textarea class="fta" id="lv-notes" placeholder="Any details for the approver…" style="min-height:70px"></textarea>
+    </div>
+    <div style="background:var(--yellow-dim);border:1px solid rgba(255,187,0,.3);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--yellow);margin-bottom:14px">
+      ⚠️ Leave requests are reviewed by Admin or Coordinator Head.
+    </div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
+      <button class="btn btn-p" onclick="submitLeaveRequest()">Submit Request</button>
+    </div>`);
 }
+
 async function submitLeaveRequest(){
-  const from=document.getElementById('lv-from')?.value,to=document.getElementById('lv-to')?.value,reason=document.getElementById('lv-reason')?.value,notes=document.getElementById('lv-notes')?.value.trim()||'';
+  const from=document.getElementById('lv-from')?.value;
+  const to=document.getElementById('lv-to')?.value;
+  const reason=document.getElementById('lv-reason')?.value;
+  const notes=document.getElementById('lv-notes')?.value.trim()||'';
   if(!from||!to||!reason){toast('Fill all required fields','error');return}
   if(to<from){toast('To date must be on or after from date','error');return}
   const days=Math.ceil((new Date(to)-new Date(from))/(1000*60*60*24))+1;
@@ -825,14 +813,32 @@ async function submitLeaveRequest(){
     closeM1();toast('Leave request submitted! ✅','success');myleaves();
   }catch(e){toast('Error: '+e.message,'error');}
 }
-async function cancelLeave(id){if(!confirm('Cancel this leave request?'))return;try{await fsDel('leaves',id);toast('Cancelled','success');myleaves();}catch(e){toast('Error','error');}}
+
+async function cancelLeave(id){
+  if(!confirm('Cancel this leave request?'))return;
+  try{await fsDel('leaves',id);toast('Cancelled','success');myleaves();}
+  catch(e){toast('Error','error');}
+}
+
 async function leavemgmt(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const[data,users]=await Promise.all([fsGetAll('leaves'),fsGetAll('users')]);
   data.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-  const pending=data.filter(l=>l.status==='pending'),approved=data.filter(l=>l.status==='approved'),rejected=data.filter(l=>l.status==='rejected');
-  const today=getTodayStr(),activeToday=approved.filter(l=>l.fromDate<=today&&l.toDate>=today);
-  function userRoleBadge(role){return role==='trainer'?'<span class="badge b-g">🧑‍🏫 Trainer</span>':role==='coordinator'?'<span class="badge b-b">🧑‍💼 Coordinator</span>':role==='coordinatorhead'?'<span class="badge b-o">👑 Coord. Head</span>':'<span class="badge b-gray">—</span>';}
+  window._leaveData=data;
+
+  const pending=data.filter(l=>l.status==='pending');
+  const approved=data.filter(l=>l.status==='approved');
+  const rejected=data.filter(l=>l.status==='rejected');
+  const today=getTodayStr();
+  const activeToday=approved.filter(l=>l.fromDate<=today&&l.toDate>=today);
+
+  function userRoleBadge(role){
+    return role==='trainer'?'<span class="badge b-g">🧑‍🏫 Trainer</span>':
+           role==='coordinator'?'<span class="badge b-b">🧑‍💼 Coordinator</span>':
+           role==='coordinatorhead'?'<span class="badge b-o">👑 Coord. Head</span>':
+           '<span class="badge b-gray">—</span>';
+  }
+
   $('page').innerHTML=`
     <div class="stats-grid" style="margin-bottom:18px">
       <div class="sc sc-y"><div class="sc-ico">⏳</div><div class="sc-lbl">Pending</div><div class="sc-val">${pending.length}</div><div class="sc-sub">Needs review</div></div>
@@ -840,48 +846,111 @@ async function leavemgmt(){
       <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Rejected</div><div class="sc-val">${rejected.length}</div></div>
       <div class="sc sc-o"><div class="sc-ico">🏖</div><div class="sc-lbl">On Leave Today</div><div class="sc-val">${activeToday.length}</div></div>
     </div>
+
     ${activeToday.length?`<div class="card" style="background:var(--orange-dim);border-color:rgba(255,140,0,.3);margin-bottom:18px">
       <div style="font-weight:700;color:var(--orange);margin-bottom:10px">🏖 Staff On Leave Today (${today})</div>
-      ${activeToday.map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,140,0,.15)"><span style="font-size:18px">${l.requestedByRole==='trainer'?'🧑‍🏫':'🧑‍💼'}</span><div><div style="font-weight:600;font-size:13px">${l.requestedByName||'—'}</div><div style="font-size:11px;color:var(--muted)">${l.requestedByRole} · Leave: ${l.fromDate} to ${l.toDate} · ${l.reason}</div></div></div>`).join('')}
+      ${activeToday.map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,140,0,.15)">
+        <span style="font-size:18px">${l.requestedByRole==='trainer'?'🧑‍🏫':'🧑‍💼'}</span>
+        <div>
+          <div style="font-weight:600;font-size:13px">${l.requestedByName||'—'}</div>
+          <div style="font-size:11px;color:var(--muted)">${l.requestedByRole} · Leave: ${l.fromDate} to ${l.toDate} · ${l.reason}</div>
+        </div>
+      </div>`).join('')}
     </div>`:''}
+
     ${pending.length?`<div class="card" style="border-color:rgba(255,187,0,.4);margin-bottom:18px">
       <div class="card-hd"><div class="card-title" style="color:var(--yellow)">⏳ Pending Requests (${pending.length})</div></div>
-      ${pending.map(l=>`<div class="leave-card leave-status-pending"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap"><div>
-        <div style="font-weight:700;font-size:14px">${l.requestedByName||'—'} ${userRoleBadge(l.requestedByRole)}</div>
-        <div style="font-size:12px;color:var(--muted);margin-top:4px">📅 ${l.fromDate} → ${l.toDate} <strong style="color:var(--text)">(${l.days} day${l.days!==1?'s':''})</strong></div>
-        <div style="font-size:12px;margin-top:4px"><span class="badge b-b">${l.reason}</span></div>
-        ${l.notes?`<div style="font-size:12px;color:var(--muted);margin-top:4px">📝 ${l.notes}</div>`:''}
-      </div><div style="display:flex;flex-direction:column;gap:6px;min-width:180px">
-        <button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅ Approve</button>
-        <button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌ Reject</button>
-      </div></div></div>`).join('')}
+      ${pending.map(l=>`<div class="leave-card leave-status-pending">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:700;font-size:14px">${l.requestedByName||'—'} ${userRoleBadge(l.requestedByRole)}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">📅 ${l.fromDate} → ${l.toDate} <strong style="color:var(--text)">(${l.days} day${l.days!==1?'s':''})</strong></div>
+            <div style="font-size:12px;margin-top:4px"><span class="badge b-b">${l.reason}</span></div>
+            ${l.notes?`<div style="font-size:12px;color:var(--muted);margin-top:4px">📝 ${l.notes}</div>`:''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;min-width:180px">
+            <button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅ Approve</button>
+            <button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌ Reject</button>
+          </div>
+        </div>
+      </div>`).join('')}
     </div>`:''}
-   <div class="card" style="padding:0">
-  <div class="card-hd" style="padding:14px 18px">
-    <div class="card-title">All Leave History</div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <input class="fi" type="date" id="lv-filter-from" style="max-width:130px;margin:0" onchange="filterLeaveByDate()">
-      <span style="color:var(--muted);font-size:12px">→</span>
-      <input class="fi" type="date" id="lv-filter-to" style="max-width:130px;margin:0" onchange="filterLeaveByDate()">
-      <button class="btn btn-g btn-sm" onclick="$('lv-filter-from').value='';$('lv-filter-to').value='';filterLeaveByDate()">✕ Clear</button>
-    </div>
-  </div>
-  <div class="tbl-wrap" id="lv-table">
-      ${data.length===0?emptyState('🏖','No leave requests','','',''):
-      `<table><thead><tr><th>Staff</th><th>Role</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>
-      ${data.map(l=>`<tr><td><strong>${l.requestedByName||'—'}</strong></td><td>${userRoleBadge(l.requestedByRole)}</td>
-        <td style="font-size:12px">${l.fromDate||'—'}</td><td style="font-size:12px">${l.toDate||'—'}</td>
-        <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${l.days||'—'}</td>
-        <td><span class="badge b-b">${l.reason||'—'}</span></td>
-        <td>${statusBadge(l.status||'pending')}</td>
-        <td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td>
-        <td><div class="td-actions">
-          ${l.status==='pending'?`<button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅</button><button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌</button>`:''}
-          <button class="btn btn-d btn-sm" onclick="delLeave('${l.id}')">Del</button>
-        </div></td>
-      </tr>`).join('')}</tbody></table>`}
-    </div></div>`;
+
+    <!-- All Leave History with filter -->
+    <div class="card" style="padding:0">
+      <div class="card-hd" style="padding:14px 18px;flex-wrap:wrap;gap:10px">
+        <div class="card-title">All Leave History</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input class="fi" type="date" id="lv-filter-from" style="max-width:140px;margin:0;padding:7px 10px;font-size:12px" onchange="filterLeaveByDate()">
+          <span style="color:var(--muted);font-size:12px">→</span>
+          <input class="fi" type="date" id="lv-filter-to" style="max-width:140px;margin:0;padding:7px 10px;font-size:12px" onchange="filterLeaveByDate()">
+          <select class="fs" id="lv-filter-status" style="max-width:130px;padding:7px 10px;font-size:12px" onchange="filterLeaveByDate()">
+            <option value="">All Statuses</option>
+            <option value="pending">⏳ Pending</option>
+            <option value="approved">✅ Approved</option>
+            <option value="rejected">❌ Rejected</option>
+          </select>
+          <input class="fi" type="text" id="lv-filter-search" placeholder="🔍 Staff name…" style="max-width:160px;margin:0;padding:7px 10px;font-size:12px" oninput="filterLeaveByDate()">
+          <button class="btn btn-g btn-sm" onclick="
+            $('lv-filter-from').value='';
+            $('lv-filter-to').value='';
+            $('lv-filter-status').value='';
+            $('lv-filter-search').value='';
+            filterLeaveByDate()
+          ">✕ Clear</button>
+        </div>
+      </div>
+      <div class="tbl-wrap" id="lv-table">
+        ${renderLeaveTable(data,userRoleBadge)}
+      </div>
+    </div>`;
 }
+
+function renderLeaveTable(data, userRoleBadge){
+  if(!data.length) return emptyState('🏖','No leave requests','','','');
+  // userRoleBadge helper inline for global use
+  function badge(role){
+    return role==='trainer'?'<span class="badge b-g">🧑‍🏫 Trainer</span>':
+           role==='coordinator'?'<span class="badge b-b">🧑‍💼 Coordinator</span>':
+           role==='coordinatorhead'?'<span class="badge b-o">👑 Coord. Head</span>':
+           '<span class="badge b-gray">—</span>';
+  }
+  return`<table><thead><tr>
+    <th>Staff</th><th>Role</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Reviewed By</th><th>Actions</th>
+  </tr></thead><tbody>
+  ${data.map(l=>`<tr>
+    <td><strong>${l.requestedByName||'—'}</strong></td>
+    <td>${badge(l.requestedByRole)}</td>
+    <td style="font-size:12px">${l.fromDate||'—'}</td>
+    <td style="font-size:12px">${l.toDate||'—'}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${l.days||'—'}</td>
+    <td><span class="badge b-b">${l.reason||'—'}</span></td>
+    <td>${statusBadge(l.status||'pending')}</td>
+    <td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td>
+    <td><div class="td-actions">
+      ${l.status==='pending'?`
+        <button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅</button>
+        <button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌</button>`:''}
+      <button class="btn btn-d btn-sm" onclick="delLeave('${l.id}')">Del</button>
+    </div></td>
+  </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function filterLeaveByDate(){
+  const from=$('lv-filter-from')?.value;
+  const to=$('lv-filter-to')?.value;
+  const status=$('lv-filter-status')?.value||'';
+  const search=($('lv-filter-search')?.value||'').toLowerCase().trim();
+  let data=window._leaveData||[];
+  if(from)data=data.filter(l=>(l.fromDate||'')>=from);
+  if(to)data=data.filter(l=>(l.fromDate||'')<=to);
+  if(status)data=data.filter(l=>l.status===status);
+  if(search)data=data.filter(l=>(l.requestedByName||'').toLowerCase().includes(search));
+  const tbl=$('lv-table');
+  if(tbl)tbl.innerHTML=renderLeaveTable(data);
+}
+
 function openReviewLeave(leaveId,decision,staffName,staffRole,fromDate,toDate){
   const isApprove=decision==='approved';
   openM1(`${isApprove?'APPROVE':'REJECT'} LEAVE`,`
@@ -890,33 +959,39 @@ function openReviewLeave(leaveId,decision,staffName,staffRole,fromDate,toDate){
       <div style="font-size:13px"><strong>${staffName}</strong> (${staffRole})</div>
       <div style="font-size:12px;color:var(--muted);margin-top:3px">📅 ${fromDate} → ${toDate}</div>
     </div>
-    <div class="fg"><label class="fl">Review Note (optional)</label><textarea class="fta" id="lv-rnote" placeholder="${isApprove?'e.g. Approved.':'e.g. Insufficient notice.'}" style="min-height:70px"></textarea></div>
-    <div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button>
+    <div class="fg"><label class="fl">Review Note (optional)</label>
+      <textarea class="fta" id="lv-rnote" placeholder="${isApprove?'e.g. Approved.':'e.g. Insufficient notice.'}" style="min-height:70px"></textarea>
+    </div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
       <button class="btn ${isApprove?'btn-gr':'btn-d'}" onclick="submitLeaveReview('${leaveId}','${decision}','${staffName.replace(/'/g,"\\'")}','${staffRole}')">
         ${isApprove?'✅ Confirm Approve':'❌ Confirm Reject'}
       </button>
     </div>`);
 }
+
 async function submitLeaveReview(leaveId,decision,staffName,staffRole){
   const note=document.getElementById('lv-rnote')?.value.trim()||'';
   try{
     await fsUpdate('leaves',leaveId,{status:decision,reviewedBy:auth().currentUser.uid,reviewedByName:CU.name||'',reviewNote:note,reviewedAt:fn().serverTimestamp()});
     const leave=await fsGet('leaves',leaveId);
-    if(leave?.requestedById){await createNotifForUsers({key:`leave_review_${leaveId}`,title:`🏖 Leave ${decision==='approved'?'Approved ✅':'Rejected ❌'}`,body:`Your leave request (${leave.fromDate} – ${leave.toDate}) has been ${decision} by ${CU.name||'Manager'}.${note?` Note: "${note}"`:'' }`,type:'leave_review'},[leave.requestedById]);}
+    if(leave?.requestedById){
+      await createNotifForUsers({
+        key:`leave_review_${leaveId}`,
+        title:`🏖 Leave ${decision==='approved'?'Approved ✅':'Rejected ❌'}`,
+        body:`Your leave request (${leave.fromDate} – ${leave.toDate}) has been ${decision} by ${CU.name||'Manager'}.${note?` Note: "${note}"`:'' }`,
+        type:'leave_review'
+      },[leave.requestedById]);
+    }
     closeM1();toast(`Leave ${decision}!`,'success');leavemgmt();
   }catch(e){toast('Error: '+e.message,'error');}
 }
-async function delLeave(id){if(!confirm('Delete this leave record?'))return;try{await fsDel('leaves',id);toast('Deleted','success');leavemgmt();}catch(e){toast('Error','error');}}function filterLeaveByDate(){
-  const from=$('lv-filter-from')?.value;
-  const to=$('lv-filter-to')?.value;
-  let data=window._leaveData||[];
-  if(from)data=data.filter(l=>(l.fromDate||'')>=from);
-  if(to)data=data.filter(l=>(l.fromDate||'')<=to);
-  const tbl=$('lv-table');if(!tbl)return;
-  function userRoleBadge(role){return role==='trainer'?'<span class="badge b-g">🧑‍🏫 Trainer</span>':role==='coordinator'?'<span class="badge b-b">🧑‍💼 Coordinator</span>':role==='coordinatorhead'?'<span class="badge b-o">👑 Coord. Head</span>':'<span class="badge b-gray">—</span>';}
-  tbl.innerHTML=data.length===0?emptyState('🏖','No records for this range','','',''):`<table><thead><tr><th>Staff</th><th>Role</th><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>${data.map(l=>`<tr><td><strong>${l.requestedByName||'—'}</strong></td><td>${userRoleBadge(l.requestedByRole)}</td><td style="font-size:12px">${l.fromDate||'—'}</td><td style="font-size:12px">${l.toDate||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px">${l.days||'—'}</td><td><span class="badge b-b">${l.reason||'—'}</span></td><td>${statusBadge(l.status||'pending')}</td><td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td><td><div class="td-actions">${l.status==='pending'?`<button class="btn btn-gr btn-sm" onclick="openReviewLeave('${l.id}','approved','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">✅</button><button class="btn btn-d btn-sm" onclick="openReviewLeave('${l.id}','rejected','${(l.requestedByName||'').replace(/'/g,"\\'")}','${l.requestedByRole}','${l.fromDate}','${l.toDate}')">❌</button>`:''}<button class="btn btn-d btn-sm" onclick="delLeave('${l.id}')">Del</button></div></td></tr>`).join('')}</tbody></table>`;
-}
 
+async function delLeave(id){
+  if(!confirm('Delete this leave record?'))return;
+  try{await fsDel('leaves',id);toast('Deleted','success');leavemgmt();}
+  catch(e){toast('Error','error');}
+}
 // ══════════════════════════════════════════════════════════════
 // RATING SYSTEM
 // ══════════════════════════════════════════════════════════════
@@ -980,15 +1055,7 @@ async function missedreasons(){
   }
   $('page').innerHTML=`${pendingHtml}<div class="card" style="background:var(--red-dim);border-color:rgba(255,68,68,.3);margin-bottom:18px"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">⚠️</span><div><div style="font-weight:700;color:var(--red)">Missed Session Reports</div><div style="font-size:12px;color:var(--muted)">Reasons entered by coordinators for missed sessions</div></div></div></div><div class="card" style="padding:0"><div class="tbl-wrap">${data.length===0?emptyState('⚠️','No reports yet','Missed session reasons will appear here.','',''):`<table><thead><tr><th>Date</th><th>Client</th><th>Trainer</th><th>Time</th><th>Reason</th><th>Notes</th><th>Reported By</th>${CR==='admin'||CR==='coordinatorhead'?'<th>Actions</th>':''}</tr></thead><tbody>${data.map(r=>`<tr><td style="font-size:12px">${r.date||'—'}</td><td><strong>${r.clientName||'—'}</strong></td><td style="font-size:12px">${r.trainerName||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(r.time)}</td><td><span class="badge b-r">${r.reason||'—'}</span></td><td style="font-size:12px;max-width:180px">${r.notes||'—'}</td><td style="font-size:12px">${r.reportedByName||'—'}<div style="font-size:10px;color:var(--muted)">${r.reportedByRole||''}</div></td>${CR==='admin'||CR==='coordinatorhead'?`<td><button class="btn btn-d btn-sm" onclick="delMissedReason('${r.id}')">Delete</button></td>`:''}</tr>`).join('')}</tbody></table>`}</div></div>`;
 }
-async function delMissedReason(id){if(!confirm('Delete?'))return;try{await fsDel('missedreasons',id);toast('Deleted','success');missedreasons()}catch(e){toast('Error','error')}}function filterMyLeaves(){
-  const from=$('mlv-from')?.value;
-  const to=$('mlv-to')?.value;
-  let data=window._myLeaveData||[];
-  if(from)data=data.filter(l=>(l.fromDate||'')>=from);
-  if(to)data=data.filter(l=>(l.fromDate||'')<=to);
-  const tbl=$('mlv-table');if(!tbl)return;
-  tbl.innerHTML=data.length===0?emptyState('🏖','No records for this range','','',''):`<table><thead><tr><th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Notes</th><th>Status</th><th>Reviewed By</th><th>Actions</th></tr></thead><tbody>${data.map(l=>{const days=Math.ceil((new Date(l.toDate)-new Date(l.fromDate))/(1000*60*60*24))+1;return`<tr><td style="font-size:12px">${l.fromDate||'—'}</td><td style="font-size:12px">${l.toDate||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px">${days}</td><td><span class="badge b-b">${l.reason||'—'}</span></td><td style="font-size:12px;max-width:160px">${l.notes||'—'}</td><td>${statusBadge(l.status||'pending')}</td><td style="font-size:12px">${l.reviewedByName||'—'}${l.reviewNote?`<div style="color:var(--muted);font-size:11px">"${l.reviewNote}"</div>`:''}</td><td>${l.status==='pending'?`<button class="btn btn-d btn-sm" onclick="cancelLeave('${l.id}')">Cancel</button>`:'—'}</td></tr>`;}).join('')}</tbody></table>`;
-}
+async function delMissedReason(id){if(!confirm('Delete?'))return;try{await fsDel('missedreasons',id);toast('Deleted','success');missedreasons()}catch(e){toast('Error','error')}}
 
 // ══════════════════════════════════════════════════════════════
 // OLD CLIENTS
@@ -1151,60 +1218,187 @@ async function viewTrainerRatings(trainerId,trainerName){
 async function delRating(id){if(!confirm('Delete?'))return;try{await fsDel('trainerratings',id);toast('Deleted','success');trainerratings()}catch(e){toast('Error','error')}}
 
 // ══════════════════════════════════════════════════════════════
-// SESSIONS
+// SESSIONS 
 // ══════════════════════════════════════════════════════════════
+
 async function sessions(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   let coordClientIds=null;
-  if(CR==='coordinator'){const myUid=auth().currentUser.uid;const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));coordClientIds=myClients.map(c=>c.id);}
+  if(CR==='coordinator'){
+    const myUid=auth().currentUser.uid;
+    const myClients=await fsGetAll('clients',fn().where('coordinatorId','==',myUid));
+    coordClientIds=myClients.map(c=>c.id);
+  }
+
   async function loadSTab(tab){
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));const tabEl=document.querySelector(`.tab[data-stab="${tab}"]`);if(tabEl)tabEl.classList.add('active');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    const tabEl=document.querySelector(`.tab[data-stab="${tab}"]`);
+    if(tabEl)tabEl.classList.add('active');
     $('sess-list').innerHTML=`<div style="padding:30px;text-align:center;color:var(--muted)"><div class="spin" style="width:22px;height:22px;margin:0 auto"></div></div>`;
-    let q=[];if(CR==='trainer')q=[fn().where('trainerId','==',auth().currentUser.uid)];if(CR==='client')q=[fn().where('clientId','==',auth().currentUser.uid)];
+
+    let q=[];
+    if(CR==='trainer')q=[fn().where('trainerId','==',auth().currentUser.uid)];
+    if(CR==='client')q=[fn().where('clientId','==',auth().currentUser.uid)];
     let data=await fsGetAll('sessions',...q);
     if(CR==='coordinator'&&coordClientIds){data=data.filter(s=>coordClientIds.includes(s.clientId));}
+
     const today=new Date();today.setHours(0,0,0,0);
     if(tab==='today')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()===today.getTime()});
     else if(tab==='upcoming')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()>today.getTime()});
     else if(tab==='past')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()<today.getTime()});
-    data.sort((a,b)=>(a.date||'').localeCompare(b.date||''loadSTab$('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-  <div class="tabs" style="margin:0;border:none">${['today','upcoming','past','all'].map(t=>`<div class="tab ${t==='today'?'active':''}" data-stab="${t}" onclick="window._sTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</div>`).join('')}</div>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <input class="fi" type="date" id="sess-date-from" placeholder="From" style="max-width:140px;margin:0" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
-    <span style="color:var(--muted);font-size:12px">→</span>
-    <input class="fi" type="date" id="sess-date-to" placeholder="To" style="max-width:140px;margin:0" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
-    <button class="btn btn-g btn-sm" onclick="$('sess-date-from').value='';$('sess-date-to').value='';window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">✕ Clear</button>
-    ${CR!=='client'?`<button class="btn btn-p" onclick="openAddSession()">+ Schedule Session</button>`:''}
-  </div>
-</div>
-<div class="card" style="padding:0"><div class="tbl-wrap" id="sess-list"></div></div>`;)||(a.time||'').localeCompare(b.time||''));
+
+    data.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
+
+    // ── Date range filter ──
+    const fromDate=$('sess-date-from')?.value;
+    const toDate=$('sess-date-to')?.value;
+    if(fromDate)data=data.filter(s=>(s.date||'')>=fromDate);
+    if(toDate)data=data.filter(s=>(s.date||'')<=toDate);
+
+    // ── Status filter ──
+    const statusFilter=$('sess-status-filter')?.value||'';
+    if(statusFilter)data=data.filter(s=>s.status===statusFilter);
+
+    // ── Search filter ──
+    const search=($('sess-search')?.value||'').toLowerCase().trim();
+    if(search)data=data.filter(s=>(s.clientName||'').toLowerCase().includes(search)||(s.trainerName||'').toLowerCase().includes(search)||(s.type||'').toLowerCase().includes(search));
+
     $('sess-list').innerHTML=renderSessionsTable(data,tab);
   }
-  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-  <div class="tabs" style="margin:0;border:none">${['today','upcoming','past','all'].map(t=>`<div class="tab ${t==='today'?'active':''}" data-stab="${t}" onclick="window._sTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</div>`).join('')}</div>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <input class="fi" type="date" id="sess-date-from" placeholder="From" style="max-width:140px;margin:0" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
-    <span style="color:var(--muted);font-size:12px">→</span>
-    <input class="fi" type="date" id="sess-date-to" placeholder="To" style="max-width:140px;margin:0" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
-    <button class="btn btn-g btn-sm" onclick="$('sess-date-from').value='';$('sess-date-to').value='';window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">✕ Clear</button>
-    ${CR!=='client'?`<button class="btn btn-p" onclick="openAddSession()">+ Schedule Session</button>`:''}
-  </div>
-</div>
-<div class="card" style="padding:0"><div class="tbl-wrap" id="sess-list"></div></div>`;;gap:10px"><div class="tabs" style="margin:0;border:none">${['today','upcoming','past','all'].map(t=>`<div class="tab ${t==='today'?'active':''}" data-stab="${t}" onclick="window._sTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</div>`).join('')}</div>${CR!=='client'?`<button class="btn btn-p" onclick="openAddSession()">+ Schedule Session</button>`:''}</div><div class="card" style="padding:0"><div class="tbl-wrap" id="sess-list"></div></div>`;
-  window._sTab=loadSTab;loadSTab('today');
-}
-function renderSessionsTable(data,tab){
-  if(!data.length){const msgs={today:'No sessions today.',upcoming:'No upcoming sessions.',past:'No past sessions.',all:'No sessions found.'};return emptyState('📅',msgs[tab]||'No sessions',CR!=='client'?'Use the Schedule button to add sessions.':'Your coordinator will schedule sessions.',CR!=='client'&&tab!=='past'?'+ Schedule':'',CR!=='client'&&tab!=='past'?'openAddSession()':'');}
-  return`<table><thead><tr><th>Date</th><th>Time</th><th>Client</th><th>Trainer</th><th>Type</th><th>Status</th><th>Meet Link</th><th>Actions</th></tr></thead><tbody>${data.map(s=>`<tr><td style="font-size:12px">${s.date||'—'}</td><td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(s.time)}</td><td><strong>${s.clientName||'—'}</strong></td><td style="font-size:12px">${s.trainerName||'—'}</td><td style="font-size:12px">${s.type||'—'}</td><td>${statusBadge(s.status)}</td><td>${s.meetLink?`<a href="${s.meetLink}" target="_blank" style="color:var(--accent);font-size:12px">Join 🔗</a>`:'—'}</td><td><div class="td-actions">${CR!=='client'&&s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair',true)">▶ Start</button>`:''}${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}${CR==='admin'&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}${CR==='trainer'&&(s.status==='onair'||s.status==='not-started')?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed',true)">✗ Miss</button>`:''}${CR==='admin'||CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-g btn-sm" onclick="openEditSession('${s.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delSession('${s.id}')">Del</button>`:''}${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='completed'?`<button class="btn btn-yw btn-sm" onclick="openRateTrainer('${s.trainerId||''}','${(s.trainerName||'').replace(/'/g,"\\'")}')">⭐ Rate</button>`:''}
-  </div></td></tr>`).join('')}</tbody></table>`;
-}
-function openAddSession(){loadSessionForm().then(html=>{openM2('SCHEDULE SESSION',html);initSessionFormAC()})}
-async function openEditSession(id){const s=await fsGet('sessions',id);if(!s){toast('Not found','error');return}loadSessionForm(s).then(html=>{openM2('EDIT SESSION',html);initSessionFormAC(s)})}
-async function initSessionFormAC(s={}){const[clients,trainers]=await Promise.all([fsGetAll('clients',fn().where('active','==',true)),fsGetAll('users',fn().where('role','==','trainer'))]);const clientInp=document.getElementById('sf-client-inp');if(clientInp){const items=clients.map(c=>({id:c.id,label:c.name||'',sub:c.phone||''}));createAutocomplete(clientInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-client-id');if(hid)hid.value=it.id;}});}const trainerInp=document.getElementById('sf-trainer-inp');if(trainerInp){const items=trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''}));createAutocomplete(trainerInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-trainer-id');if(hid)hid.value=it.id;}});}}
-async function loadSessionForm(s={}){return`<div class="fr"><div><label class="fl">Client *</label><input class="fi" id="sf-client-inp" placeholder="Type client name…" value="${s.clientName||''}" autocomplete="off"><input type="hidden" id="sf-client-id" value="${s.clientId||''}"></div><div><label class="fl">Trainer *</label><input class="fi" id="sf-trainer-inp" placeholder="Type trainer name…" value="${s.trainerName||''}" autocomplete="off"><input type="hidden" id="sf-trainer-id" value="${s.trainerId||''}"></div></div><div class="fr"><div><label class="fl">Date *</label><input class="fi" id="sf-date" type="date" value="${s.date||''}"></div><div><label class="fl">Time *</label><input class="fi" id="sf-time" type="time" value="${s.time||''}"></div></div><div class="fr"><div><label class="fl">Session Type</label><select class="fs" id="sf-type">${SESSION_TYPES.map(t=>`<option ${s.type===t?'selected':''}>${t}</option>`).join('')}</select></div><div><label class="fl">Status</label><select class="fs" id="sf-status">${['not-started','onair','completed','missed'].map(st=>`<option value="${st}" ${(s.status||'not-started')===st?'selected':''}>${st}</option>`).join('')}</select></div></div><div style="margin-bottom:14px"><label class="fl">Meet Link</label><input class="fi" id="sf-link" value="${s.meetLink||''}" placeholder="https://meet.google.com/…"></div><div style="margin-bottom:14px"><label class="fl">Notes</label><textarea class="fta" id="sf-notes">${s.notes||''}</textarea></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveSession('${s.id||''}')">Save Session</button></div>`;}
-async function saveSession(existingId=''){const clientId=$('sf-client-id').value||$('sf-client-inp')?.dataset.selectedId||'';const clientName=$('sf-client-inp')?.value||'';const trainerId=$('sf-trainer-id').value||$('sf-trainer-inp')?.dataset.selectedId||'';const trainerName=($('sf-trainer-inp')?.value||'').replace(/\s*\([^)]*\)\s*$/,'').trim();const date=$('sf-date').value,time=$('sf-time').value;if(!clientName||!trainerName||!date||!time){toast('Client, trainer, date and time required','error');return}const data={clientId,clientName,trainerId,trainerName,date,time,type:$('sf-type').value,status:$('sf-status').value||'not-started',meetLink:$('sf-link').value.trim(),notes:$('sf-notes').value};try{if(existingId){await fsUpdate('sessions',existingId,data);toast('Updated!','success')}else{await fsAdd('sessions',data);toast('Scheduled!','success')}closeM2();sessions();}catch(e){toast('Error: '+e.message,'error')}}
-async function delSession(id){if(!confirm('Delete?'))return;try{await fsDel('sessions',id);toast('Deleted','success');sessions()}catch(e){toast('Error: '+e.message,'error')}}
 
+  window._sTab=loadSTab;
+
+  $('page').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+      <div class="tabs" style="margin:0;border:none">
+        ${['today','upcoming','past','all'].map(t=>`<div class="tab ${t==='today'?'active':''}" data-stab="${t}" onclick="window._sTab('${t}')">${t.charAt(0).toUpperCase()+t.slice(1)}</div>`).join('')}
+      </div>
+      ${CR!=='client'?`<button class="btn btn-p" onclick="openAddSession()">+ Schedule Session</button>`:''}
+    </div>
+
+    <!-- Filter bar -->
+    <div class="card" style="padding:12px 16px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">From</span>
+          <input class="fi" type="date" id="sess-date-from" style="max-width:148px;margin:0;padding:8px 10px;font-size:12px" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">To</span>
+          <input class="fi" type="date" id="sess-date-to" style="max-width:148px;margin:0;padding:8px 10px;font-size:12px" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
+        </div>
+        <select class="fs" id="sess-status-filter" style="max-width:148px;padding:8px 10px;font-size:12px" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
+          <option value="">All Statuses</option>
+          <option value="not-started">⏳ Pending</option>
+          <option value="onair">🟢 On Air</option>
+          <option value="completed">✅ Completed</option>
+          <option value="missed">❌ Missed</option>
+        </select>
+        <input class="fi" type="text" id="sess-search" placeholder="🔍 Client / Trainer / Type…" style="max-width:200px;margin:0;padding:8px 10px;font-size:12px" oninput="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
+        <button class="btn btn-g btn-sm" onclick="
+          $('sess-date-from').value='';
+          $('sess-date-to').value='';
+          $('sess-status-filter').value='';
+          $('sess-search').value='';
+          window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')
+        ">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0"><div class="tbl-wrap" id="sess-list"></div></div>`;
+
+  loadSTab('today');
+}
+
+function renderSessionsTable(data,tab){
+  if(!data.length){
+    const msgs={today:'No sessions today.',upcoming:'No upcoming sessions.',past:'No past sessions.',all:'No sessions found.'};
+    return emptyState('📅',msgs[tab]||'No sessions',CR!=='client'?'Use the Schedule button to add sessions.':'Your coordinator will schedule sessions.',CR!=='client'&&tab!=='past'?'+ Schedule':'',CR!=='client'&&tab!=='past'?'openAddSession()':'');
+  }
+  return`<table><thead><tr><th>Date</th><th>Time</th><th>Client</th><th>Trainer</th><th>Type</th><th>Status</th><th>Meet Link</th><th>Actions</th></tr></thead><tbody>
+  ${data.map(s=>`<tr>
+    <td style="font-size:12px">${s.date||'—'}</td>
+    <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(s.time)}</td>
+    <td><strong>${s.clientName||'—'}</strong></td>
+    <td style="font-size:12px">${s.trainerName||'—'}</td>
+    <td style="font-size:12px">${s.type||'—'}</td>
+    <td>${statusBadge(s.status)}</td>
+    <td>${s.meetLink?`<a href="${s.meetLink}" target="_blank" style="color:var(--accent);font-size:12px">Join 🔗</a>`:'—'}</td>
+    <td><div class="td-actions">
+      ${CR!=='client'&&s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair',true)">▶ Start</button>`:''}
+      ${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}
+      ${CR==='admin'&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}
+      ${CR==='trainer'&&(s.status==='onair'||s.status==='not-started')?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed',true)">✗ Miss</button>`:''}
+      ${CR==='admin'||CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-g btn-sm" onclick="openEditSession('${s.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delSession('${s.id}')">Del</button>`:''}
+      ${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='completed'?`<button class="btn btn-yw btn-sm" onclick="openRateTrainer('${s.trainerId||''}','${(s.trainerName||'').replace(/'/g,"\\'")}')">⭐ Rate</button>`:''}
+    </div></td>
+  </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function openAddSession(){loadSessionForm().then(html=>{openM2('SCHEDULE SESSION',html);initSessionFormAC()})}
+
+async function openEditSession(id){
+  const s=await fsGet('sessions',id);
+  if(!s){toast('Not found','error');return}
+  loadSessionForm(s).then(html=>{openM2('EDIT SESSION',html);initSessionFormAC(s)})
+}
+
+async function initSessionFormAC(s={}){
+  const[clients,trainers]=await Promise.all([
+    fsGetAll('clients',fn().where('active','==',true)),
+    fsGetAll('users',fn().where('role','==','trainer'))
+  ]);
+  const clientInp=document.getElementById('sf-client-inp');
+  if(clientInp){
+    const items=clients.map(c=>({id:c.id,label:c.name||'',sub:c.phone||''}));
+    createAutocomplete(clientInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-client-id');if(hid)hid.value=it.id;}});
+  }
+  const trainerInp=document.getElementById('sf-trainer-inp');
+  if(trainerInp){
+    const items=trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''}));
+    createAutocomplete(trainerInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-trainer-id');if(hid)hid.value=it.id;}});
+  }
+}
+
+async function loadSessionForm(s={}){
+  return`<div class="fr">
+    <div><label class="fl">Client *</label><input class="fi" id="sf-client-inp" placeholder="Type client name…" value="${s.clientName||''}" autocomplete="off"><input type="hidden" id="sf-client-id" value="${s.clientId||''}"></div>
+    <div><label class="fl">Trainer *</label><input class="fi" id="sf-trainer-inp" placeholder="Type trainer name…" value="${s.trainerName||''}" autocomplete="off"><input type="hidden" id="sf-trainer-id" value="${s.trainerId||''}"></div>
+  </div>
+  <div class="fr">
+    <div><label class="fl">Date *</label><input class="fi" id="sf-date" type="date" value="${s.date||''}"></div>
+    <div><label class="fl">Time *</label><input class="fi" id="sf-time" type="time" value="${s.time||''}"></div>
+  </div>
+  <div class="fr">
+    <div><label class="fl">Session Type</label><select class="fs" id="sf-type">${SESSION_TYPES.map(t=>`<option ${s.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
+    <div><label class="fl">Status</label><select class="fs" id="sf-status">${['not-started','onair','completed','missed'].map(st=>`<option value="${st}" ${(s.status||'not-started')===st?'selected':''}>${st}</option>`).join('')}</select></div>
+  </div>
+  <div style="margin-bottom:14px"><label class="fl">Meet Link</label><input class="fi" id="sf-link" value="${s.meetLink||''}" placeholder="https://meet.google.com/…"></div>
+  <div style="margin-bottom:14px"><label class="fl">Notes</label><textarea class="fta" id="sf-notes">${s.notes||''}</textarea></div>
+  <div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveSession('${s.id||''}')">Save Session</button></div>`;
+}
+
+async function saveSession(existingId=''){
+  const clientId=$('sf-client-id').value||$('sf-client-inp')?.dataset.selectedId||'';
+  const clientName=$('sf-client-inp')?.value||'';
+  const trainerId=$('sf-trainer-id').value||$('sf-trainer-inp')?.dataset.selectedId||'';
+  const trainerName=($('sf-trainer-inp')?.value||'').replace(/\s*\([^)]*\)\s*$/,'').trim();
+  const date=$('sf-date').value,time=$('sf-time').value;
+  if(!clientName||!trainerName||!date||!time){toast('Client, trainer, date and time required','error');return}
+  const data={clientId,clientName,trainerId,trainerName,date,time,type:$('sf-type').value,status:$('sf-status').value||'not-started',meetLink:$('sf-link').value.trim(),notes:$('sf-notes').value};
+  try{
+    if(existingId){await fsUpdate('sessions',existingId,data);toast('Updated!','success')}
+    else{await fsAdd('sessions',data);toast('Scheduled!','success')}
+    closeM2();sessions();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+async function delSession(id){
+  if(!confirm('Delete?'))return;
+  try{await fsDel('sessions',id);toast('Deleted','success');sessions()}
+  catch(e){toast('Error: '+e.message,'error')}
+}
 // ══════════════════════════════════════════════════════════════
 // TIME CHART
 // ══════════════════════════════════════════════════════════════
@@ -1225,24 +1419,645 @@ async function openTcStatus(clientId,clientName){openM1(`UPDATE STATUS: ${client
 async function saveTcStatus(clientId){const status=document.getElementById('tc-st-sel')?.value||'not-started';const tc=(window._tcMap||{})[clientId];if(tc){await fsUpdate('timechart',tc.id,{todayStatus:status,lastStatusUpdate:new Date().toISOString().split('T')[0]});}else{const c=(window._tcClients||[]).find(x=>x.id===clientId)||{};await fsAdd('timechart',{clientId,clientName:c.name||'',trainerName:c.trainerName||'',trainerId:c.trainerId||'',todayStatus:status,lastStatusUpdate:new Date().toISOString().split('T')[0]});}closeM1();toast('Status updated!','success');timechart();}
 
 // ══════════════════════════════════════════════════════════════
-// PDF EXPORT
+// PDF EXPORT — replace the entire existing exportPDF() function
+// Find: "async function exportPDF(){"
+// Select until its closing "}"
+// Replace with this entire block
 // ══════════════════════════════════════════════════════════════
-async function exportPDF(){
-  toast('Generating PDF…','info');
-  const now=new Date();const monthName=now.toLocaleString('en-IN',{month:'long'});const year=now.getFullYear();
-  const[clients,sessions,attendance,followups,trainers]=await Promise.all([fsGetAll('clients',fn().where('active','==',true)),fsGetAll('sessions'),fsGetAll('attendance'),fsGetAll('followups'),fsGetAll('users',fn().where('role','==','trainer'))]);
-  const month=now.getMonth();const monthSessions=sessions.filter(s=>s.date&&new Date(s.date).getMonth()===month&&new Date(s.date).getFullYear()===year);
-  try{
-    const{jsPDF}=window.jspdf;const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});const pageW=doc.internal.pageSize.getWidth();
-    doc.setFillColor(20,20,20);doc.rect(0,0,pageW,22,'F');doc.setTextColor(212,255,0);doc.setFontSize(18);doc.setFont('helvetica','bold');doc.text('GYM AT YOUR HOME',pageW/2,10,{align:'center'});doc.setFontSize(10);doc.setTextColor(200,200,200);doc.text(`Monthly Report — ${monthName} ${year}  |  Generated: ${now.toLocaleString('en-IN')}`,pageW/2,17,{align:'center'});
-    doc.setTextColor(30,30,30);doc.setFontSize(13);doc.setFont('helvetica','bold');doc.text('Summary',14,30);
-    const completed=monthSessions.filter(s=>s.status==='completed').length;const missed=monthSessions.filter(s=>s.status==='missed').length;
-    doc.autoTable({startY:33,head:[['Metric','Value']],body:[['Active Clients',clients.length],['Total Sessions This Month',monthSessions.length],['Completed Sessions',completed],['Missed Sessions',missed],['Total Trainers',trainers.length],['Total Follow-ups',followups.length]],theme:'grid',headStyles:{fillColor:[212,255,0],textColor:[0,0,0],fontStyle:'bold'},styles:{fontSize:10},margin:{left:14,right:14}});
-    doc.addPage();doc.autoTable({startY:22,head:[['Name','Phone','Plan','Trainer','Coordinator','Goal','Start Date','Sessions/Wk','Status']],body:clients.map(c=>[c.name||'—',c.phone||'—',c.plan||'—',c.trainerName||'—',c.coordinatorName||'—',c.goal||'—',c.startDate||'—',c.sessionsPerWeek||'—',c.active?'Active':'Inactive']),theme:'striped',headStyles:{fillColor:[40,40,40],textColor:[212,255,0]},styles:{fontSize:8},margin:{left:10,right:10}});
-    doc.save(`GYH_Report_${monthName}_${year}.pdf`);toast(`PDF exported!`,'success');
-  }catch(e){toast('PDF error: '+e.message,'error');}
-}
 
+async function exportPDF(){
+  toast('Generating premium report…','info');
+  const now=new Date();
+  const monthName=now.toLocaleString('en-IN',{month:'long'});
+  const year=now.getFullYear();
+  const genTime=now.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
+
+  const[clients,sessions,attendance,followups,trainers,allRatings,batches,leaves]=await Promise.all([
+    fsGetAll('clients'),
+    fsGetAll('sessions'),
+    fsGetAll('attendance'),
+    fsGetAll('followups'),
+    fsGetAll('users',fn().where('role','==','trainer')),
+    fsGetAll('trainerratings'),
+    fsGetAll('batches'),
+    fsGetAll('leaves')
+  ]);
+
+  const activeClients=clients.filter(c=>c.active!==false);
+  const inactiveClients=clients.filter(c=>c.active===false);
+  const month=now.getMonth();
+  const monthSessions=sessions.filter(s=>s.date&&new Date(s.date).getMonth()===month&&new Date(s.date).getFullYear()===year);
+  const completed=monthSessions.filter(s=>s.status==='completed').length;
+  const missed=monthSessions.filter(s=>s.status==='missed').length;
+  const onair=monthSessions.filter(s=>s.status==='onair').length;
+  const pending=monthSessions.filter(s=>s.status==='not-started').length;
+  const presentCount=attendance.filter(a=>a.status==='present').length;
+  const attendRate=attendance.length?Math.round(presentCount/attendance.length*100):0;
+  const approvedLeaves=leaves.filter(l=>l.status==='approved').length;
+  const pendingLeaves=leaves.filter(l=>l.status==='pending').length;
+
+  // Plan distribution
+  const planCounts={};
+  activeClients.forEach(c=>{planCounts[c.plan||'Unknown']=(planCounts[c.plan||'Unknown']||0)+1;});
+
+  // Top trainers by rating
+  const trainerStats=trainers.map(t=>{
+    const tR=allRatings.filter(r=>r.trainerId===t.id);
+    const avg=tR.length?(tR.reduce((s,r)=>s+(r.rating||0),0)/tR.length):0;
+    const clientCount=activeClients.filter(c=>c.trainerId===t.id).length;
+    return{...t,avg,totalRatings:tR.length,clientCount};
+  }).sort((a,b)=>b.avg-a.avg||b.totalRatings-a.totalRatings);
+
+  // Sessions by day of week this month
+  const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const byDay=[0,0,0,0,0,0,0];
+  monthSessions.forEach(s=>{if(s.date){byDay[new Date(s.date).getDay()]++;}});
+
+  // Coordinator performance
+  const coordStats={};
+  followups.forEach(f=>{
+    if(!f.assignedToName)return;
+    const k=f.assignedToName;
+    if(!coordStats[k])coordStats[k]={name:k,total:0,done:0};
+    coordStats[k].total++;
+    if(f.done||f.status==='completed')coordStats[k].done++;
+  });
+
+  try{
+    const{jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pw=doc.internal.pageSize.getWidth();
+    const ph=doc.internal.pageSize.getHeight();
+    let y=0;
+
+    // ── COLOR PALETTE ──────────────────────────────────────
+    const C={
+      black:[11,11,11],
+      darkGray:[28,28,28],
+      midGray:[45,45,45],
+      lightGray:[245,245,242],
+      border:[55,55,55],
+      accent:[212,255,0],
+      accentDark:[140,168,0],
+      green:[0,200,100],
+      red:[255,68,68],
+      yellow:[255,187,0],
+      blue:[77,159,255],
+      purple:[170,102,255],
+      orange:[255,140,0],
+      white:[255,255,255],
+      muted:[136,136,136],
+    };
+
+    // ── HELPERS ────────────────────────────────────────────
+    function setFont(style='normal',size=10,color=C.white){
+      doc.setFont('helvetica',style);
+      doc.setFontSize(size);
+      doc.setTextColor(...color);
+    }
+    function fillRect(x,ry,w,h,color){
+      doc.setFillColor(...color);
+      doc.rect(x,ry,w,h,'F');
+    }
+    function roundRect(x,ry,w,h,r,color){
+      doc.setFillColor(...color);
+      doc.roundedRect(x,ry,w,h,r,r,'F');
+    }
+    function hline(ry,color=C.border,lx=10,rx=pw-10){
+      doc.setDrawColor(...color);
+      doc.setLineWidth(0.3);
+      doc.line(lx,ry,rx,ry);
+    }
+    function addPage(){
+      doc.addPage();
+      // subtle side accent bar
+      fillRect(0,0,3,ph,C.accent);
+      y=20;
+    }
+    function checkPage(needed=30){
+      if(y+needed>ph-15){addPage();}
+    }
+
+    // ══════════════════════════════════════════════════════
+    // PAGE 1 — COVER
+    // ══════════════════════════════════════════════════════
+    fillRect(0,0,pw,ph,C.black);
+    // accent bar left
+    fillRect(0,0,4,ph,C.accent);
+    // top accent strip
+    fillRect(4,0,pw-4,1.5,C.accent);
+
+    // big background text watermark
+    doc.setTextColor(255,255,255,0.03);
+    doc.setFontSize(120);
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(30,30,30);
+    doc.text('GYH',pw/2,ph/2+20,{align:'center'});
+
+    // brand name
+    doc.setTextColor(...C.accent);
+    doc.setFontSize(28);
+    doc.setFont('helvetica','bold');
+    doc.text('GYM AT YOUR HOME',pw/2,60,{align:'center'});
+
+    // tagline
+    doc.setTextColor(...C.muted);
+    doc.setFontSize(10);
+    doc.setFont('helvetica','normal');
+    doc.text('MANAGEMENT PLATFORM',pw/2,70,{align:'center'});
+
+    // divider line with dots
+    doc.setDrawColor(...C.accent);
+    doc.setLineWidth(0.8);
+    doc.line(30,78,pw-30,78);
+    fillRect(pw/2-1.5,76.5,3,3,C.accent);
+
+    // report title
+    doc.setTextColor(...C.white);
+    doc.setFontSize(20);
+    doc.setFont('helvetica','bold');
+    doc.text(`MONTHLY REPORT`,pw/2,100,{align:'center'});
+
+    doc.setTextColor(...C.accent);
+    doc.setFontSize(30);
+    doc.text(`${monthName.toUpperCase()} ${year}`,pw/2,118,{align:'center'});
+
+    // 4 hero stat boxes
+    const heroStats=[
+      {label:'ACTIVE CLIENTS',val:activeClients.length,color:C.accent,icon:''},
+      {label:'SESSIONS',val:monthSessions.length,color:C.green,icon:''},
+      {label:'COMPLETION',val:monthSessions.length?`${Math.round(completed/monthSessions.length*100)}%`:'0%',color:C.blue,icon:''},
+      {label:'ATTENDANCE',val:`${attendRate}%`,color:C.purple,icon:''},
+    ];
+    const bw=38,bh=26,bx=14,bSpacing=(pw-28-bw*4)/3;
+    heroStats.forEach((s,i)=>{
+      const hx=bx+i*(bw+bSpacing);
+      roundRect(hx,138,bw,bh,3,C.darkGray);
+      // top accent
+      doc.setFillColor(...s.color);
+      doc.roundedRect(hx,138,bw,2,1,1,'F');
+      // value
+      doc.setTextColor(...s.color);
+      doc.setFontSize(20);
+      doc.setFont('helvetica','bold');
+      doc.text(String(s.val),hx+bw/2,152,{align:'center'});
+      // label
+      doc.setTextColor(...C.muted);
+      doc.setFontSize(7);
+      doc.setFont('helvetica','normal');
+      doc.text(s.label,hx+bw/2,160,{align:'center'});
+    });
+
+    // session breakdown row
+    const sBreak=[
+      {label:'Completed',val:completed,color:C.green},
+      {label:'Missed',val:missed,color:C.red},
+      {label:'On Air',val:onair,color:C.yellow},
+      {label:'Pending',val:pending,color:C.muted},
+    ];
+    sBreak.forEach((s,i)=>{
+      const hx=bx+i*(bw+bSpacing);
+      roundRect(hx,172,bw,16,2,C.midGray);
+      doc.setTextColor(...s.color);
+      doc.setFontSize(14);
+      doc.setFont('helvetica','bold');
+      doc.text(String(s.val),hx+bw/2,181,{align:'center'});
+      doc.setTextColor(...C.muted);
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica','normal');
+      doc.text(s.label,hx+bw/2,186,{align:'center'});
+    });
+
+    // generated info box
+    roundRect(14,200,pw-28,20,3,C.midGray);
+    doc.setTextColor(...C.muted);
+    doc.setFontSize(8);
+    doc.setFont('helvetica','normal');
+    doc.text(`Generated by: ${CU?.name||'Admin'}`,18,209);
+    doc.text(`Date & Time: ${genTime}`,18,215);
+    doc.setTextColor(...C.accent);
+    doc.text(`Gym At Your Home™ — Confidential`,pw-18,209,{align:'right'});
+    doc.text(`Page 1 of Report`,pw-18,215,{align:'right'});
+
+    // bottom accent
+    fillRect(4,ph-4,pw-4,4,C.midGray);
+    doc.setTextColor(...C.accent);
+    doc.setFontSize(7);
+    doc.text('GYM AT YOUR HOME™  ·  MANAGEMENT PLATFORM  ·  CONFIDENTIAL',pw/2,ph-1,{align:'center'});
+
+    // ══════════════════════════════════════════════════════
+    // PAGE 2 — EXECUTIVE SUMMARY
+    // ══════════════════════════════════════════════════════
+    addPage();
+
+    // section header helper
+    function sectionHeader(title,subtitle=''){
+      checkPage(20);
+      fillRect(10,y,pw-20,10,C.darkGray);
+      doc.setFillColor(...C.accent);
+      doc.rect(10,y,3,10,'F');
+      doc.setTextColor(...C.accent);
+      doc.setFontSize(11);
+      doc.setFont('helvetica','bold');
+      doc.text(title,16,y+7);
+      if(subtitle){
+        doc.setTextColor(...C.muted);
+        doc.setFontSize(8);
+        doc.setFont('helvetica','normal');
+        doc.text(subtitle,pw-12,y+7,{align:'right'});
+      }
+      y+=14;
+    }
+
+    // stat row helper (2-col or 3-col)
+    function statRow(items){
+      checkPage(22);
+      const w=(pw-20)/items.length;
+      items.forEach((s,i)=>{
+        const sx=10+i*w;
+        roundRect(sx,y,w-2,18,2,C.darkGray);
+        doc.setFillColor(...(s.color||C.accent));
+        doc.roundedRect(sx,y,w-2,1.5,0.5,0.5,'F');
+        doc.setTextColor(...(s.color||C.accent));
+        doc.setFontSize(16);
+        doc.setFont('helvetica','bold');
+        doc.text(String(s.val),sx+(w-2)/2,y+11,{align:'center'});
+        doc.setTextColor(...C.muted);
+        doc.setFontSize(6.5);
+        doc.setFont('helvetica','normal');
+        doc.text(s.label,sx+(w-2)/2,y+16,{align:'center'});
+      });
+      y+=22;
+    }
+
+    // page header
+    fillRect(10,y,pw-20,14,C.midGray);
+    doc.setTextColor(...C.white);
+    doc.setFontSize(14);
+    doc.setFont('helvetica','bold');
+    doc.text('EXECUTIVE SUMMARY',14,y+10);
+    doc.setTextColor(...C.accent);
+    doc.setFontSize(9);
+    doc.text(`${monthName} ${year}`,pw-12,y+10,{align:'right'});
+    y+=18;
+
+    sectionHeader('CLIENT OVERVIEW');
+    statRow([
+      {label:'Active Clients',val:activeClients.length,color:C.accent},
+      {label:'Inactive Clients',val:inactiveClients.length,color:C.red},
+      {label:'Total Clients',val:clients.length,color:C.blue},
+      {label:'Total Trainers',val:trainers.length,color:C.green},
+    ]);
+
+    sectionHeader('SESSION PERFORMANCE',`Month of ${monthName} ${year}`);
+    statRow([
+      {label:'Total Sessions',val:monthSessions.length,color:C.white},
+      {label:'Completed',val:completed,color:C.green},
+      {label:'Missed',val:missed,color:C.red},
+      {label:'Completion Rate',val:monthSessions.length?`${Math.round(completed/monthSessions.length*100)}%`:'—',color:C.accent},
+    ]);
+
+    sectionHeader('ATTENDANCE & LEAVES');
+    statRow([
+      {label:'Total Records',val:attendance.length,color:C.white},
+      {label:'Present',val:presentCount,color:C.green},
+      {label:'Attendance Rate',val:`${attendRate}%`,color:C.accent},
+      {label:'Approved Leaves',val:approvedLeaves,color:C.yellow},
+    ]);
+
+    sectionHeader('FOLLOW-UPS & ENGAGEMENT');
+    const totalFU=followups.length;
+    const doneFU=followups.filter(f=>f.done||f.status==='completed').length;
+    const pendingFU=followups.filter(f=>!f.done&&f.status!=='completed').length;
+    statRow([
+      {label:'Total Follow-ups',val:totalFU,color:C.white},
+      {label:'Completed',val:doneFU,color:C.green},
+      {label:'Pending',val:pendingFU,color:C.yellow},
+      {label:'Completion Rate',val:totalFU?`${Math.round(doneFU/totalFU*100)}%`:'—',color:C.accent},
+    ]);
+
+    // Plan distribution bar chart
+    sectionHeader('CLIENT PLAN DISTRIBUTION');
+    const planColors={Silver:C.muted,Gold:C.yellow,Platinum:C.purple,'Platinum Plus':C.blue,Couple:C.orange,'Corporate Fitness':C.green};
+    const planEntries=Object.entries(planCounts).sort((a,b)=>b[1]-a[1]);
+    const maxPlan=Math.max(...planEntries.map(e=>e[1]),1);
+    planEntries.forEach(([plan,count])=>{
+      checkPage(10);
+      const barW=((pw-80)/maxPlan)*count;
+      const pct=Math.round(count/activeClients.length*100);
+      const col=planColors[plan]||C.accent;
+      // label
+      doc.setTextColor(...C.muted);
+      doc.setFontSize(8);
+      doc.setFont('helvetica','normal');
+      doc.text(plan,12,y+5.5);
+      // bar bg
+      fillRect(55,y+1,pw-75,6,C.darkGray);
+      // bar fill
+      doc.setFillColor(...col);
+      doc.roundedRect(55,y+1,Math.max(barW,2),6,1,1,'F');
+      // count
+      doc.setTextColor(...col);
+      doc.setFontSize(8);
+      doc.setFont('helvetica','bold');
+      doc.text(`${count} (${pct}%)`,pw-12,y+6,{align:'right'});
+      y+=10;
+    });
+    y+=4;
+
+    // Sessions by day of week
+    sectionHeader('SESSIONS BY DAY OF WEEK');
+    const maxDay=Math.max(...byDay,1);
+    const dayW=(pw-20)/7;
+    byDay.forEach((cnt,i)=>{
+      const dx=10+i*dayW;
+      const barH=Math.max((cnt/maxDay)*28,1);
+      // bar
+      doc.setFillColor(...(cnt===Math.max(...byDay)?C.accent:C.midGray));
+      doc.roundedRect(dx+dayW/2-5,y+30-barH,10,barH,1,1,'F');
+      // count
+      doc.setTextColor(...(cnt===Math.max(...byDay)?C.accent:C.muted));
+      doc.setFontSize(8);
+      doc.setFont('helvetica','bold');
+      doc.text(String(cnt),dx+dayW/2,y+28-barH,{align:'center'});
+      // day label
+      doc.setTextColor(...C.muted);
+      doc.setFontSize(7);
+      doc.setFont('helvetica','normal');
+      doc.text(dayNames[i],dx+dayW/2,y+37,{align:'center'});
+    });
+    y+=42;
+
+    // ══════════════════════════════════════════════════════
+    // PAGE 3 — TRAINER LEADERBOARD & CLIENTS
+    // ══════════════════════════════════════════════════════
+    addPage();
+
+    fillRect(10,y,pw-20,14,C.midGray);
+    doc.setTextColor(...C.white);
+    doc.setFontSize(14);
+    doc.setFont('helvetica','bold');
+    doc.text('TRAINER PERFORMANCE',14,y+10);
+    doc.setTextColor(...C.accent);
+    doc.setFontSize(9);
+    doc.text('Leaderboard & Ratings',pw-12,y+10,{align:'right'});
+    y+=18;
+
+    sectionHeader('TRAINER LEADERBOARD',`Top ${Math.min(trainerStats.length,10)} by rating`);
+
+    const medals=['🥇','🥈','🥉'];
+    const rankColors=[C.yellow,C.muted,C.orange];
+    trainerStats.slice(0,10).forEach((t,i)=>{
+      checkPage(14);
+      roundRect(10,y,pw-20,12,2,i<3?C.darkGray:C.midGray);
+      if(i<3){
+        doc.setFillColor(...rankColors[i]);
+        doc.roundedRect(10,y,2,12,0.5,0.5,'F');
+      }
+      // rank
+      doc.setTextColor(...(i<3?rankColors[i]:C.muted));
+      doc.setFontSize(10);
+      doc.setFont('helvetica','bold');
+      doc.text(`#${i+1}`,16,y+8);
+      // name
+      doc.setTextColor(...C.white);
+      doc.setFontSize(9);
+      doc.setFont('helvetica','bold');
+      doc.text(t.name||'—',30,y+8);
+      // gender
+      doc.setTextColor(...C.muted);
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica','normal');
+      doc.text(t.gender||'—',85,y+8);
+      // clients
+      doc.text(`${t.clientCount} clients`,105,y+8);
+      // ratings count
+      doc.text(`${t.totalRatings} ratings`,130,y+8);
+      // stars bar
+      const starW=25;
+      fillRect(152,y+4,starW,4,C.midGray);
+      doc.setFillColor(...(t.avg>=4?C.green:t.avg>=3?C.yellow:C.red));
+      doc.rect(152,y+4,(t.avg/5)*starW,4,'F');
+      // avg score
+      doc.setTextColor(...(t.avg>=4?C.green:t.avg>=3?C.yellow:C.red));
+      doc.setFontSize(9);
+      doc.setFont('helvetica','bold');
+      doc.text(t.avg>0?t.avg.toFixed(1):'N/R',pw-12,y+8,{align:'right'});
+      y+=14;
+    });
+
+    if(trainerStats.length===0){
+      doc.setTextColor(...C.muted);doc.setFontSize(9);
+      doc.text('No trainer ratings recorded yet.',14,y+6);y+=14;
+    }
+
+    y+=6;
+    sectionHeader('ACTIVE CLIENTS LIST',`${activeClients.length} clients`);
+
+    // table header
+    checkPage(10);
+    fillRect(10,y,pw-20,9,C.midGray);
+    doc.setTextColor(...C.accent);
+    doc.setFontSize(7);
+    doc.setFont('helvetica','bold');
+    const cCols=[
+      {t:'NAME',x:13},{t:'PHONE',x:55},{t:'PLAN',x:85},{t:'TRAINER',x:110},
+      {t:'COORDINATOR',x:140},{t:'GOAL',x:168},{t:'START',x:188}
+    ];
+    cCols.forEach(c=>doc.text(c.t,c.x,y+6.5));
+    y+=11;
+
+    activeClients.forEach((c,i)=>{
+      checkPage(9);
+      if(i%2===0)fillRect(10,y,pw-20,8,C.darkGray);
+      doc.setTextColor(...C.white);
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica','normal');
+      doc.text((c.name||'—').substring(0,20),13,y+5.5);
+      doc.text(c.phone||'—',55,y+5.5);
+      // plan badge color
+      const pCol={Silver:C.muted,Gold:C.yellow,Platinum:C.purple,'Platinum Plus':C.blue,Couple:C.orange,'Corporate Fitness':C.green}[c.plan]||C.muted;
+      doc.setTextColor(...pCol);
+      doc.text((c.plan||'—').substring(0,12),85,y+5.5);
+      doc.setTextColor(...C.white);
+      doc.text((c.trainerName||'—').substring(0,16),110,y+5.5);
+      doc.text((c.coordinatorName||'—').substring(0,14),140,y+5.5);
+      doc.text((c.goal||'—').substring(0,12),168,y+5.5);
+      doc.text(c.startDate||'—',188,y+5.5);
+      y+=8.5;
+    });
+
+    // ══════════════════════════════════════════════════════
+    // PAGE 4 — SESSIONS LOG
+    // ══════════════════════════════════════════════════════
+    addPage();
+
+    fillRect(10,y,pw-20,14,C.midGray);
+    doc.setTextColor(...C.white);
+    doc.setFontSize(14);
+    doc.setFont('helvetica','bold');
+    doc.text('SESSIONS LOG',14,y+10);
+    doc.setTextColor(...C.accent);
+    doc.setFontSize(9);
+    doc.text(`${monthName} ${year} — ${monthSessions.length} total`,pw-12,y+10,{align:'right'});
+    y+=18;
+
+    // table header
+    fillRect(10,y,pw-20,9,C.midGray);
+    doc.setTextColor(...C.accent);
+    doc.setFontSize(7);
+    doc.setFont('helvetica','bold');
+    const sCols=[
+      {t:'DATE',x:13},{t:'TIME',x:35},{t:'CLIENT',x:55},
+      {t:'TRAINER',x:100},{t:'TYPE',x:138},{t:'STATUS',x:172}
+    ];
+    sCols.forEach(c=>doc.text(c.t,c.x,y+6.5));
+    y+=11;
+
+    const statusColors={'completed':C.green,'missed':C.red,'onair':C.yellow,'not-started':C.muted};
+    const statusLabels={'completed':'Completed','missed':'Missed','onair':'On Air','not-started':'Pending'};
+
+    monthSessions.sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach((s,i)=>{
+      checkPage(9);
+      if(i%2===0)fillRect(10,y,pw-20,8,C.darkGray);
+      doc.setTextColor(...C.white);
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica','normal');
+      doc.text(s.date||'—',13,y+5.5);
+      doc.text(to12h(s.time),35,y+5.5);
+      doc.text((s.clientName||'—').substring(0,22),55,y+5.5);
+      doc.text((s.trainerName||'—').substring(0,18),100,y+5.5);
+      doc.text((s.type||'—').substring(0,16),138,y+5.5);
+      const sc=statusColors[s.status]||C.muted;
+      doc.setTextColor(...sc);
+      doc.setFont('helvetica','bold');
+      doc.text(statusLabels[s.status]||s.status||'—',172,y+5.5);
+      doc.setFont('helvetica','normal');
+      y+=8.5;
+    });
+
+    if(monthSessions.length===0){
+      doc.setTextColor(...C.muted);doc.setFontSize(9);
+      doc.text('No sessions recorded this month.',14,y+6);y+=14;
+    }
+
+    // ══════════════════════════════════════════════════════
+    // PAGE 5 — ATTENDANCE & LEAVE SUMMARY
+    // ══════════════════════════════════════════════════════
+    addPage();
+
+    fillRect(10,y,pw-20,14,C.midGray);
+    doc.setTextColor(...C.white);
+    doc.setFontSize(14);
+    doc.setFont('helvetica','bold');
+    doc.text('ATTENDANCE & LEAVE',14,y+10);
+    doc.setTextColor(...C.accent);
+    doc.setFontSize(9);
+    doc.text('Summary Report',pw-12,y+10,{align:'right'});
+    y+=18;
+
+    sectionHeader('ATTENDANCE SUMMARY');
+    statRow([
+      {label:'Total Records',val:attendance.length,color:C.white},
+      {label:'Present',val:presentCount,color:C.green},
+      {label:'Absent',val:attendance.filter(a=>a.status==='absent').length,color:C.red},
+      {label:'Late',val:attendance.filter(a=>a.status==='late').length,color:C.yellow},
+    ]);
+
+    // Attendance rate bar
+    checkPage(20);
+    doc.setTextColor(...C.muted);doc.setFontSize(8);
+    doc.text('Overall Attendance Rate',12,y+5);
+    fillRect(12,y+8,pw-24,8,C.darkGray);
+    doc.setFillColor(...(attendRate>=80?C.green:attendRate>=60?C.yellow:C.red));
+    doc.roundedRect(12,y+8,(pw-24)*attendRate/100,8,2,2,'F');
+    doc.setTextColor(...C.white);doc.setFontSize(8);doc.setFont('helvetica','bold');
+    doc.text(`${attendRate}%`,pw/2,y+14,{align:'center'});
+    y+=22;
+
+    sectionHeader('LEAVE ANALYSIS');
+    statRow([
+      {label:'Total Requests',val:leaves.length,color:C.white},
+      {label:'Approved',val:approvedLeaves,color:C.green},
+      {label:'Rejected',val:leaves.filter(l=>l.status==='rejected').length,color:C.red},
+      {label:'Pending',val:pendingLeaves,color:C.yellow},
+    ]);
+
+    // Leave by role
+    checkPage(40);
+    const leaveByRole={trainer:0,coordinator:0,coordinatorhead:0};
+    leaves.filter(l=>l.status==='approved').forEach(l=>{if(leaveByRole[l.requestedByRole]!==undefined)leaveByRole[l.requestedByRole]++;});
+    const lrEntries=[['Trainers',leaveByRole.trainer,C.green],['Coordinators',leaveByRole.coordinator,C.blue],['Coord. Heads',leaveByRole.coordinatorhead,C.orange]];
+    const maxLR=Math.max(...lrEntries.map(e=>e[1]),1);
+    lrEntries.forEach(([label,cnt,color])=>{
+      const bw2=((pw-70)/maxLR)*cnt;
+      doc.setTextColor(...C.muted);doc.setFontSize(8);doc.setFont('helvetica','normal');
+      doc.text(label,12,y+5.5);
+      fillRect(52,y+1,pw-64,6,C.darkGray);
+      doc.setFillColor(...color);
+      doc.roundedRect(52,y+1,Math.max(bw2,2),6,1,1,'F');
+      doc.setTextColor(...color);doc.setFontSize(8);doc.setFont('helvetica','bold');
+      doc.text(String(cnt),pw-12,y+6,{align:'right'});
+      y+=10;
+    });
+    y+=6;
+
+    sectionHeader('COORDINATOR FOLLOW-UP PERFORMANCE');
+    if(Object.keys(coordStats).length===0){
+      doc.setTextColor(...C.muted);doc.setFontSize(9);
+      doc.text('No follow-up data available.',14,y+6);y+=14;
+    } else {
+      fillRect(10,y,pw-20,9,C.midGray);
+      doc.setTextColor(...C.accent);doc.setFontSize(7);doc.setFont('helvetica','bold');
+      doc.text('COORDINATOR',13,y+6.5);
+      doc.text('TOTAL',100,y+6.5);
+      doc.text('DONE',125,y+6.5);
+      doc.text('PENDING',150,y+6.5);
+      doc.text('RATE',175,y+6.5);
+      y+=11;
+      Object.values(coordStats).sort((a,b)=>b.done-a.done).forEach((c,i)=>{
+        checkPage(9);
+        if(i%2===0)fillRect(10,y,pw-20,8,C.darkGray);
+        const rate=c.total?Math.round(c.done/c.total*100):0;
+        doc.setTextColor(...C.white);doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+        doc.text(c.name.substring(0,30),13,y+5.5);
+        doc.text(String(c.total),100,y+5.5);
+        doc.setTextColor(...C.green);doc.text(String(c.done),125,y+5.5);
+        doc.setTextColor(...C.yellow);doc.text(String(c.total-c.done),150,y+5.5);
+        doc.setTextColor(...(rate>=80?C.green:rate>=60?C.yellow:C.red));
+        doc.setFont('helvetica','bold');doc.text(`${rate}%`,175,y+5.5);
+        y+=8.5;
+      });
+    }
+
+    // ══════════════════════════════════════════════════════
+    // FOOTER ON EVERY PAGE
+    // ══════════════════════════════════════════════════════
+    const totalPages=doc.internal.getNumberOfPages();
+    for(let p=1;p<=totalPages;p++){
+      doc.setPage(p);
+      if(p>1){
+        // left accent bar (already drawn for pages 2+)
+        fillRect(0,0,3,ph,C.accent);
+      }
+      // footer bar
+      fillRect(0,ph-10,pw,10,C.darkGray);
+      doc.setTextColor(...C.muted);
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica','normal');
+      doc.text(`GYM AT YOUR HOME™  ·  ${monthName} ${year} Report  ·  Confidential`,10,ph-4);
+      doc.setTextColor(...C.accent);
+      doc.text(`Page ${p} of ${totalPages}`,pw-10,ph-4,{align:'right'});
+    }
+
+    doc.save(`GYH_Premium_Report_${monthName}_${year}.pdf`);
+    toast(`✅ Premium PDF exported — ${totalPages} pages!`,'success');
+
+  }catch(e){
+    toast('PDF error: '+e.message,'error');
+    console.error('[PDF Export]',e);
+  }
+}
 // ══════════════════════════════════════════════════════════════
 // CERTIFICATES
 // ══════════════════════════════════════════════════════════════
@@ -1299,14 +2114,7 @@ async function trainers(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const[data,clientData,allRatings,allCerts]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('clients',fn().where('active','==',true)),fsGetAll('trainerratings'),fsGetAll('certificates')]);
   $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><span style="color:var(--muted);font-size:13px">${data.length} trainer${data.length!==1?'s':''} registered</span>${CR==='admin'||CR==='coordinatorhead'?`<button class="btn btn-p" onclick="openAddUser()">+ Add Trainer</button>`:''}</div>
-   <div class="card" style="padding:0">
-  <div style="padding:12px 18px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <input class="fi" type="date" id="mlv-from" style="max-width:140px;margin:0" onchange="filterMyLeaves()">
-    <span style="color:var(--muted);font-size:12px">→</span>
-    <input class="fi" type="date" id="mlv-to" style="max-width:140px;margin:0" onchange="filterMyLeaves()">
-    <button class="btn btn-g btn-sm" onclick="$('mlv-from').value='';$('mlv-to').value='';filterMyLeaves()">✕ Clear</button>
-  </div>
-  <div class="tbl-wrap" id="mlv-table">${data.length===0?emptyState('🧑‍🏫','No trainers yet','','',''):`<table><thead><tr><th>Trainer</th><th>Gender</th><th>Phone</th><th>Clients</th><th>Rating</th><th>Certs</th><th>Status</th><th>Actions</th></tr></thead><tbody>${data.map(t=>{const mc=clientData.filter(c=>c.trainerId===t.id).length;const tRatings=allRatings.filter(r=>r.trainerId===t.id);const avg=tRatings.length?avgRating(tRatings):0;const tCerts=allCerts.filter(c=>c.trainerId===t.id);const starCol=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';return`<tr><td><strong>${t.name||'—'}</strong><div style="font-size:11px;color:var(--muted)">${t.email||''}</div></td><td style="font-size:12px">${t.gender||'—'}</td><td style="font-size:12px;font-family:'JetBrains Mono',monospace">${t.phone||'—'}</td><td>${mc}</td><td>${tRatings.length?`<span style="color:${starCol}">★ ${avg.toFixed(1)}</span> <span style="font-size:11px;color:var(--muted)">(${tRatings.length})</span>`:'<span style="color:var(--muted2)">—</span>'}</td><td>${tCerts.length?`<span class="badge b-a">🎓 ${tCerts.length}</span>`:'<span style="color:var(--muted2)">0</span>'}</td><td>${t.active!==false?`<span class="badge b-g">Active</span>`:`<span class="badge b-r">Inactive</span>`}</td><td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="viewTrainerProfile('${t.id}','${(t.name||'').replace(/'/g,"\\'")}')">Profile</button>${CR==='admin'||CR==='coordinatorhead'?`<button class="btn btn-g btn-sm" onclick="openEditUser('${t.id}')">Edit</button>`:''}</div></td></tr>`;}).join('')}</tbody></table>`}</div></div>`;
+    <div class="card" style="padding:0"><div class="tbl-wrap">${data.length===0?emptyState('🧑‍🏫','No trainers yet','','',''):`<table><thead><tr><th>Trainer</th><th>Gender</th><th>Phone</th><th>Clients</th><th>Rating</th><th>Certs</th><th>Status</th><th>Actions</th></tr></thead><tbody>${data.map(t=>{const mc=clientData.filter(c=>c.trainerId===t.id).length;const tRatings=allRatings.filter(r=>r.trainerId===t.id);const avg=tRatings.length?avgRating(tRatings):0;const tCerts=allCerts.filter(c=>c.trainerId===t.id);const starCol=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';return`<tr><td><strong>${t.name||'—'}</strong><div style="font-size:11px;color:var(--muted)">${t.email||''}</div></td><td style="font-size:12px">${t.gender||'—'}</td><td style="font-size:12px;font-family:'JetBrains Mono',monospace">${t.phone||'—'}</td><td>${mc}</td><td>${tRatings.length?`<span style="color:${starCol}">★ ${avg.toFixed(1)}</span> <span style="font-size:11px;color:var(--muted)">(${tRatings.length})</span>`:'<span style="color:var(--muted2)">—</span>'}</td><td>${tCerts.length?`<span class="badge b-a">🎓 ${tCerts.length}</span>`:'<span style="color:var(--muted2)">0</span>'}</td><td>${t.active!==false?`<span class="badge b-g">Active</span>`:`<span class="badge b-r">Inactive</span>`}</td><td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="viewTrainerProfile('${t.id}','${(t.name||'').replace(/'/g,"\\'")}')">Profile</button>${CR==='admin'||CR==='coordinatorhead'?`<button class="btn btn-g btn-sm" onclick="openEditUser('${t.id}')">Edit</button>`:''}</div></td></tr>`;}).join('')}</tbody></table>`}</div></div>`;
 }
 async function viewTrainerProfile(trainerId,trainerName){const[tUser,tRatings,tCerts,tClients]=await Promise.all([fsGet('users',trainerId),fsGetAll('trainerratings',fn().where('trainerId','==',trainerId)),fsGetAll('certificates',fn().where('trainerId','==',trainerId)),fsGetAll('clients',fn().where('trainerId','==',trainerId),fn().where('active','==',true))]);const avg=tRatings.length?avgRating(tRatings):0;const col=['#888','#ff4444','#ffbb00','#ffbb00','#00e676','#d4ff00'][Math.round(avg)]||'#888';const critBreakdown=RATING_CRITERIA.map(c=>{const vals=tRatings.filter(r=>r.criteria&&r.criteria[c.id]).map(r=>r.criteria[c.id]);const a=vals.length?vals.reduce((x,y)=>x+y,0)/vals.length:0;return{...c,avg:a};});openM2(`TRAINER: ${trainerName.toUpperCase()}`,`<div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px"><div class="staff-avatar" style="width:60px;height:60px;font-size:24px;background:var(--green-dim);color:var(--green)">${(trainerName||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div><div><div style="font-size:18px;font-weight:700">${tUser?.name||'—'}</div><div style="font-size:13px;color:var(--muted)">${tUser?.gender||''} · ${tUser?.phone||'—'}</div><div style="margin-top:6px"><span style="font-size:24px;font-weight:700;color:${col}">${avg.toFixed(1)}</span><span style="font-size:18px;color:${col};margin-left:4px">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span></div></div></div><div class="fr" style="margin-bottom:14px"><div class="sc sc-b" style="margin:0;padding:12px"><div class="sc-lbl">Clients</div><div style="font-size:28px;font-weight:700">${tClients.length}</div></div><div class="sc sc-a" style="margin:0;padding:12px"><div class="sc-lbl">Certificates</div><div style="font-size:28px;font-weight:700">${tCerts.length}</div></div><div class="sc sc-y" style="margin:0;padding:12px"><div class="sc-lbl">Ratings</div><div style="font-size:28px;font-weight:700">${tRatings.length}</div></div></div><div class="detail-section"><div class="detail-section-title">Performance Criteria</div><div class="rating-criteria-grid">${critBreakdown.map(c=>`<div class="criteria-card"><div class="criteria-label">${c.icon} ${c.label}</div><div style="display:flex;align-items:center;gap:8px;margin-top:4px"><div style="flex:1"><div class="pb"><div class="pb-fill" style="width:${c.avg/5*100}%;background:var(--yellow)"></div></div></div><div style="font-weight:700;font-size:13px;color:var(--yellow)">${c.avg>0?c.avg.toFixed(1):'—'}</div></div></div>`).join('')}</div></div>${tCerts.length>0?`<div class="detail-section"><div class="detail-section-title">🎓 Certificates</div>${tCerts.map(c=>`<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><strong>${c.name}</strong> · ${c.issuer}${c.issueYear?` · ${c.issueYear}`:''}</div>`).join('')}</div>`:''}<div class="mo-foot">${CR==='coordinator'||CR==='coordinatorhead'?`<button class="btn btn-p" onclick="closeM2();openRateTrainer('${trainerId}','${trainerName.replace(/'/g,"\\'")}')">+ Rate Session</button>`:''}<button class="btn btn-g" onclick="closeM2()">Close</button></div>`);}
 
@@ -1345,36 +2153,182 @@ async function openEditTrainerAttend(id){const a=await fsGet('trainerattendance'
 async function saveTrainerAttend(existingId=''){const trainerId=$('ta-trainer-id').value||$('ta-trainer-inp')?.dataset.selectedId||'';const trainerName=$('ta-trainer-inp')?.value||'';const date=$('ta-date').value,status=$('ta-status').value,time=$('ta-time').value;if(!trainerName||!date){toast('Select trainer and date','error');return}const data={trainerId,trainerName,date,time,status,note:$('ta-note').value,markedBy:auth().currentUser.uid,markedByName:CU.name||''};try{if(existingId){await fsUpdate('trainerattendance',existingId,data);toast('Updated!','success')}else{await fsAdd('trainerattendance',data);toast('Marked!','success')}closeM1();trainerattendance();}catch(e){toast('Error: '+e.message,'error')}}
 async function delTrainerAttend(id){if(!confirm('Delete?'))return;try{await fsDel('trainerattendance',id);toast('Deleted','success');trainerattendance()}catch(e){toast('Error: '+e.message,'error')}}
 
-// ══════ ATTENDANCE ══════
+// ══════════════════════════════════════════════════════════════
+// ATTENDANCE — replace everything from
+// "async function attendance()" down to "async function delAttend"
+// ══════════════════════════════════════════════════════════════
+
 async function attendance(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   let q=[];if(CR==='client')q=[fn().where('clientId','==',auth().currentUser.uid)];
-  const data=await fsGetAll('attendance',...q);data.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  const present=data.filter(a=>a.status==='present').length,absent=data.filter(a=>a.status==='absent').length,late=data.filter(a=>a.status==='late').length;
-  $('page').innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <input class="fi" type="date" id="at-filter-from" style="max-width:140px;margin:0" onchange="filterAttendanceByDate()">
-    <span style="color:var(--muted);font-size:12px">→</span>
-    <input class="fi" type="date" id="at-filter-to" style="max-width:140px;margin:0" onchange="filterAttendanceByDate()">
-    <button class="btn btn-g btn-sm" onclick="$('at-filter-from').value='';$('at-filter-to').value='';filterAttendanceByDate()">✕ Clear</button>
-  </div>
-  ${CR!=='client'?`<button class="btn btn-p" onclick="openMarkAttendance()">+ Mark Attendance</button>`:''}
-</div></div>${CR!=='client'?`<button class="btn btn-p" onclick="openMarkAttendance()">+ Mark Attendance</button>`:''}</div><div class="stats-grid"><div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Present</div><div class="sc-val">${present}</div></div><div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Absent</div><div class="sc-val">${absent}</div></div><div class="sc sc-y"><div class="sc-ico">⏰</div><div class="sc-lbl">Late</div><div class="sc-val">${late}</div></div><div class="sc sc-a"><div class="sc-ico">📊</div><div class="sc-lbl">Rate</div><div class="sc-val">${data.length?Math.round(present/data.length*100):0}%</div></div></div><div class="card" style="padding:0"><div class="tbl-wrap">${data.length===0?emptyState('✅','No records','Attendance will appear here.',CR!=='client'?'+ Mark Attendance':'',CR!=='client'?'openMarkAttendance()':''):`<table><thead><tr><th>Date</th><th>Client</th><th>Trainer</th><th>Session</th><th>Status</th><th>Reason</th>${CR!=='client'?'<th>Actions</th>':''}</tr></thead><tbody>${data.map(a=>`<tr><td style="font-size:12px">${a.date||'—'}</td><td><strong>${a.clientName||'—'}</strong></td><td style="font-size:12px">${a.trainerName||'—'}</td><td style="font-size:12px">${a.sessionType||'—'}</td><td>${statusBadge(a.status)}</td><td style="font-size:12px">${a.reason||'—'}</td>${CR!=='client'?`<td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="openEditAttend('${a.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delAttend('${a.id}')">Delete</button></div></td>`:''}</tr>`).join('')}</tbody></table>`}</div></div>`;
+  const data=await fsGetAll('attendance',...q);
+  data.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  window._attendanceData=data;
+
+  const present=data.filter(a=>a.status==='present').length;
+  const absent=data.filter(a=>a.status==='absent').length;
+  const late=data.filter(a=>a.status==='late').length;
+
+  $('page').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div></div>
+      ${CR!=='client'?`<button class="btn btn-p" onclick="openMarkAttendance()">+ Mark Attendance</button>`:''}
+    </div>
+
+    <div class="stats-grid">
+      <div class="sc sc-g"><div class="sc-ico">✅</div><div class="sc-lbl">Present</div><div class="sc-val">${present}</div></div>
+      <div class="sc sc-r"><div class="sc-ico">❌</div><div class="sc-lbl">Absent</div><div class="sc-val">${absent}</div></div>
+      <div class="sc sc-y"><div class="sc-ico">⏰</div><div class="sc-lbl">Late</div><div class="sc-val">${late}</div></div>
+      <div class="sc sc-a"><div class="sc-ico">📊</div><div class="sc-lbl">Rate</div><div class="sc-val">${data.length?Math.round(present/data.length*100):0}%</div></div>
+    </div>
+
+    <!-- Filter bar -->
+    <div class="card" style="padding:12px 16px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">From</span>
+          <input class="fi" type="date" id="at-filter-from" style="max-width:148px;margin:0;padding:8px 10px;font-size:12px" onchange="filterAttendanceByDate()">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">To</span>
+          <input class="fi" type="date" id="at-filter-to" style="max-width:148px;margin:0;padding:8px 10px;font-size:12px" onchange="filterAttendanceByDate()">
+        </div>
+        <select class="fs" id="at-filter-status" style="max-width:148px;padding:8px 10px;font-size:12px" onchange="filterAttendanceByDate()">
+          <option value="">All Statuses</option>
+          <option value="present">✅ Present</option>
+          <option value="absent">❌ Absent</option>
+          <option value="late">⏰ Late</option>
+        </select>
+        <input class="fi" type="text" id="at-filter-search" placeholder="🔍 Client / Trainer…" style="max-width:200px;margin:0;padding:8px 10px;font-size:12px" oninput="filterAttendanceByDate()">
+        <button class="btn btn-g btn-sm" onclick="
+          $('at-filter-from').value='';
+          $('at-filter-to').value='';
+          $('at-filter-status').value='';
+          $('at-filter-search').value='';
+          filterAttendanceByDate()
+        ">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0">
+      <div class="tbl-wrap" id="at-table">
+        ${renderAttendanceTable(data)}
+      </div>
+    </div>`;
 }
-async function openMarkAttendance(){const cls=await fsGetAll('clients',fn().where('active','==',true));openM1('MARK ATTENDANCE',`<div class="fg"><label class="fl">Client *</label><input class="fi" id="at-client-inp" placeholder="Type client name…" autocomplete="off"><input type="hidden" id="at-client-id"></div><div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" id="at-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div><div class="fg"><label class="fl">Status *</label><select class="fs" id="at-status"><option value="present">✅ Present</option><option value="absent">❌ Absent</option><option value="late">⏰ Late</option></select></div></div><div class="fg"><label class="fl">Session Type</label><select class="fs" id="at-type"><option value="">— Select —</option>${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}</select></div><div class="fg"><label class="fl">Reason</label><input class="fi" id="at-reason" placeholder="Optional reason"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveAttendance('')">Save</button></div>`);attachClientAC('at-client-inp','at-client-id',cls);}
-async function openEditAttend(id){const a=await fsGet('attendance',id);if(!a){toast('Not found','error');return}const cls=await fsGetAll('clients',fn().where('active','==',true));openM1('EDIT ATTENDANCE',`<div class="fg"><label class="fl">Client *</label><input class="fi" id="at-client-inp" placeholder="Type client name…" value="${a.clientName||''}" autocomplete="off"><input type="hidden" id="at-client-id" value="${a.clientId||''}"></div><div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" id="at-date" type="date" value="${a.date||''}"></div><div class="fg"><label class="fl">Status *</label><select class="fs" id="at-status"><option value="present" ${a.status==='present'?'selected':''}>✅ Present</option><option value="absent" ${a.status==='absent'?'selected':''}>❌ Absent</option><option value="late" ${a.status==='late'?'selected':''}>⏰ Late</option></select></div></div><div class="fg"><label class="fl">Reason</label><input class="fi" id="at-reason" value="${a.reason||''}"></div><div class="mo-foot"><button class="btn btn-g" onclick="closeM1()">Cancel</button><button class="btn btn-p" onclick="saveAttendance('${id}')">Update</button></div>`);attachClientAC('at-client-inp','at-client-id',cls);}
-async function saveAttendance(existingId=''){const clientId=$('at-client-id').value||$('at-client-inp')?.dataset.selectedId||'';const clientName=$('at-client-inp')?.value||'';const date=$('at-date').value,status=$('at-status').value;if(!clientName||!date||!status){toast('Fill required fields','error');return}const clientDoc=clientId?await fsGet('clients',clientId):null;const data={clientId,clientName,trainerId:clientDoc?.trainerId||'',trainerName:clientDoc?.trainerName||'',date,status,sessionType:document.getElementById('at-type')?.value||'',reason:$('at-reason').value,markedBy:auth().currentUser.uid};try{if(existingId){await fsUpdate('attendance',existingId,data);toast('Updated!','success')}else{await fsAdd('attendance',data);toast('Marked!','success')}closeM1();attendance();}catch(e){toast('Error: '+e.message,'error')}}
-async function delAttend(id){if(!confirm('Delete?'))return;try{await fsDel('attendance',id);toast('Deleted','success');attendance()}catch(e){toast('Error: '+e.message,'error')}}function filterAttendanceByDate(){
+
+function renderAttendanceTable(data){
+  if(!data.length) return emptyState('✅','No records','Attendance will appear here.',CR!=='client'?'+ Mark Attendance':'',CR!=='client'?'openMarkAttendance()':'');
+  return`<table><thead><tr>
+    <th>Date</th><th>Client</th><th>Trainer</th><th>Session</th><th>Status</th><th>Reason</th>
+    ${CR!=='client'?'<th>Actions</th>':''}
+  </tr></thead><tbody>
+  ${data.map(a=>`<tr>
+    <td style="font-size:12px">${a.date||'—'}</td>
+    <td><strong>${a.clientName||'—'}</strong></td>
+    <td style="font-size:12px">${a.trainerName||'—'}</td>
+    <td style="font-size:12px">${a.sessionType||'—'}</td>
+    <td>${statusBadge(a.status)}</td>
+    <td style="font-size:12px">${a.reason||'—'}</td>
+    ${CR!=='client'?`<td><div class="td-actions">
+      <button class="btn btn-g btn-sm" onclick="openEditAttend('${a.id}')">Edit</button>
+      <button class="btn btn-d btn-sm" onclick="delAttend('${a.id}')">Delete</button>
+    </div></td>`:''}
+  </tr>`).join('')}
+  </tbody></table>`;
+}
+
+function filterAttendanceByDate(){
   const from=$('at-filter-from')?.value;
   const to=$('at-filter-to')?.value;
+  const status=$('at-filter-status')?.value||'';
+  const search=($('at-filter-search')?.value||'').toLowerCase().trim();
   let data=window._attendanceData||[];
   if(from)data=data.filter(a=>(a.date||'')>=from);
   if(to)data=data.filter(a=>(a.date||'')<=to);
-  const tbl=$('at-table');if(!tbl)return;
-  const present=data.filter(a=>a.status==='present').length,absent=data.filter(a=>a.status==='absent').length,late=data.filter(a=>a.status==='late').length;
-  tbl.innerHTML=data.length===0?emptyState('✅','No records for this range','','',''):`<table><thead><tr><th>Date</th><th>Client</th><th>Trainer</th><th>Session</th><th>Status</th><th>Reason</th>${CR!=='client'?'<th>Actions</th>':''}</tr></thead><tbody>${data.map(a=>`<tr><td style="font-size:12px">${a.date||'—'}</td><td><strong>${a.clientName||'—'}</strong></td><td style="font-size:12px">${a.trainerName||'—'}</td><td style="font-size:12px">${a.sessionType||'—'}</td><td>${statusBadge(a.status)}</td><td style="font-size:12px">${a.reason||'—'}</td>${CR!=='client'?`<td><div class="td-actions"><button class="btn btn-g btn-sm" onclick="openEditAttend('${a.id}')">Edit</button><button class="btn btn-d btn-sm" onclick="delAttend('${a.id}')">Delete</button></div></td>`:''}</tr>`).join('')}</tbody></table>`;
+  if(status)data=data.filter(a=>a.status===status);
+  if(search)data=data.filter(a=>(a.clientName||'').toLowerCase().includes(search)||(a.trainerName||'').toLowerCase().includes(search));
+  const tbl=$('at-table');
+  if(tbl)tbl.innerHTML=renderAttendanceTable(data);
 }
 
+async function openMarkAttendance(){
+  const cls=await fsGetAll('clients',fn().where('active','==',true));
+  openM1('MARK ATTENDANCE',`
+    <div class="fg"><label class="fl">Client *</label>
+      <input class="fi" id="at-client-inp" placeholder="Type client name…" autocomplete="off">
+      <input type="hidden" id="at-client-id">
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Date *</label><input class="fi" id="at-date" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+      <div class="fg"><label class="fl">Status *</label>
+        <select class="fs" id="at-status">
+          <option value="present">✅ Present</option>
+          <option value="absent">❌ Absent</option>
+          <option value="late">⏰ Late</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Session Type</label>
+      <select class="fs" id="at-type">
+        <option value="">— Select —</option>
+        ${SESSION_TYPES.map(t=>`<option>${t}</option>`).join('')}
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Reason</label><input class="fi" id="at-reason" placeholder="Optional reason"></div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
+      <button class="btn btn-p" onclick="saveAttendance('')">Save</button>
+    </div>`);
+  attachClientAC('at-client-inp','at-client-id',cls);
+}
+
+async function openEditAttend(id){
+  const a=await fsGet('attendance',id);
+  if(!a){toast('Not found','error');return}
+  const cls=await fsGetAll('clients',fn().where('active','==',true));
+  openM1('EDIT ATTENDANCE',`
+    <div class="fg"><label class="fl">Client *</label>
+      <input class="fi" id="at-client-inp" placeholder="Type client name…" value="${a.clientName||''}" autocomplete="off">
+      <input type="hidden" id="at-client-id" value="${a.clientId||''}">
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Date *</label><input class="fi" id="at-date" type="date" value="${a.date||''}"></div>
+      <div class="fg"><label class="fl">Status *</label>
+        <select class="fs" id="at-status">
+          <option value="present" ${a.status==='present'?'selected':''}>✅ Present</option>
+          <option value="absent" ${a.status==='absent'?'selected':''}>❌ Absent</option>
+          <option value="late" ${a.status==='late'?'selected':''}>⏰ Late</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Reason</label><input class="fi" id="at-reason" value="${a.reason||''}"></div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
+      <button class="btn btn-p" onclick="saveAttendance('${id}')">Update</button>
+    </div>`);
+  attachClientAC('at-client-inp','at-client-id',cls);
+}
+
+async function saveAttendance(existingId=''){
+  const clientId=$('at-client-id').value||$('at-client-inp')?.dataset.selectedId||'';
+  const clientName=$('at-client-inp')?.value||'';
+  const date=$('at-date').value,status=$('at-status').value;
+  if(!clientName||!date||!status){toast('Fill required fields','error');return}
+  const clientDoc=clientId?await fsGet('clients',clientId):null;
+  const data={clientId,clientName,trainerId:clientDoc?.trainerId||'',trainerName:clientDoc?.trainerName||'',date,status,sessionType:document.getElementById('at-type')?.value||'',reason:$('at-reason').value,markedBy:auth().currentUser.uid};
+  try{
+    if(existingId){await fsUpdate('attendance',existingId,data);toast('Updated!','success')}
+    else{await fsAdd('attendance',data);toast('Marked!','success')}
+    closeM1();attendance();
+  }catch(e){toast('Error: '+e.message,'error')}
+}
+
+async function delAttend(id){
+  if(!confirm('Delete?'))return;
+  try{await fsDel('attendance',id);toast('Deleted','success');attendance()}
+  catch(e){toast('Error: '+e.message,'error')}
+}
 // ══════ ANALYTICS ══════
 async function analytics(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
@@ -1406,7 +2360,7 @@ async function followups(){
       <div class="stats-grid" style="margin:0;flex:1"><div class="sc sc-r" style="padding:12px"><div class="sc-lbl">Pending</div><div class="sc-val" style="font-size:24px">${pending}</div></div><div class="sc sc-y" style="padding:12px"><div class="sc-lbl">In Progress</div><div class="sc-val" style="font-size:24px">${inprog}</div></div><div class="sc sc-g" style="padding:12px"><div class="sc-lbl">Completed</div><div class="sc-val" style="font-size:24px">${done}</div></div></div>
       ${(CR==='admin'||CR==='coordinatorhead')?`<button class="btn btn-p" style="align-self:flex-start" onclick="openAddFollowup()">+ Add Follow-up</button>`:''}
     </div>
-    <div class="card" style="padding:0"><div class="tbl-wrap" id="at-table">
+    <div class="card" style="padding:0"><div class="tbl-wrap">
       ${data.length===0?emptyState('📞','No follow-ups',CR==='coordinator'?'No follow-ups assigned to you yet.':'Add follow-up reminders.',(CR==='admin'||CR==='coordinatorhead')?'+ Add Follow-up':'',(CR==='admin'||CR==='coordinatorhead')?'openAddFollowup()':'')
       :`<table><thead><tr><th>Client</th><th>Type</th><th>Remark</th><th>Due</th><th>Priority</th><th>Assigned To</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>${data.map(f=>`<tr>
