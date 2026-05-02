@@ -1419,28 +1419,24 @@ async function openTcStatus(clientId,clientName){openM1(`UPDATE STATUS: ${client
 async function saveTcStatus(clientId){const status=document.getElementById('tc-st-sel')?.value||'not-started';const tc=(window._tcMap||{})[clientId];if(tc){await fsUpdate('timechart',tc.id,{todayStatus:status,lastStatusUpdate:new Date().toISOString().split('T')[0]});}else{const c=(window._tcClients||[]).find(x=>x.id===clientId)||{};await fsAdd('timechart',{clientId,clientName:c.name||'',trainerName:c.trainerName||'',trainerId:c.trainerId||'',todayStatus:status,lastStatusUpdate:new Date().toISOString().split('T')[0]});}closeM1();toast('Status updated!','success');timechart();}
 
 // ══════════════════════════════════════════════════════════════
-// PDF EXPORT — replace the entire existing exportPDF() function
-// Find: "async function exportPDF(){"
-// Select until its closing "}"
-// Replace with this entire block
+// PROFESSIONAL IT-GRADE PDF EXPORT
+// Find:   async function exportPDF(){
+// Select until its closing }
+// Replace entirely with this block
 // ══════════════════════════════════════════════════════════════
 
 async function exportPDF(){
-  toast('Generating premium report…','info');
+  toast('📊 Generating professional report…','info');
   const now=new Date();
   const monthName=now.toLocaleString('en-IN',{month:'long'});
   const year=now.getFullYear();
+  const reportId=`GYH-${year}${String(now.getMonth()+1).padStart(2,'0')}-${Math.floor(Math.random()*9000+1000)}`;
   const genTime=now.toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true});
 
   const[clients,sessions,attendance,followups,trainers,allRatings,batches,leaves]=await Promise.all([
-    fsGetAll('clients'),
-    fsGetAll('sessions'),
-    fsGetAll('attendance'),
-    fsGetAll('followups'),
-    fsGetAll('users',fn().where('role','==','trainer')),
-    fsGetAll('trainerratings'),
-    fsGetAll('batches'),
-    fsGetAll('leaves')
+    fsGetAll('clients'),fsGetAll('sessions'),fsGetAll('attendance'),
+    fsGetAll('followups'),fsGetAll('users',fn().where('role','==','trainer')),
+    fsGetAll('trainerratings'),fsGetAll('batches'),fsGetAll('leaves')
   ]);
 
   const activeClients=clients.filter(c=>c.active!==false);
@@ -1450,30 +1446,32 @@ async function exportPDF(){
   const completed=monthSessions.filter(s=>s.status==='completed').length;
   const missed=monthSessions.filter(s=>s.status==='missed').length;
   const onair=monthSessions.filter(s=>s.status==='onair').length;
-  const pending=monthSessions.filter(s=>s.status==='not-started').length;
+  const pendingSess=monthSessions.filter(s=>s.status==='not-started').length;
   const presentCount=attendance.filter(a=>a.status==='present').length;
+  const absentCount=attendance.filter(a=>a.status==='absent').length;
+  const lateCount=attendance.filter(a=>a.status==='late').length;
   const attendRate=attendance.length?Math.round(presentCount/attendance.length*100):0;
+  const compRate=monthSessions.length?Math.round(completed/monthSessions.length*100):0;
   const approvedLeaves=leaves.filter(l=>l.status==='approved').length;
   const pendingLeaves=leaves.filter(l=>l.status==='pending').length;
+  const rejectedLeaves=leaves.filter(l=>l.status==='rejected').length;
+  const doneFU=followups.filter(f=>f.done||f.status==='completed').length;
+  const pendingFU=followups.filter(f=>!f.done&&f.status!=='completed').length;
+  const fuRate=followups.length?Math.round(doneFU/followups.length*100):0;
 
-  // Plan distribution
   const planCounts={};
-  activeClients.forEach(c=>{planCounts[c.plan||'Unknown']=(planCounts[c.plan||'Unknown']||0)+1;});
+  activeClients.forEach(c=>{planCounts[c.plan||'Unassigned']=(planCounts[c.plan||'Unassigned']||0)+1;});
 
-  // Top trainers by rating
   const trainerStats=trainers.map(t=>{
     const tR=allRatings.filter(r=>r.trainerId===t.id);
     const avg=tR.length?(tR.reduce((s,r)=>s+(r.rating||0),0)/tR.length):0;
-    const clientCount=activeClients.filter(c=>c.trainerId===t.id).length;
-    return{...t,avg,totalRatings:tR.length,clientCount};
+    return{...t,avg,totalRatings:tR.length,clientCount:activeClients.filter(c=>c.trainerId===t.id).length};
   }).sort((a,b)=>b.avg-a.avg||b.totalRatings-a.totalRatings);
 
-  // Sessions by day of week this month
   const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const byDay=[0,0,0,0,0,0,0];
-  monthSessions.forEach(s=>{if(s.date){byDay[new Date(s.date).getDay()]++;}});
+  monthSessions.forEach(s=>{if(s.date)byDay[new Date(s.date).getDay()]++;});
 
-  // Coordinator performance
   const coordStats={};
   followups.forEach(f=>{
     if(!f.assignedToName)return;
@@ -1489,569 +1487,681 @@ async function exportPDF(){
     const pw=doc.internal.pageSize.getWidth();
     const ph=doc.internal.pageSize.getHeight();
     let y=0;
+    let pageNum=0;
 
-    // ── COLOR PALETTE ──────────────────────────────────────
+    // ── BRAND COLORS (corporate dark theme) ───────────────
     const C={
-      black:[11,11,11],
-      darkGray:[28,28,28],
-      midGray:[45,45,45],
-      lightGray:[245,245,242],
-      border:[55,55,55],
-      accent:[212,255,0],
-      accentDark:[140,168,0],
-      green:[0,200,100],
-      red:[255,68,68],
-      yellow:[255,187,0],
-      blue:[77,159,255],
-      purple:[170,102,255],
-      orange:[255,140,0],
+      // Backgrounds
+      pageBg:[8,10,15],
+      cardBg:[16,20,30],
+      cardBg2:[22,28,40],
+      headerBg:[12,16,24],
+      rowAlt:[18,24,36],
+      // Accents
+      primary:[212,255,0],       // lime accent
+      primaryDim:[140,168,0],
+      secondary:[77,159,255],    // blue
+      success:[0,210,110],       // green
+      danger:[255,75,75],        // red
+      warning:[255,190,0],       // amber
+      purple:[160,110,255],
+      orange:[255,150,50],
+      cyan:[0,220,200],
+      // Text
+      textPrimary:[240,242,248],
+      textSecondary:[160,168,185],
+      textMuted:[90,100,118],
       white:[255,255,255],
-      muted:[136,136,136],
+      // Borders
+      border:[30,38,55],
+      border2:[40,50,70],
+      // Special
+      gold:[255,215,0],
+      silver:[192,192,192],
+      bronze:[205,127,50],
     };
 
-    // ── HELPERS ────────────────────────────────────────────
-    function setFont(style='normal',size=10,color=C.white){
-      doc.setFont('helvetica',style);
-      doc.setFontSize(size);
-      doc.setTextColor(...color);
+    // ── UTILITY FUNCTIONS ──────────────────────────────────
+    const setFill=(...c)=>doc.setFillColor(...c);
+    const setDraw=(...c)=>doc.setDrawColor(...c);
+    const setTxt=(...c)=>doc.setTextColor(...c);
+    const setFont=(style,size)=>{doc.setFont('helvetica',style);doc.setFontSize(size);};
+
+    function fillRect(x,ry,w,h,col){setFill(...col);doc.rect(x,ry,w,h,'F');}
+    function rRect(x,ry,w,h,r,col){setFill(...col);doc.roundedRect(x,ry,w,h,r,r,'F');}
+    function strokeRect(x,ry,w,h,r,col,lw=0.3){setDraw(...col);doc.setLineWidth(lw);doc.roundedRect(x,ry,w,h,r,r,'S');}
+    function hLine(ry,col=C.border,x1=10,x2=pw-10,lw=0.25){setDraw(...col);doc.setLineWidth(lw);doc.line(x1,ry,x2,ry);}
+    function txt(text,x,ry,opts={}){doc.text(String(text),x,ry,opts);}
+
+    function checkY(need=25){if(y+need>ph-18)newPage();}
+
+    function drawPageBase(){
+      // Full dark background
+      fillRect(0,0,pw,ph,C.pageBg);
+      // Left accent stripe (3 sections)
+      fillRect(0,0,2,ph*0.4,C.primary);
+      fillRect(0,ph*0.4,2,ph*0.35,C.secondary);
+      fillRect(0,ph*0.75,2,ph*0.25,C.purple);
+      // Subtle grid pattern (horizontal rules)
+      setDraw(...C.border);doc.setLineWidth(0.1);
+      for(let gy=20;gy<ph;gy+=8){doc.line(4,gy,pw,gy);}
+      // Top header bar
+      fillRect(0,0,pw,14,C.headerBg);
+      strokeRect(0,0,pw,14,0,C.border2,0.5);
+      // Company name left
+      setFont('bold',8);setTxt(...C.primary);
+      txt('GYM AT YOUR HOME™',5,9);
+      // Report ID right
+      setFont('normal',6.5);setTxt(...C.textMuted);
+      txt(`REPORT ID: ${reportId}`,pw-5,9,{align:'right'});
+      // Corner accent dots
+      setFill(...C.primary);doc.circle(pw-4,4,1,'F');
+      setFill(...C.secondary);doc.circle(pw-8,4,0.7,'F');
+      setFill(...C.purple);doc.circle(pw-11.5,4,0.5,'F');
     }
-    function fillRect(x,ry,w,h,color){
-      doc.setFillColor(...color);
-      doc.rect(x,ry,w,h,'F');
+
+    function drawFooter(pn,total){
+      // Footer bar
+      fillRect(0,ph-12,pw,12,C.headerBg);
+      hLine(ph-12,C.border,0,pw,0.5);
+      setFont('normal',6);setTxt(...C.textMuted);
+      txt(`© ${year} Gym At Your Home™ — Management Platform — Confidential & Proprietary`,5,ph-5);
+      setFont('bold',6);setTxt(...C.primary);
+      txt(`${pn} / ${total}`,pw-5,ph-5,{align:'right'});
+      setFont('normal',6);setTxt(...C.textMuted);
+      txt(`Generated: ${genTime}`,pw/2,ph-5,{align:'center'});
     }
-    function roundRect(x,ry,w,h,r,color){
-      doc.setFillColor(...color);
-      doc.roundedRect(x,ry,w,h,r,r,'F');
-    }
-    function hline(ry,color=C.border,lx=10,rx=pw-10){
-      doc.setDrawColor(...color);
-      doc.setLineWidth(0.3);
-      doc.line(lx,ry,rx,ry);
-    }
-    function addPage(){
+
+    function newPage(){
       doc.addPage();
-      // subtle side accent bar
-      fillRect(0,0,3,ph,C.accent);
+      pageNum++;
+      drawPageBase();
       y=20;
     }
-    function checkPage(needed=30){
-      if(y+needed>ph-15){addPage();}
+
+    // Section header (full width, corporate style)
+    function sectionHead(label,sub='',accentCol=C.primary){
+      checkY(16);
+      rRect(4,y,pw-8,11,1,C.cardBg);
+      strokeRect(4,y,pw-8,11,1,C.border,0.3);
+      // Left accent pill
+      rRect(4,y,3,11,1,accentCol);
+      setFont('bold',9);setTxt(...accentCol);
+      txt(label,10,y+7.5);
+      if(sub){setFont('normal',7);setTxt(...C.textMuted);txt(sub,pw-6,y+7.5,{align:'right'});}
+      y+=15;
+    }
+
+    // KPI card row
+    function kpiRow(items,h=22){
+      checkY(h+4);
+      const gap=2;
+      const cardW=(pw-8-(gap*(items.length-1)))/items.length;
+      items.forEach((s,i)=>{
+        const cx=4+i*(cardW+gap);
+        rRect(cx,y,cardW,h,1.5,C.cardBg);
+        strokeRect(cx,y,cardW,h,1.5,C.border,0.25);
+        // Top accent line
+        rRect(cx,y,cardW,1.5,0.5,s.color||C.primary);
+        // Value
+        setFont('bold',18);setTxt(...(s.color||C.primary));
+        txt(String(s.val),cx+cardW/2,y+14,{align:'center'});
+        // Label
+        setFont('normal',6);setTxt(...C.textMuted);
+        txt(s.label,cx+cardW/2,y+19,{align:'center'});
+        // Optional delta
+        if(s.sub){
+          setFont('bold',6);setTxt(...(s.subColor||C.textMuted));
+          txt(s.sub,cx+cardW/2,y+h-1,{align:'center'});
+        }
+      });
+      y+=h+5;
+    }
+
+    // Horizontal progress bar
+    function progressBar(label,val,max,col,showPct=true){
+      checkY(12);
+      setFont('normal',7.5);setTxt(...C.textSecondary);
+      txt(label,6,y+5);
+      const bx=52,bw=pw-70;
+      rRect(bx,y+1,bw,6,1,C.cardBg2);
+      const fill=max>0?(val/max)*bw:0;
+      rRect(bx,y+1,Math.max(fill,1.5),6,1,col);
+      setFont('bold',7);setTxt(...col);
+      txt(showPct?`${max>0?Math.round(val/max*100):0}% (${val})`:`${val}`,pw-5,y+6,{align:'right'});
+      y+=11;
+    }
+
+    // Table
+    function drawTable(headers,rows,colWidths,colColors=[]){
+      checkY(12);
+      // Header row
+      rRect(4,y,pw-8,9,0,C.cardBg2);
+      strokeRect(4,y,pw-8,9,0,C.border,0.3);
+      let cx=6;
+      headers.forEach((h,i)=>{
+        setFont('bold',6.5);setTxt(...C.primary);
+        txt(h,cx,y+6.5);
+        cx+=colWidths[i];
+      });
+      y+=10;
+      rows.forEach((row,ri)=>{
+        checkY(9);
+        if(ri%2===0)rRect(4,y,pw-8,8,0,C.rowAlt);
+        strokeRect(4,y,pw-8,8,0,C.border,0.1);
+        cx=6;
+        row.forEach((cell,ci)=>{
+          const col=colColors[ci]?colColors[ci](cell,row):C.textPrimary;
+          setFont(ci===0?'bold':'normal',7);setTxt(...col);
+          const cellStr=String(cell||'—').substring(0,colWidths[ci]>30?28:colWidths[ci]>20?18:colWidths[ci]>15?13:10);
+          txt(cellStr,cx,y+5.5);
+          cx+=colWidths[ci];
+        });
+        y+=8.5;
+      });
+      y+=4;
+    }
+
+    // Donut-style pie segment (simplified arc using lines)
+    function miniDonut(cx,cy,r,segments){
+      let angle=-Math.PI/2;
+      segments.forEach(s=>{
+        if(!s.val)return;
+        const slice=(s.val/s.total)*Math.PI*2;
+        // draw filled wedge approximation with many thin lines
+        setDraw(...s.color);doc.setLineWidth(r*0.5);
+        for(let a=angle;a<angle+slice;a+=0.05){
+          const x1=cx+Math.cos(a)*(r*0.75);
+          const y1=cy+Math.sin(a)*(r*0.75);
+          const x2=cx+Math.cos(a+0.05)*(r*0.75);
+          const y2=cy+Math.sin(a+0.05)*(r*0.75);
+          doc.line(x1,y1,x2,y2);
+        }
+        angle+=slice;
+      });
+      // center circle (white hole)
+      setFill(...C.pageBg);doc.circle(cx,cy,r*0.45,'F');
+    }
+
+    // Column bar chart
+    function barChart(x,ry,w,h,bars,maxVal){
+      // bg
+      rRect(x,ry,w,h,1,C.cardBg);
+      strokeRect(x,ry,w,h,1,C.border,0.2);
+      const bw=Math.min((w-10)/(bars.length*1.6),12);
+      const gap=(w-10-bw*bars.length)/(bars.length+1);
+      bars.forEach((b,i)=>{
+        const bh=maxVal>0?((b.val/maxVal)*(h-14)):0;
+        const bx=x+5+gap+(bw+gap)*i;
+        const by=ry+h-8-bh;
+        // shadow
+        setFill(...C.border);doc.roundedRect(bx+0.5,by+0.5,bw,bh,0.5,0.5,'F');
+        // bar
+        setFill(...b.color);doc.roundedRect(bx,by,bw,bh,0.5,0.5,'F');
+        // value
+        setFont('bold',6);setTxt(...b.color);
+        txt(b.val,bx+bw/2,by-1.5,{align:'center'});
+        // label
+        setFont('normal',5.5);setTxt(...C.textMuted);
+        txt(b.label,bx+bw/2,ry+h-3,{align:'center'});
+      });
     }
 
     // ══════════════════════════════════════════════════════
     // PAGE 1 — COVER
     // ══════════════════════════════════════════════════════
-    fillRect(0,0,pw,ph,C.black);
-    // accent bar left
-    fillRect(0,0,4,ph,C.accent);
-    // top accent strip
-    fillRect(4,0,pw-4,1.5,C.accent);
+    pageNum=1;
+    drawPageBase();
 
-    // big background text watermark
-    doc.setTextColor(255,255,255,0.03);
-    doc.setFontSize(120);
-    doc.setFont('helvetica','bold');
-    doc.setTextColor(30,30,30);
-    doc.text('GYH',pw/2,ph/2+20,{align:'center'});
+    // Override background with richer cover
+    fillRect(0,0,pw,ph,C.pageBg);
+    // Geometric background elements
+    setFill(...C.cardBg);
+    doc.circle(pw+20,ph*0.2,60,'F');
+    doc.circle(-20,ph*0.8,50,'F');
+    rRect(pw*0.6,ph*0.3,80,80,5,C.cardBg);
+    // Grid lines
+    setDraw(...C.border);doc.setLineWidth(0.1);
+    for(let gx=0;gx<pw;gx+=8)doc.line(gx,0,gx,ph);
+    for(let gy=0;gy<ph;gy+=8)doc.line(0,gy,pw,gy);
+    // Top bar
+    fillRect(0,0,pw,18,C.headerBg);
+    // Left full stripe
+    fillRect(0,0,5,ph,C.primary);
+    // Top accent dot row
+    [C.primary,C.secondary,C.purple,C.success,C.warning].forEach((c,i)=>{
+      setFill(...c);doc.circle(pw-8-i*6,9,1.8,'F');
+    });
+    setFont('bold',8);setTxt(...C.primary);txt('GYM AT YOUR HOME™',8,11);
+    setFont('normal',6.5);setTxt(...C.textMuted);txt(`REPORT ID: ${reportId}`,pw-5,11,{align:'right'});
 
-    // brand name
-    doc.setTextColor(...C.accent);
-    doc.setFontSize(28);
-    doc.setFont('helvetica','bold');
-    doc.text('GYM AT YOUR HOME',pw/2,60,{align:'center'});
+    // Main cover content
+    // Decorative circle behind brand
+    setFill(20,26,40);doc.circle(pw/2,82,45,'F');
+    setFill(28,36,52);doc.circle(pw/2,82,38,'F');
+    setDraw(...C.primary);doc.setLineWidth(0.8);doc.circle(pw/2,82,42,'S');
+    setDraw(...C.secondary);doc.setLineWidth(0.3);doc.circle(pw/2,82,50,'S');
 
-    // tagline
-    doc.setTextColor(...C.muted);
-    doc.setFontSize(10);
-    doc.setFont('helvetica','normal');
-    doc.text('MANAGEMENT PLATFORM',pw/2,70,{align:'center'});
+    // Brand initials in circle
+    setFont('bold',28);setTxt(...C.primary);txt('GYH',pw/2,88,{align:'center'});
 
-    // divider line with dots
-    doc.setDrawColor(...C.accent);
-    doc.setLineWidth(0.8);
-    doc.line(30,78,pw-30,78);
-    fillRect(pw/2-1.5,76.5,3,3,C.accent);
+    // Brand full name
+    setFont('bold',16);setTxt(...C.textPrimary);txt('GYM AT YOUR HOME',pw/2,108,{align:'center'});
+    setFont('normal',7.5);setTxt(...C.textMuted);txt('MANAGEMENT PLATFORM  ·  OPERATIONS DIVISION',pw/2,115,{align:'center'});
 
-    // report title
-    doc.setTextColor(...C.white);
-    doc.setFontSize(20);
-    doc.setFont('helvetica','bold');
-    doc.text(`MONTHLY REPORT`,pw/2,100,{align:'center'});
+    // Divider
+    setDraw(...C.primary);doc.setLineWidth(0.5);doc.line(30,120,pw-30,120);
+    setFill(...C.primary);doc.circle(pw/2,120,1.2,'F');
+    setFill(...C.secondary);doc.circle(pw/2-6,120,0.7,'F');
+    setFill(...C.secondary);doc.circle(pw/2+6,120,0.7,'F');
 
-    doc.setTextColor(...C.accent);
-    doc.setFontSize(30);
-    doc.text(`${monthName.toUpperCase()} ${year}`,pw/2,118,{align:'center'});
+    // Report type
+    setFont('normal',8);setTxt(...C.textSecondary);txt('OFFICIAL MONTHLY OPERATIONS REPORT',pw/2,128,{align:'center'});
+    setFont('bold',22);setTxt(...C.primary);txt(`${monthName.toUpperCase()} ${year}`,pw/2,140,{align:'center'});
 
-    // 4 hero stat boxes
-    const heroStats=[
-      {label:'ACTIVE CLIENTS',val:activeClients.length,color:C.accent,icon:''},
-      {label:'SESSIONS',val:monthSessions.length,color:C.green,icon:''},
-      {label:'COMPLETION',val:monthSessions.length?`${Math.round(completed/monthSessions.length*100)}%`:'0%',color:C.blue,icon:''},
-      {label:'ATTENDANCE',val:`${attendRate}%`,color:C.purple,icon:''},
+    // 4 hero KPI boxes
+    const heroKPIs=[
+      {label:'ACTIVE CLIENTS',val:activeClients.length,col:C.primary},
+      {label:'SESSIONS THIS MONTH',val:monthSessions.length,col:C.secondary},
+      {label:'COMPLETION RATE',val:`${compRate}%`,col:C.success},
+      {label:'ATTENDANCE RATE',val:`${attendRate}%`,col:C.purple},
     ];
-    const bw=38,bh=26,bx=14,bSpacing=(pw-28-bw*4)/3;
-    heroStats.forEach((s,i)=>{
-      const hx=bx+i*(bw+bSpacing);
-      roundRect(hx,138,bw,bh,3,C.darkGray);
-      // top accent
-      doc.setFillColor(...s.color);
-      doc.roundedRect(hx,138,bw,2,1,1,'F');
-      // value
-      doc.setTextColor(...s.color);
-      doc.setFontSize(20);
-      doc.setFont('helvetica','bold');
-      doc.text(String(s.val),hx+bw/2,152,{align:'center'});
-      // label
-      doc.setTextColor(...C.muted);
-      doc.setFontSize(7);
-      doc.setFont('helvetica','normal');
-      doc.text(s.label,hx+bw/2,160,{align:'center'});
+    const hkw=42,hkh=26,hkgap=(pw-10-hkw*4)/3,hkx=5;
+    heroKPIs.forEach((k,i)=>{
+      const kx=hkx+i*(hkw+hkgap);
+      // Card shadow
+      setFill(5,7,12);doc.roundedRect(kx+0.8,154.8,hkw,hkh,2,2,'F');
+      rRect(kx,154,hkw,hkh,2,C.cardBg);
+      strokeRect(kx,154,hkw,hkh,2,C.border,0.3);
+      // Top accent
+      rRect(kx,154,hkw,1.8,0.5,k.col);
+      // Value
+      setFont('bold',18);setTxt(...k.col);txt(String(k.val),kx+hkw/2,168,{align:'center'});
+      // Label
+      setFont('normal',5.5);setTxt(...C.textMuted);txt(k.label,kx+hkw/2,175,{align:'center'});
     });
 
-    // session breakdown row
-    const sBreak=[
-      {label:'Completed',val:completed,color:C.green},
-      {label:'Missed',val:missed,color:C.red},
-      {label:'On Air',val:onair,color:C.yellow},
-      {label:'Pending',val:pending,color:C.muted},
+    // Session status mini-row
+    const ssItems=[
+      {label:'Completed',val:completed,col:C.success},
+      {label:'Missed',val:missed,col:C.danger},
+      {label:'On Air',val:onair,col:C.warning},
+      {label:'Pending',val:pendingSess,col:C.textMuted},
+      {label:'Trainers',val:trainers.length,col:C.cyan},
+      {label:'Coordinators',val:0,col:C.orange},
     ];
-    sBreak.forEach((s,i)=>{
-      const hx=bx+i*(bw+bSpacing);
-      roundRect(hx,172,bw,16,2,C.midGray);
-      doc.setTextColor(...s.color);
-      doc.setFontSize(14);
-      doc.setFont('helvetica','bold');
-      doc.text(String(s.val),hx+bw/2,181,{align:'center'});
-      doc.setTextColor(...C.muted);
-      doc.setFontSize(6.5);
-      doc.setFont('helvetica','normal');
-      doc.text(s.label,hx+bw/2,186,{align:'center'});
+    const siw=(pw-10)/ssItems.length,six=5;
+    ssItems.forEach((s,i)=>{
+      const sx=six+i*siw;
+      rRect(sx,186,siw-1.5,15,1.5,C.cardBg2);
+      strokeRect(sx,186,siw-1.5,15,1.5,C.border,0.2);
+      setFont('bold',11);setTxt(...s.col);txt(String(s.val),sx+(siw-1.5)/2,195,{align:'center'});
+      setFont('normal',5.5);setTxt(...C.textMuted);txt(s.label,sx+(siw-1.5)/2,199,{align:'center'});
     });
 
-    // generated info box
-    roundRect(14,200,pw-28,20,3,C.midGray);
-    doc.setTextColor(...C.muted);
-    doc.setFontSize(8);
-    doc.setFont('helvetica','normal');
-    doc.text(`Generated by: ${CU?.name||'Admin'}`,18,209);
-    doc.text(`Date & Time: ${genTime}`,18,215);
-    doc.setTextColor(...C.accent);
-    doc.text(`Gym At Your Home™ — Confidential`,pw-18,209,{align:'right'});
-    doc.text(`Page 1 of Report`,pw-18,215,{align:'right'});
+    // Confidential banner
+    rRect(5,207,pw-10,14,2,[20,26,38]);
+    strokeRect(5,207,pw-10,14,2,C.primary,0.4);
+    setFont('bold',8);setTxt(...C.primary);txt('CONFIDENTIAL — INTERNAL USE ONLY',pw/2,213,{align:'center'});
+    setFont('normal',6.5);setTxt(...C.textMuted);
+    txt(`Prepared by: ${CU?.name||'System Admin'}  ·  ${CU?.role?.toUpperCase()||'ADMIN'}`,pw/2,218,{align:'center'});
 
-    // bottom accent
-    fillRect(4,ph-4,pw-4,4,C.midGray);
-    doc.setTextColor(...C.accent);
-    doc.setFontSize(7);
-    doc.text('GYM AT YOUR HOME™  ·  MANAGEMENT PLATFORM  ·  CONFIDENTIAL',pw/2,ph-1,{align:'center'});
+    // Footer
+    fillRect(0,ph-12,pw,12,C.headerBg);
+    hLine(ph-12,C.border,0,pw,0.5);
+    setFont('normal',6);setTxt(...C.textMuted);
+    txt(`© ${year} Gym At Your Home™ — All Rights Reserved`,5,ph-5);
+    setFont('bold',6);setTxt(...C.primary);txt(`1 / —`,pw-5,ph-5,{align:'right'});
+    setFont('normal',6);setTxt(...C.textMuted);txt(genTime,pw/2,ph-5,{align:'center'});
 
     // ══════════════════════════════════════════════════════
     // PAGE 2 — EXECUTIVE SUMMARY
     // ══════════════════════════════════════════════════════
-    addPage();
+    newPage();
 
-    // section header helper
-    function sectionHeader(title,subtitle=''){
-      checkPage(20);
-      fillRect(10,y,pw-20,10,C.darkGray);
-      doc.setFillColor(...C.accent);
-      doc.rect(10,y,3,10,'F');
-      doc.setTextColor(...C.accent);
-      doc.setFontSize(11);
-      doc.setFont('helvetica','bold');
-      doc.text(title,16,y+7);
-      if(subtitle){
-        doc.setTextColor(...C.muted);
-        doc.setFontSize(8);
-        doc.setFont('helvetica','normal');
-        doc.text(subtitle,pw-12,y+7,{align:'right'});
-      }
-      y+=14;
-    }
-
-    // stat row helper (2-col or 3-col)
-    function statRow(items){
-      checkPage(22);
-      const w=(pw-20)/items.length;
-      items.forEach((s,i)=>{
-        const sx=10+i*w;
-        roundRect(sx,y,w-2,18,2,C.darkGray);
-        doc.setFillColor(...(s.color||C.accent));
-        doc.roundedRect(sx,y,w-2,1.5,0.5,0.5,'F');
-        doc.setTextColor(...(s.color||C.accent));
-        doc.setFontSize(16);
-        doc.setFont('helvetica','bold');
-        doc.text(String(s.val),sx+(w-2)/2,y+11,{align:'center'});
-        doc.setTextColor(...C.muted);
-        doc.setFontSize(6.5);
-        doc.setFont('helvetica','normal');
-        doc.text(s.label,sx+(w-2)/2,y+16,{align:'center'});
-      });
-      y+=22;
-    }
-
-    // page header
-    fillRect(10,y,pw-20,14,C.midGray);
-    doc.setTextColor(...C.white);
-    doc.setFontSize(14);
-    doc.setFont('helvetica','bold');
-    doc.text('EXECUTIVE SUMMARY',14,y+10);
-    doc.setTextColor(...C.accent);
-    doc.setFontSize(9);
-    doc.text(`${monthName} ${year}`,pw-12,y+10,{align:'right'});
+    // Page title band
+    rRect(4,y,pw-8,14,1.5,C.cardBg);
+    strokeRect(4,y,pw-8,14,1.5,C.border,0.4);
+    rRect(4,y,4,14,1,C.primary);
+    setFont('bold',12);setTxt(...C.textPrimary);txt('EXECUTIVE SUMMARY',11,y+10);
+    setFont('normal',7);setTxt(...C.textMuted);txt(`${monthName} ${year}  ·  Monthly Overview`,pw-6,y+10,{align:'right'});
     y+=18;
 
-    sectionHeader('CLIENT OVERVIEW');
-    statRow([
-      {label:'Active Clients',val:activeClients.length,color:C.accent},
-      {label:'Inactive Clients',val:inactiveClients.length,color:C.red},
-      {label:'Total Clients',val:clients.length,color:C.blue},
-      {label:'Total Trainers',val:trainers.length,color:C.green},
+    sectionHead('01  CLIENT PORTFOLIO',`Total: ${clients.length}  ·  Active: ${activeClients.length}`,C.primary);
+    kpiRow([
+      {label:'Active Clients',val:activeClients.length,color:C.primary},
+      {label:'Inactive Clients',val:inactiveClients.length,color:C.danger},
+      {label:'Total Trainers',val:trainers.length,color:C.success},
+      {label:'Total Batches',val:batches.length,color:C.secondary},
     ]);
 
-    sectionHeader('SESSION PERFORMANCE',`Month of ${monthName} ${year}`);
-    statRow([
-      {label:'Total Sessions',val:monthSessions.length,color:C.white},
-      {label:'Completed',val:completed,color:C.green},
-      {label:'Missed',val:missed,color:C.red},
-      {label:'Completion Rate',val:monthSessions.length?`${Math.round(completed/monthSessions.length*100)}%`:'—',color:C.accent},
+    sectionHead('02  SESSION PERFORMANCE',`${monthName} ${year}`,C.secondary);
+    kpiRow([
+      {label:'Total Sessions',val:monthSessions.length,color:C.textPrimary,sub:'This month'},
+      {label:'Completed',val:completed,color:C.success,sub:`${compRate}% rate`},
+      {label:'Missed',val:missed,color:C.danger,sub:`${monthSessions.length?Math.round(missed/monthSessions.length*100):0}% rate`},
+      {label:'On Air / Pending',val:`${onair}/${pendingSess}`,color:C.warning},
     ]);
 
-    sectionHeader('ATTENDANCE & LEAVES');
-    statRow([
-      {label:'Total Records',val:attendance.length,color:C.white},
-      {label:'Present',val:presentCount,color:C.green},
-      {label:'Attendance Rate',val:`${attendRate}%`,color:C.accent},
-      {label:'Approved Leaves',val:approvedLeaves,color:C.yellow},
+    sectionHead('03  ATTENDANCE & LEAVES','All time data',C.purple);
+    kpiRow([
+      {label:'Present',val:presentCount,color:C.success},
+      {label:'Absent',val:absentCount,color:C.danger},
+      {label:'Late',val:lateCount,color:C.warning},
+      {label:'Attendance Rate',val:`${attendRate}%`,color:C.purple},
     ]);
 
-    sectionHeader('FOLLOW-UPS & ENGAGEMENT');
-    const totalFU=followups.length;
-    const doneFU=followups.filter(f=>f.done||f.status==='completed').length;
-    const pendingFU=followups.filter(f=>!f.done&&f.status!=='completed').length;
-    statRow([
-      {label:'Total Follow-ups',val:totalFU,color:C.white},
-      {label:'Completed',val:doneFU,color:C.green},
-      {label:'Pending',val:pendingFU,color:C.yellow},
-      {label:'Completion Rate',val:totalFU?`${Math.round(doneFU/totalFU*100)}%`:'—',color:C.accent},
+    sectionHead('04  CRM & FOLLOW-UPS','Coordinator activity',C.cyan);
+    kpiRow([
+      {label:'Total Follow-ups',val:followups.length,color:C.textPrimary},
+      {label:'Completed',val:doneFU,color:C.success},
+      {label:'Pending',val:pendingFU,color:C.warning},
+      {label:'Completion Rate',val:`${fuRate}%`,color:C.cyan},
     ]);
 
-    // Plan distribution bar chart
-    sectionHeader('CLIENT PLAN DISTRIBUTION');
-    const planColors={Silver:C.muted,Gold:C.yellow,Platinum:C.purple,'Platinum Plus':C.blue,Couple:C.orange,'Corporate Fitness':C.green};
-    const planEntries=Object.entries(planCounts).sort((a,b)=>b[1]-a[1]);
-    const maxPlan=Math.max(...planEntries.map(e=>e[1]),1);
-    planEntries.forEach(([plan,count])=>{
-      checkPage(10);
-      const barW=((pw-80)/maxPlan)*count;
-      const pct=Math.round(count/activeClients.length*100);
-      const col=planColors[plan]||C.accent;
-      // label
-      doc.setTextColor(...C.muted);
-      doc.setFontSize(8);
-      doc.setFont('helvetica','normal');
-      doc.text(plan,12,y+5.5);
-      // bar bg
-      fillRect(55,y+1,pw-75,6,C.darkGray);
-      // bar fill
-      doc.setFillColor(...col);
-      doc.roundedRect(55,y+1,Math.max(barW,2),6,1,1,'F');
-      // count
-      doc.setTextColor(...col);
-      doc.setFontSize(8);
-      doc.setFont('helvetica','bold');
-      doc.text(`${count} (${pct}%)`,pw-12,y+6,{align:'right'});
-      y+=10;
+    sectionHead('05  LEAVE MANAGEMENT',`${leaves.length} total requests`,C.orange);
+    kpiRow([
+      {label:'Total Requests',val:leaves.length,color:C.textPrimary},
+      {label:'Approved',val:approvedLeaves,color:C.success},
+      {label:'Rejected',val:rejectedLeaves,color:C.danger},
+      {label:'Pending Review',val:pendingLeaves,color:C.warning},
+    ]);
+
+    // ══════════════════════════════════════════════════════
+    // PAGE 3 — ANALYTICS & CHARTS
+    // ══════════════════════════════════════════════════════
+    newPage();
+    rRect(4,y,pw-8,14,1.5,C.cardBg);
+    strokeRect(4,y,pw-8,14,1.5,C.border,0.4);
+    rRect(4,y,4,14,1,C.secondary);
+    setFont('bold',12);setTxt(...C.textPrimary);txt('ANALYTICS & VISUALIZATIONS',11,y+10);
+    setFont('normal',7);setTxt(...C.textMuted);txt('Data-driven insights',pw-6,y+10,{align:'right'});
+    y+=18;
+
+    sectionHead('SESSION STATUS BREAKDOWN','This month',C.primary);
+    const totalS=Math.max(monthSessions.length,1);
+    progressBar('Completed',completed,totalS,C.success);
+    progressBar('Missed',missed,totalS,C.danger);
+    progressBar('On Air',onair,totalS,C.warning);
+    progressBar('Pending',pendingSess,totalS,C.textMuted);
+    y+=4;
+
+    sectionHead('SESSIONS BY DAY OF WEEK',`Peak day: ${dayNames[byDay.indexOf(Math.max(...byDay))]}`,C.secondary);
+    checkY(50);
+    barChart(4,y,pw-8,46,byDay.map((v,i)=>({val:v,label:dayNames[i],color:byDay.indexOf(v)===byDay.indexOf(Math.max(...byDay))?C.primary:C.secondary})),Math.max(...byDay,1));
+    y+=52;
+
+    sectionHead('CLIENT PLAN DISTRIBUTION',`${activeClients.length} active clients`,C.purple);
+    const planCols={Silver:C.textMuted,Gold:C.warning,Platinum:C.purple,'Platinum Plus':C.secondary,Couple:C.orange,'Corporate Fitness':C.success,'Unassigned':C.danger};
+    Object.entries(planCounts).sort((a,b)=>b[1]-a[1]).forEach(([plan,count])=>{
+      progressBar(plan,count,activeClients.length,planCols[plan]||C.primary);
     });
     y+=4;
 
-    // Sessions by day of week
-    sectionHeader('SESSIONS BY DAY OF WEEK');
-    const maxDay=Math.max(...byDay,1);
-    const dayW=(pw-20)/7;
-    byDay.forEach((cnt,i)=>{
-      const dx=10+i*dayW;
-      const barH=Math.max((cnt/maxDay)*28,1);
-      // bar
-      doc.setFillColor(...(cnt===Math.max(...byDay)?C.accent:C.midGray));
-      doc.roundedRect(dx+dayW/2-5,y+30-barH,10,barH,1,1,'F');
-      // count
-      doc.setTextColor(...(cnt===Math.max(...byDay)?C.accent:C.muted));
-      doc.setFontSize(8);
-      doc.setFont('helvetica','bold');
-      doc.text(String(cnt),dx+dayW/2,y+28-barH,{align:'center'});
-      // day label
-      doc.setTextColor(...C.muted);
-      doc.setFontSize(7);
-      doc.setFont('helvetica','normal');
-      doc.text(dayNames[i],dx+dayW/2,y+37,{align:'center'});
-    });
-    y+=42;
+    sectionHead('ATTENDANCE BREAKDOWN','All time',C.success);
+    progressBar('Present',presentCount,attendance.length||1,C.success);
+    progressBar('Absent',absentCount,attendance.length||1,C.danger);
+    progressBar('Late',lateCount,attendance.length||1,C.warning);
+    y+=4;
 
     // ══════════════════════════════════════════════════════
-    // PAGE 3 — TRAINER LEADERBOARD & CLIENTS
+    // PAGE 4 — TRAINER LEADERBOARD
     // ══════════════════════════════════════════════════════
-    addPage();
-
-    fillRect(10,y,pw-20,14,C.midGray);
-    doc.setTextColor(...C.white);
-    doc.setFontSize(14);
-    doc.setFont('helvetica','bold');
-    doc.text('TRAINER PERFORMANCE',14,y+10);
-    doc.setTextColor(...C.accent);
-    doc.setFontSize(9);
-    doc.text('Leaderboard & Ratings',pw-12,y+10,{align:'right'});
+    newPage();
+    rRect(4,y,pw-8,14,1.5,C.cardBg);
+    strokeRect(4,y,pw-8,14,1.5,C.border,0.4);
+    rRect(4,y,4,14,1,C.warning);
+    setFont('bold',12);setTxt(...C.textPrimary);txt('TRAINER PERFORMANCE REPORT',11,y+10);
+    setFont('normal',7);setTxt(...C.textMuted);txt(`${trainerStats.length} trainers evaluated`,pw-6,y+10,{align:'right'});
     y+=18;
 
-    sectionHeader('TRAINER LEADERBOARD',`Top ${Math.min(trainerStats.length,10)} by rating`);
+    sectionHead('TRAINER LEADERBOARD','Ranked by average rating score',C.warning);
 
-    const medals=['🥇','🥈','🥉'];
-    const rankColors=[C.yellow,C.muted,C.orange];
-    trainerStats.slice(0,10).forEach((t,i)=>{
-      checkPage(14);
-      roundRect(10,y,pw-20,12,2,i<3?C.darkGray:C.midGray);
+    // Table headers
+    checkY(10);
+    rRect(4,y,pw-8,9,0,C.cardBg2);
+    strokeRect(4,y,pw-8,9,0,C.border,0.3);
+    setFont('bold',6.5);setTxt(...C.primary);
+    const thCols=[{t:'RNK',x:7},{t:'TRAINER NAME',x:20},{t:'GENDER',x:75},{t:'CLIENTS',x:102},{t:'RATINGS',x:122},{t:'AVG SCORE',x:144},{t:'RATING BAR',x:164}];
+    thCols.forEach(c=>txt(c.t,c.x,y+6.5));
+    y+=10;
+
+    trainerStats.slice(0,15).forEach((t,i)=>{
+      checkY(11);
+      if(i%2===0)rRect(4,y,pw-8,10,0,C.rowAlt);
+      strokeRect(4,y,pw-8,10,0,C.border,0.1);
+
+      // Rank badge
+      const rankCol=i===0?C.gold:i===1?C.silver:i===2?C.bronze:C.textMuted;
+      rRect(5,y+1.5,12,7,1,[20,26,38]);
+      setFont('bold',7);setTxt(...rankCol);txt(`#${i+1}`,11,y+7,{align:'center'});
+
+      // Medal
       if(i<3){
-        doc.setFillColor(...rankColors[i]);
-        doc.roundedRect(10,y,2,12,0.5,0.5,'F');
+        setFont('normal',8);setTxt(...rankCol);
+        txt(i===0?'◆':i===1?'◈':'◇',18,y+7);
       }
-      // rank
-      doc.setTextColor(...(i<3?rankColors[i]:C.muted));
-      doc.setFontSize(10);
-      doc.setFont('helvetica','bold');
-      doc.text(`#${i+1}`,16,y+8);
-      // name
-      doc.setTextColor(...C.white);
-      doc.setFontSize(9);
-      doc.setFont('helvetica','bold');
-      doc.text(t.name||'—',30,y+8);
-      // gender
-      doc.setTextColor(...C.muted);
-      doc.setFontSize(7.5);
-      doc.setFont('helvetica','normal');
-      doc.text(t.gender||'—',85,y+8);
-      // clients
-      doc.text(`${t.clientCount} clients`,105,y+8);
-      // ratings count
-      doc.text(`${t.totalRatings} ratings`,130,y+8);
-      // stars bar
-      const starW=25;
-      fillRect(152,y+4,starW,4,C.midGray);
-      doc.setFillColor(...(t.avg>=4?C.green:t.avg>=3?C.yellow:C.red));
-      doc.rect(152,y+4,(t.avg/5)*starW,4,'F');
-      // avg score
-      doc.setTextColor(...(t.avg>=4?C.green:t.avg>=3?C.yellow:C.red));
-      doc.setFontSize(9);
-      doc.setFont('helvetica','bold');
-      doc.text(t.avg>0?t.avg.toFixed(1):'N/R',pw-12,y+8,{align:'right'});
-      y+=14;
+
+      // Name
+      setFont('bold',7.5);setTxt(...C.textPrimary);
+      txt((t.name||'—').substring(0,22),20,y+7);
+
+      // Gender
+      setFont('normal',7);setTxt(...C.textSecondary);
+      txt(t.gender||'—',75,y+7);
+
+      // Clients
+      setFont('bold',7);setTxt(...C.secondary);
+      txt(String(t.clientCount),110,y+7);
+
+      // Ratings count
+      setFont('normal',7);setTxt(...C.textSecondary);
+      txt(String(t.totalRatings),129,y+7);
+
+      // Score
+      const sc=t.avg>=4?C.success:t.avg>=3?C.warning:t.avg>0?C.danger:C.textMuted;
+      setFont('bold',9);setTxt(...sc);
+      txt(t.avg>0?t.avg.toFixed(1):'N/R',155,y+7,{align:'center'});
+
+      // Rating bar
+      rRect(162,y+3,36,4,1,C.cardBg2);
+      rRect(162,y+3,Math.max(t.avg/5*36,0),4,1,sc);
+      // Star dots
+      [1,2,3,4,5].forEach((s,si)=>{
+        setFill(...(si<Math.round(t.avg)?sc:C.border2));
+        doc.circle(200+si*4,y+5,1.2,'F');
+      });
+
+      y+=10.5;
     });
 
     if(trainerStats.length===0){
-      doc.setTextColor(...C.muted);doc.setFontSize(9);
-      doc.text('No trainer ratings recorded yet.',14,y+6);y+=14;
+      checkY(14);rRect(4,y,pw-8,12,1,C.cardBg2);
+      setFont('normal',8);setTxt(...C.textMuted);txt('No trainer ratings have been submitted yet.',pw/2,y+8,{align:'center'});y+=16;
     }
 
     y+=6;
-    sectionHeader('ACTIVE CLIENTS LIST',`${activeClients.length} clients`);
-
-    // table header
-    checkPage(10);
-    fillRect(10,y,pw-20,9,C.midGray);
-    doc.setTextColor(...C.accent);
-    doc.setFontSize(7);
-    doc.setFont('helvetica','bold');
-    const cCols=[
-      {t:'NAME',x:13},{t:'PHONE',x:55},{t:'PLAN',x:85},{t:'TRAINER',x:110},
-      {t:'COORDINATOR',x:140},{t:'GOAL',x:168},{t:'START',x:188}
-    ];
-    cCols.forEach(c=>doc.text(c.t,c.x,y+6.5));
-    y+=11;
-
-    activeClients.forEach((c,i)=>{
-      checkPage(9);
-      if(i%2===0)fillRect(10,y,pw-20,8,C.darkGray);
-      doc.setTextColor(...C.white);
-      doc.setFontSize(7.5);
-      doc.setFont('helvetica','normal');
-      doc.text((c.name||'—').substring(0,20),13,y+5.5);
-      doc.text(c.phone||'—',55,y+5.5);
-      // plan badge color
-      const pCol={Silver:C.muted,Gold:C.yellow,Platinum:C.purple,'Platinum Plus':C.blue,Couple:C.orange,'Corporate Fitness':C.green}[c.plan]||C.muted;
-      doc.setTextColor(...pCol);
-      doc.text((c.plan||'—').substring(0,12),85,y+5.5);
-      doc.setTextColor(...C.white);
-      doc.text((c.trainerName||'—').substring(0,16),110,y+5.5);
-      doc.text((c.coordinatorName||'—').substring(0,14),140,y+5.5);
-      doc.text((c.goal||'—').substring(0,12),168,y+5.5);
-      doc.text(c.startDate||'—',188,y+5.5);
-      y+=8.5;
-    });
-
-    // ══════════════════════════════════════════════════════
-    // PAGE 4 — SESSIONS LOG
-    // ══════════════════════════════════════════════════════
-    addPage();
-
-    fillRect(10,y,pw-20,14,C.midGray);
-    doc.setTextColor(...C.white);
-    doc.setFontSize(14);
-    doc.setFont('helvetica','bold');
-    doc.text('SESSIONS LOG',14,y+10);
-    doc.setTextColor(...C.accent);
-    doc.setFontSize(9);
-    doc.text(`${monthName} ${year} — ${monthSessions.length} total`,pw-12,y+10,{align:'right'});
-    y+=18;
-
-    // table header
-    fillRect(10,y,pw-20,9,C.midGray);
-    doc.setTextColor(...C.accent);
-    doc.setFontSize(7);
-    doc.setFont('helvetica','bold');
-    const sCols=[
-      {t:'DATE',x:13},{t:'TIME',x:35},{t:'CLIENT',x:55},
-      {t:'TRAINER',x:100},{t:'TYPE',x:138},{t:'STATUS',x:172}
-    ];
-    sCols.forEach(c=>doc.text(c.t,c.x,y+6.5));
-    y+=11;
-
-    const statusColors={'completed':C.green,'missed':C.red,'onair':C.yellow,'not-started':C.muted};
-    const statusLabels={'completed':'Completed','missed':'Missed','onair':'On Air','not-started':'Pending'};
-
-    monthSessions.sort((a,b)=>(a.date||'').localeCompare(b.date||'')).forEach((s,i)=>{
-      checkPage(9);
-      if(i%2===0)fillRect(10,y,pw-20,8,C.darkGray);
-      doc.setTextColor(...C.white);
-      doc.setFontSize(7.5);
-      doc.setFont('helvetica','normal');
-      doc.text(s.date||'—',13,y+5.5);
-      doc.text(to12h(s.time),35,y+5.5);
-      doc.text((s.clientName||'—').substring(0,22),55,y+5.5);
-      doc.text((s.trainerName||'—').substring(0,18),100,y+5.5);
-      doc.text((s.type||'—').substring(0,16),138,y+5.5);
-      const sc=statusColors[s.status]||C.muted;
-      doc.setTextColor(...sc);
-      doc.setFont('helvetica','bold');
-      doc.text(statusLabels[s.status]||s.status||'—',172,y+5.5);
-      doc.setFont('helvetica','normal');
-      y+=8.5;
-    });
-
-    if(monthSessions.length===0){
-      doc.setTextColor(...C.muted);doc.setFontSize(9);
-      doc.text('No sessions recorded this month.',14,y+6);y+=14;
-    }
-
-    // ══════════════════════════════════════════════════════
-    // PAGE 5 — ATTENDANCE & LEAVE SUMMARY
-    // ══════════════════════════════════════════════════════
-    addPage();
-
-    fillRect(10,y,pw-20,14,C.midGray);
-    doc.setTextColor(...C.white);
-    doc.setFontSize(14);
-    doc.setFont('helvetica','bold');
-    doc.text('ATTENDANCE & LEAVE',14,y+10);
-    doc.setTextColor(...C.accent);
-    doc.setFontSize(9);
-    doc.text('Summary Report',pw-12,y+10,{align:'right'});
-    y+=18;
-
-    sectionHeader('ATTENDANCE SUMMARY');
-    statRow([
-      {label:'Total Records',val:attendance.length,color:C.white},
-      {label:'Present',val:presentCount,color:C.green},
-      {label:'Absent',val:attendance.filter(a=>a.status==='absent').length,color:C.red},
-      {label:'Late',val:attendance.filter(a=>a.status==='late').length,color:C.yellow},
-    ]);
-
-    // Attendance rate bar
-    checkPage(20);
-    doc.setTextColor(...C.muted);doc.setFontSize(8);
-    doc.text('Overall Attendance Rate',12,y+5);
-    fillRect(12,y+8,pw-24,8,C.darkGray);
-    doc.setFillColor(...(attendRate>=80?C.green:attendRate>=60?C.yellow:C.red));
-    doc.roundedRect(12,y+8,(pw-24)*attendRate/100,8,2,2,'F');
-    doc.setTextColor(...C.white);doc.setFontSize(8);doc.setFont('helvetica','bold');
-    doc.text(`${attendRate}%`,pw/2,y+14,{align:'center'});
-    y+=22;
-
-    sectionHeader('LEAVE ANALYSIS');
-    statRow([
-      {label:'Total Requests',val:leaves.length,color:C.white},
-      {label:'Approved',val:approvedLeaves,color:C.green},
-      {label:'Rejected',val:leaves.filter(l=>l.status==='rejected').length,color:C.red},
-      {label:'Pending',val:pendingLeaves,color:C.yellow},
-    ]);
-
-    // Leave by role
-    checkPage(40);
-    const leaveByRole={trainer:0,coordinator:0,coordinatorhead:0};
-    leaves.filter(l=>l.status==='approved').forEach(l=>{if(leaveByRole[l.requestedByRole]!==undefined)leaveByRole[l.requestedByRole]++;});
-    const lrEntries=[['Trainers',leaveByRole.trainer,C.green],['Coordinators',leaveByRole.coordinator,C.blue],['Coord. Heads',leaveByRole.coordinatorhead,C.orange]];
-    const maxLR=Math.max(...lrEntries.map(e=>e[1]),1);
-    lrEntries.forEach(([label,cnt,color])=>{
-      const bw2=((pw-70)/maxLR)*cnt;
-      doc.setTextColor(...C.muted);doc.setFontSize(8);doc.setFont('helvetica','normal');
-      doc.text(label,12,y+5.5);
-      fillRect(52,y+1,pw-64,6,C.darkGray);
-      doc.setFillColor(...color);
-      doc.roundedRect(52,y+1,Math.max(bw2,2),6,1,1,'F');
-      doc.setTextColor(...color);doc.setFontSize(8);doc.setFont('helvetica','bold');
-      doc.text(String(cnt),pw-12,y+6,{align:'right'});
-      y+=10;
-    });
-    y+=6;
-
-    sectionHeader('COORDINATOR FOLLOW-UP PERFORMANCE');
-    if(Object.keys(coordStats).length===0){
-      doc.setTextColor(...C.muted);doc.setFontSize(9);
-      doc.text('No follow-up data available.',14,y+6);y+=14;
-    } else {
-      fillRect(10,y,pw-20,9,C.midGray);
-      doc.setTextColor(...C.accent);doc.setFontSize(7);doc.setFont('helvetica','bold');
-      doc.text('COORDINATOR',13,y+6.5);
-      doc.text('TOTAL',100,y+6.5);
-      doc.text('DONE',125,y+6.5);
-      doc.text('PENDING',150,y+6.5);
-      doc.text('RATE',175,y+6.5);
-      y+=11;
-      Object.values(coordStats).sort((a,b)=>b.done-a.done).forEach((c,i)=>{
-        checkPage(9);
-        if(i%2===0)fillRect(10,y,pw-20,8,C.darkGray);
-        const rate=c.total?Math.round(c.done/c.total*100):0;
-        doc.setTextColor(...C.white);doc.setFontSize(7.5);doc.setFont('helvetica','normal');
-        doc.text(c.name.substring(0,30),13,y+5.5);
-        doc.text(String(c.total),100,y+5.5);
-        doc.setTextColor(...C.green);doc.text(String(c.done),125,y+5.5);
-        doc.setTextColor(...C.yellow);doc.text(String(c.total-c.done),150,y+5.5);
-        doc.setTextColor(...(rate>=80?C.green:rate>=60?C.yellow:C.red));
-        doc.setFont('helvetica','bold');doc.text(`${rate}%`,175,y+5.5);
-        y+=8.5;
+    sectionHead('TRAINER DETAILS','Individual stats',C.cyan);
+    trainerStats.slice(0,8).forEach((t,i)=>{
+      checkY(14);
+      rRect(4,y,pw-8,12,1.5,C.cardBg);
+      strokeRect(4,y,pw-8,12,1.5,C.border,0.2);
+      const sc=t.avg>=4?C.success:t.avg>=3?C.warning:t.avg>0?C.danger:C.textMuted;
+      rRect(4,y,3,12,1,sc);
+      setFont('bold',8);setTxt(...C.textPrimary);txt(t.name||'—',10,y+8);
+      setFont('normal',6.5);setTxt(...C.textSecondary);
+      txt(`${t.gender||'—'}  ·  ${t.clientCount} clients  ·  ${t.totalRatings} ratings  ·  ${t.phone||'—'}`,55,y+5);
+      // Mini star rating
+      [1,2,3,4,5].forEach((s,si)=>{
+        setFill(...(si<Math.round(t.avg)?sc:C.border2));doc.circle(55+si*4,y+9,1.3,'F');
       });
+      setFont('bold',7);setTxt(...sc);txt(t.avg>0?`${t.avg.toFixed(1)} / 5.0`:'Not rated',75,y+9);
+      // Active badge
+      rRect(pw-22,y+3,18,6,1,t.active!==false?[0,40,20]:[40,8,8]);
+      strokeRect(pw-22,y+3,18,6,1,t.active!==false?C.success:C.danger,0.3);
+      setFont('bold',6);setTxt(...(t.active!==false?C.success:C.danger));
+      txt(t.active!==false?'ACTIVE':'INACTIVE',pw-13,y+7.5,{align:'center'});
+      y+=14;
+    });
+
+    // ══════════════════════════════════════════════════════
+    // PAGE 5 — ACTIVE CLIENTS
+    // ══════════════════════════════════════════════════════
+    newPage();
+    rRect(4,y,pw-8,14,1.5,C.cardBg);
+    strokeRect(4,y,pw-8,14,1.5,C.border,0.4);
+    rRect(4,y,4,14,1,C.success);
+    setFont('bold',12);setTxt(...C.textPrimary);txt('CLIENT REGISTRY',11,y+10);
+    setFont('normal',7);setTxt(...C.textMuted);txt(`${activeClients.length} active  ·  ${inactiveClients.length} inactive`,pw-6,y+10,{align:'right'});
+    y+=18;
+
+    sectionHead('ACTIVE CLIENT LIST',`As of ${genTime}`,C.success);
+    drawTable(
+      ['CLIENT NAME','PHONE','PLAN','TRAINER','COORDINATOR','GOAL','START'],
+      activeClients.map(c=>[c.name||'—',c.phone||'—',c.plan||'—',c.trainerName||'—',c.coordinatorName||'—',c.goal||'—',c.startDate||'—']),
+      [38,28,22,28,28,24,18],
+      [
+        null,
+        null,
+        (v)=>{const m={Silver:C.textMuted,Gold:C.warning,Platinum:C.purple,'Platinum Plus':C.secondary,Couple:C.orange,'Corporate Fitness':C.success};return m[v]||C.primary;},
+        null,null,null,null
+      ]
+    );
+
+    if(inactiveClients.length>0){
+      sectionHead('INACTIVE / OLD CLIENTS',`${inactiveClients.length} clients`,C.danger);
+      drawTable(
+        ['CLIENT NAME','PHONE','PLAN','TRAINER','END DATE'],
+        inactiveClients.map(c=>[c.name||'—',c.phone||'—',c.plan||'—',c.trainerName||'—',c.endDate||'—']),
+        [50,32,30,50,38],[]
+      );
     }
 
     // ══════════════════════════════════════════════════════
-    // FOOTER ON EVERY PAGE
+    // PAGE 6 — SESSIONS LOG
+    // ══════════════════════════════════════════════════════
+    newPage();
+    rRect(4,y,pw-8,14,1.5,C.cardBg);
+    strokeRect(4,y,pw-8,14,1.5,C.border,0.4);
+    rRect(4,y,4,14,1,C.secondary);
+    setFont('bold',12);setTxt(...C.textPrimary);txt('SESSIONS LOG',11,y+10);
+    setFont('normal',7);setTxt(...C.textMuted);txt(`${monthName} ${year}  ·  ${monthSessions.length} sessions`,pw-6,y+10,{align:'right'});
+    y+=18;
+
+    sectionHead('SESSION RECORDS',`${monthName} ${year}`,C.secondary);
+    const statusLabelMap={'completed':'DONE','missed':'MISSED','onair':'ON AIR','not-started':'PENDING'};
+    const statusColMap={'completed':C.success,'missed':C.danger,'onair':C.warning,'not-started':C.textMuted};
+    drawTable(
+      ['DATE','TIME','CLIENT','TRAINER','TYPE','STATUS'],
+      monthSessions.sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(s=>[
+        s.date||'—',to12h(s.time),s.clientName||'—',s.trainerName||'—',s.type||'—',statusLabelMap[s.status]||s.status||'—'
+      ]),
+      [22,20,38,38,32,22],
+      [null,null,null,null,null,(v)=>statusColMap[v]||C.textMuted]
+    );
+
+    // ══════════════════════════════════════════════════════
+    // PAGE 7 — ATTENDANCE LOG
+    // ══════════════════════════════════════════════════════
+    newPage();
+    rRect(4,y,pw-8,14,1.5,C.cardBg);
+    strokeRect(4,y,pw-8,14,1.5,C.border,0.4);
+    rRect(4,y,4,14,1,C.purple);
+    setFont('bold',12);setTxt(...C.textPrimary);txt('ATTENDANCE & LEAVE LOG',11,y+10);
+    setFont('normal',7);setTxt(...C.textMuted);txt(`${attendance.length} attendance records  ·  ${leaves.length} leave requests`,pw-6,y+10,{align:'right'});
+    y+=18;
+
+    sectionHead('ATTENDANCE RECORDS',`${attendRate}% overall rate`,C.purple);
+    drawTable(
+      ['DATE','CLIENT','TRAINER','SESSION TYPE','STATUS','REASON'],
+      attendance.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,60).map(a=>[
+        a.date||'—',a.clientName||'—',a.trainerName||'—',a.sessionType||'—',
+        (a.status||'').toUpperCase(),a.reason||'—'
+      ]),
+      [20,36,32,30,18,36],
+      [null,null,null,null,(v)=>v==='PRESENT'?C.success:v==='ABSENT'?C.danger:C.warning,null]
+    );
+
+    sectionHead('LEAVE REQUESTS LOG',`${leaves.length} total`,C.orange);
+    drawTable(
+      ['STAFF NAME','ROLE','FROM','TO','DAYS','REASON','STATUS'],
+      leaves.sort((a,b)=>(b.fromDate||'').localeCompare(a.fromDate||'')).map(l=>[
+        l.requestedByName||'—',l.requestedByRole||'—',l.fromDate||'—',
+        l.toDate||'—',l.days||'—',l.reason||'—',(l.status||'').toUpperCase()
+      ]),
+      [32,22,18,18,12,28,18],
+      [null,null,null,null,null,null,(v)=>v==='APPROVED'?C.success:v==='REJECTED'?C.danger:C.warning]
+    );
+
+    // ══════════════════════════════════════════════════════
+    // PAGE 8 — CRM & COORDINATOR PERFORMANCE
+    // ══════════════════════════════════════════════════════
+    newPage();
+    rRect(4,y,pw-8,14,1.5,C.cardBg);
+    strokeRect(4,y,pw-8,14,1.5,C.border,0.4);
+    rRect(4,y,4,14,1,C.cyan);
+    setFont('bold',12);setTxt(...C.textPrimary);txt('CRM & COORDINATOR PERFORMANCE',11,y+10);
+    setFont('normal',7);setTxt(...C.textMuted);txt('Follow-up & engagement analytics',pw-6,y+10,{align:'right'});
+    y+=18;
+
+    sectionHead('COORDINATOR FOLLOW-UP PERFORMANCE','Sorted by completion rate',C.cyan);
+    if(Object.keys(coordStats).length===0){
+      checkY(14);rRect(4,y,pw-8,12,1,C.cardBg2);
+      setFont('normal',8);setTxt(...C.textMuted);txt('No follow-up assignments recorded.',pw/2,y+8,{align:'center'});y+=16;
+    } else {
+      drawTable(
+        ['COORDINATOR','TOTAL','DONE','PENDING','COMPLETION RATE'],
+        Object.values(coordStats).sort((a,b)=>(b.done/b.total)-(a.done/a.total)).map(c=>{
+          const rate=c.total?Math.round(c.done/c.total*100):0;
+          return[c.name,c.total,c.done,c.total-c.done,`${rate}%`];
+        }),
+        [60,20,20,22,28],
+        [null,null,(v)=>C.success,(v)=>C.warning,
+          (v)=>parseInt(v)>=80?C.success:parseInt(v)>=60?C.warning:C.danger]
+      );
+    }
+
+    sectionHead('FOLLOW-UPS BY PRIORITY','All assigned tasks',C.orange);
+    const byPriority={High:0,Medium:0,Low:0};
+    followups.forEach(f=>{if(byPriority[f.priority]!==undefined)byPriority[f.priority]++;});
+    const totalFUP=followups.length||1;
+    progressBar('High Priority',byPriority.High,totalFUP,C.danger);
+    progressBar('Medium Priority',byPriority.Medium,totalFUP,C.warning);
+    progressBar('Low Priority',byPriority.Low,totalFUP,C.success);
+    y+=4;
+
+    sectionHead('FOLLOW-UP RECORDS','Recent 40 entries',C.secondary);
+    drawTable(
+      ['CLIENT','TYPE','PRIORITY','ASSIGNED TO','DUE DATE','STATUS'],
+      followups.slice(0,40).map(f=>[
+        f.clientName||'—',f.type||'—',f.priority||'—',
+        f.assignedToName||'—',f.dueDate||'—',
+        f.done||f.status==='completed'?'DONE':f.status==='inprogress'?'IN PROGRESS':'PENDING'
+      ]),
+      [36,26,18,32,20,22],
+      [null,null,
+        (v)=>v==='High'?C.danger:v==='Medium'?C.warning:C.success,
+        null,null,
+        (v)=>v==='DONE'?C.success:v==='IN PROGRESS'?C.secondary:C.warning
+      ]
+    );
+
+    // ══════════════════════════════════════════════════════
+    // APPLY FOOTERS TO ALL PAGES
     // ══════════════════════════════════════════════════════
     const totalPages=doc.internal.getNumberOfPages();
     for(let p=1;p<=totalPages;p++){
       doc.setPage(p);
-      if(p>1){
-        // left accent bar (already drawn for pages 2+)
-        fillRect(0,0,3,ph,C.accent);
-      }
-      // footer bar
-      fillRect(0,ph-10,pw,10,C.darkGray);
-      doc.setTextColor(...C.muted);
-      doc.setFontSize(6.5);
-      doc.setFont('helvetica','normal');
-      doc.text(`GYM AT YOUR HOME™  ·  ${monthName} ${year} Report  ·  Confidential`,10,ph-4);
-      doc.setTextColor(...C.accent);
-      doc.text(`Page ${p} of ${totalPages}`,pw-10,ph-4,{align:'right'});
+      fillRect(0,ph-12,pw,12,C.headerBg);
+      hLine(ph-12,C.border,0,pw,0.4);
+      setFont('normal',6);setTxt(...C.textMuted);
+      txt(`© ${year} Gym At Your Home™  ·  Management Platform  ·  Confidential & Proprietary  ·  Report ID: ${reportId}`,5,ph-5);
+      setFont('bold',6.5);setTxt(...C.primary);
+      txt(`${p} / ${totalPages}`,pw-5,ph-5,{align:'right'});
     }
 
-    doc.save(`GYH_Premium_Report_${monthName}_${year}.pdf`);
-    toast(`✅ Premium PDF exported — ${totalPages} pages!`,'success');
+    doc.save(`GYH_Professional_Report_${monthName}_${year}_${reportId}.pdf`);
+    toast(`✅ Professional PDF exported — ${totalPages} pages!`,'success');
 
   }catch(e){
     toast('PDF error: '+e.message,'error');
@@ -2530,286 +2640,513 @@ async function adminViewChat(chatId){
   }catch(e){const c=$('admin-chat-msgs');if(c)c.innerHTML=`<div style="color:var(--red);font-size:13px">⚠️ ${e.message}</div>`}
 }
 
-// ── TIME SLOTS (UPDATED — replace the existing slots() function and helpers) ──────
+// ══════════════════════════════════════════════════════════════
+// TIME SLOTS — Full updated section
+// Find:   async function slots(){
+// Select until closing } of async function setupDefaultSlots()
+// Replace entirely with this block
+// ══════════════════════════════════════════════════════════════
 
 async function slots(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const isAdmin=(CR==='admin'||CR==='coordinator'||CR==='coordinatorhead');
   const myUid=auth().currentUser.uid;
 
-  // Load slots + all active clients (to resolve names from enrolledClients UIDs)
-  const [slotDocs, allClients, allUsers] = await Promise.all([
+  const[slotDocs,allClients,allUsers]=await Promise.all([
     fsGetAll('slots'),
-    fsGetAll('clients', fn().where('active','==',true)),
+    fsGetAll('clients',fn().where('active','==',true)),
     fsGetAll('users')
   ]);
 
-  const fixedSlots=[
-    {id:'s1',time:'6:00 – 7:00 AM',  period:'Morning', trainerGenderHint:''},
-    {id:'s2',time:'7:00 – 8:00 AM',  period:'Morning', trainerGenderHint:'Female'},
-    {id:'s3',time:'8:00 – 9:00 AM',  period:'Morning', trainerGenderHint:''},
-    {id:'s4',time:'9:00 – 10:00 AM', period:'Morning', trainerGenderHint:'Female'},
-    {id:'s5',time:'4:30 – 5:30 PM',  period:'Evening', trainerGenderHint:'Female'},
-    {id:'s6',time:'5:30 – 6:30 PM',  period:'Evening', trainerGenderHint:''},
-    {id:'s7',time:'6:30 – 7:30 PM',  period:'Evening', trainerGenderHint:'Female'},
-    {id:'s8',time:'7:30 – 8:30 PM',  period:'Evening', trainerGenderHint:''}
-  ];
-
-  // Helper: resolve a UID → display name (checks clients first, then users)
+  // ── resolve UID → display name ─────────────────────────
   function resolveName(uid){
-    const c = allClients.find(x=>x.id===uid);
-    if(c) return c.name||'—';
-    const u = allUsers.find(x=>x.id===uid);
-    if(u) return u.name||u.email||'—';
+    const c=allClients.find(x=>x.id===uid);if(c)return c.name||'—';
+    const u=allUsers.find(x=>x.id===uid);if(u)return u.name||u.email||'—';
     return uid.slice(0,8)+'…';
   }
 
-  function renderSlotSection(title, slotList){
-    return `<div class="card">
-      <div class="card-hd"><div class="card-title">${title}</div></div>
-      <div class="slot-grid">
-        ${slotList.map(s=>{
-          const doc  = slotDocs.find(d=>d.slotId===s.id || d.id===s.id) || {};
-          const cap  = Number(doc.maxCapacity)||10;
-          const enrolled = doc.enrolledClients||[];
-          const count = Math.max(Number(doc.enrolledCount)||0, enrolled.length);
-          const isFull = count>=cap;
-          const isBooked = enrolled.includes(myUid); // client's own booking
+  // ── build slot cards ────────────────────────────────────
+  function renderSlotCard(slotDoc){
+    const cap=Number(slotDoc.maxCapacity)||10;
+    const enrolled=slotDoc.enrolledClients||[];
+    const count=Math.max(Number(slotDoc.enrolledCount)||0,enrolled.length);
+    const isFull=count>=cap;
+    const isBooked=enrolled.includes(myUid);
+    const isCustom=!!slotDoc.isCustom;
 
-          // Build enrolled names list for admin/coord view
-          const enrolledNamesHtml = (isAdmin && enrolled.length > 0)
-            ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-                <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px">
-                  👥 Booked Clients (${enrolled.length})
-                </div>
-                <div style="display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto">
-                  ${enrolled.map(uid=>{
-                    const name = resolveName(uid);
-                    const ini  = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-                    return `<div style="display:flex;align-items:center;gap:7px;padding:4px 7px;background:var(--bg);border:1px solid var(--border);border-radius:7px">
-                      <div style="width:22px;height:22px;border-radius:50%;background:var(--accent-dim);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${ini}</div>
-                      <span style="font-size:12px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>
-                      ${isAdmin ? `<button onclick="adminRemoveFromSlot('${s.id}','${uid}','${name.replace(/'/g,"\\'")}',event)" style="background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);border-radius:5px;padding:2px 7px;color:var(--red);font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0">✕</button>` : ''}
-                    </div>`;
-                  }).join('')}
-                </div>
-              </div>`
-            : (isAdmin && enrolled.length===0)
-              ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--muted2);text-align:center">No bookings yet</div>`
-              : '';
+    const enrolledNamesHtml=(isAdmin&&enrolled.length>0)?`
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px">
+          👥 Booked Clients (${enrolled.length})
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto">
+          ${enrolled.map(uid=>{
+            const name=resolveName(uid);
+            const ini=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+            return`<div style="display:flex;align-items:center;gap:7px;padding:4px 7px;background:var(--bg);border:1px solid var(--border);border-radius:7px">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--accent-dim);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0">${ini}</div>
+              <span style="font-size:12px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}</span>
+              ${isAdmin?`<button onclick="adminRemoveFromSlot('${slotDoc.id}','${uid}','${name.replace(/'/g,"\\'")}',event)" style="background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);border-radius:5px;padding:2px 7px;color:var(--red);font-size:10px;font-weight:700;cursor:pointer;flex-shrink:0">✕</button>`:''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`
+    :(isAdmin&&enrolled.length===0)?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:11px;color:var(--muted2);text-align:center">No bookings yet</div>`:'';
 
-          // Client: show their own booking status
-          const clientBookingHtml = (!isAdmin && CR==='client')
-            ? `<div style="margin-top:10px">
-                ${isBooked
-                  ? `<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;padding:6px 10px;background:var(--accent-dim);border:1px solid rgba(212,255,0,.2);border-radius:7px">
-                      <span style="color:var(--accent);font-size:13px">✅</span>
-                      <span style="font-size:12px;font-weight:600;color:var(--accent)">You've booked this slot</span>
-                    </div>
-                    <button class="btn btn-d btn-sm btn-w" onclick="unenrollSlotClient('${s.id}','${s.time}')">✕ Unbook</button>`
-                  : isFull
-                    ? `<button class="btn btn-g btn-sm btn-w" disabled style="opacity:.5;cursor:not-allowed">Slot Full</button>`
-                    : `<button class="btn btn-p btn-sm btn-w" onclick="enrollSlotClient('${s.id}','${s.time}')">+ Book This Slot</button>`
-                }
-              </div>`
-            : '';
-
-          return `<div class="slot-card ${isFull&&!isBooked?'full':''}" style="${isBooked?'border-color:var(--accent);background:var(--accent-dim)':''}">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-              <div class="slot-time">${s.time}</div>
-              ${isFull ? `<span class="badge b-r" style="font-size:10px">Full</span>` : `<span class="badge b-g" style="font-size:10px">Open</span>`}
+    const clientBookingHtml=(!isAdmin&&CR==='client')?`
+      <div style="margin-top:10px">
+        ${isBooked
+          ?`<div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;padding:6px 10px;background:var(--accent-dim);border:1px solid rgba(212,255,0,.2);border-radius:7px">
+              <span style="color:var(--accent);font-size:13px">✅</span>
+              <span style="font-size:12px;font-weight:600;color:var(--accent)">You've booked this slot</span>
             </div>
-            <div class="slot-trainer">👤 ${doc.trainerName||'TBD'}${doc.trainerGender?` (${doc.trainerGender})`:''}</div>
-            ${s.trainerGenderHint ? `<div class="slot-tag slot-tag-f">♀ ${s.trainerGenderHint}</div>` : ''}
-            <div class="slot-cap" style="margin-top:6px">
-              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">
-                <span>${count} enrolled</span><span>${Math.max(cap-count,0)} left</span>
-              </div>
-              <div class="pb"><div class="pb-fill" style="width:${Math.min(count/cap*100,100)}%;background:${count/cap>=0.8?'var(--red)':'var(--accent)'}"></div></div>
-            </div>
-            ${enrolledNamesHtml}
-            ${clientBookingHtml}
-            ${isAdmin ? `<div style="margin-top:10px"><button class="btn btn-g btn-sm btn-w" onclick="manageSlot('${s.id}','${s.time}')">⚙ Manage Slot</button></div>` : ''}
-          </div>`;
-        }).join('')}
+            <button class="btn btn-d btn-sm btn-w" onclick="unenrollSlotClient('${slotDoc.id}','${slotDoc.slotTime||slotDoc.displayTime||''}')">✕ Unbook</button>`
+          :isFull
+            ?`<button class="btn btn-g btn-sm btn-w" disabled style="opacity:.5;cursor:not-allowed">Slot Full</button>`
+            :`<button class="btn btn-p btn-sm btn-w" onclick="enrollSlotClient('${slotDoc.id}','${slotDoc.slotTime||slotDoc.displayTime||''}')">+ Book This Slot</button>`
+        }
+      </div>`:'';
+
+    const periodColor={Morning:'var(--yellow)',Evening:'var(--blue)',Afternoon:'var(--orange)',Night:'var(--purple)',Custom:'var(--accent)'}[slotDoc.period||'Custom']||'var(--accent)';
+
+    return`<div class="slot-card" style="${isBooked?'border-color:var(--accent);background:var(--accent-dim)':isFull?'border-color:rgba(255,68,68,.3)':''}">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px">
+        <div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--accent)">${slotDoc.displayTime||slotDoc.slotTime||'—'}</div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${periodColor};margin-top:2px">${slotDoc.period||'Custom'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          ${isFull?`<span class="badge b-r" style="font-size:10px">Full</span>`:`<span class="badge b-g" style="font-size:10px">Open</span>`}
+          ${isCustom?`<span class="badge b-a" style="font-size:9px">Custom</span>`:''}
+        </div>
       </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">👤 ${slotDoc.trainerName||'TBD'}${slotDoc.trainerGender?` (${slotDoc.trainerGender})`:''}</div>
+      ${slotDoc.trainerGenderHint?`<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:3px;display:inline-block;margin-bottom:6px;background:var(--purple-dim);color:var(--purple)">♀ ${slotDoc.trainerGenderHint}</div>`:''}
+      ${slotDoc.notes?`<div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-style:italic">${slotDoc.notes}</div>`:''}
+      <div style="margin-top:6px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">
+          <span>${count} enrolled</span><span>${Math.max(cap-count,0)} left</span>
+        </div>
+        <div class="pb"><div class="pb-fill" style="width:${Math.min(count/cap*100,100)}%;background:${count/cap>=0.8?'var(--red)':'var(--accent)'}"></div></div>
+      </div>
+      ${enrolledNamesHtml}
+      ${clientBookingHtml}
+      ${isAdmin?`<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-g btn-sm" style="flex:1" onclick="manageSlot('${slotDoc.id}','${(slotDoc.displayTime||slotDoc.slotTime||'').replace(/'/g,"\\'")}')">⚙ Manage</button>
+        ${isCustom?`<button class="btn btn-d btn-sm" onclick="deleteCustomSlot('${slotDoc.id}')">🗑</button>`:''}
+      </div>`:''}
     </div>`;
   }
 
+  // ── group slots by period ───────────────────────────────
+  function renderPeriodSection(title,icon,slots){
+    if(!slots.length)return'';
+    return`<div class="card">
+      <div class="card-hd">
+        <div class="card-title">${icon} ${title}</div>
+        <span class="badge b-gray" style="font-size:11px">${slots.length} slot${slots.length!==1?'s':''}</span>
+      </div>
+      <div class="slot-grid">${slots.map(s=>renderSlotCard(s)).join('')}</div>
+    </div>`;
+  }
+
+  // ── fixed default slots ─────────────────────────────────
+  const fixedSlots=[
+    {id:'s1',displayTime:'6:00 – 7:00 AM',  slotTime:'06:00',period:'Morning',trainerGenderHint:''},
+    {id:'s2',displayTime:'7:00 – 8:00 AM',  slotTime:'07:00',period:'Morning',trainerGenderHint:'Female'},
+    {id:'s3',displayTime:'8:00 – 9:00 AM',  slotTime:'08:00',period:'Morning',trainerGenderHint:''},
+    {id:'s4',displayTime:'9:00 – 10:00 AM', slotTime:'09:00',period:'Morning',trainerGenderHint:'Female'},
+    {id:'s5',displayTime:'4:30 – 5:30 PM',  slotTime:'16:30',period:'Evening',trainerGenderHint:'Female'},
+    {id:'s6',displayTime:'5:30 – 6:30 PM',  slotTime:'17:30',period:'Evening',trainerGenderHint:''},
+    {id:'s7',displayTime:'6:30 – 7:30 PM',  slotTime:'18:30',period:'Evening',trainerGenderHint:'Female'},
+    {id:'s8',displayTime:'7:30 – 8:30 PM',  slotTime:'19:30',period:'Evening',trainerGenderHint:''},
+  ];
+
+  // merge fixed slots with firestore docs
+  const mergedFixed=fixedSlots.map(fs=>{
+    const doc=slotDocs.find(d=>d.slotId===fs.id||d.id===fs.id)||{};
+    return{...fs,...doc,id:doc.id||fs.id,slotId:fs.id,isCustom:false};
+  });
+
+  // custom slots (those with isCustom:true in firestore)
+  const customSlots=slotDocs.filter(d=>d.isCustom===true);
+
+  // group by period
+  const morningSlots=mergedFixed.filter(s=>s.period==='Morning');
+  const eveningSlots=mergedFixed.filter(s=>s.period==='Evening');
+  const afternoonSlots=customSlots.filter(s=>s.period==='Afternoon');
+  const nightSlots=customSlots.filter(s=>s.period==='Night');
+  const otherCustom=customSlots.filter(s=>!['Afternoon','Night'].includes(s.period));
+
+  // summary stats
+  const allSlots=[...mergedFixed,...customSlots];
+  const totalEnrolled=allSlots.reduce((sum,s)=>sum+Math.max(Number(s.enrolledCount)||0,(s.enrolledClients||[]).length),0);
+  const fullSlots=allSlots.filter(s=>{const cnt=Math.max(Number(s.enrolledCount)||0,(s.enrolledClients||[]).length);return cnt>=(Number(s.maxCapacity)||10);}).length;
+
   $('page').innerHTML=`
+    <!-- Header banner -->
     <div class="card" style="background:var(--accent-dim);border-color:rgba(212,255,0,.3);margin-bottom:18px">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <span style="font-size:28px">🕐</span>
         <div style="flex:1;min-width:0">
-          <div style="font-weight:700;color:var(--accent)">Fixed Daily Schedule — Silver & Gold Plans</div>
-          <div style="font-size:12px;color:var(--muted)">${isAdmin?'Manage slots · see all booked clients · remove bookings.':'Choose your preferred time slot. Your booking shows in green.'}</div>
+          <div style="font-weight:700;color:var(--accent)">Daily Time Slots Schedule</div>
+          <div style="font-size:12px;color:var(--muted)">${isAdmin?'Manage slots · add custom slots · see all booked clients · remove bookings.':'Choose your preferred time slot. Your booking shows in green.'}</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${isAdmin ? `<button class="btn btn-g btn-sm" onclick="setupDefaultSlots()">⚙ Setup Defaults</button>` : ''}
+          ${isAdmin?`
+            <button class="btn btn-g btn-sm" onclick="setupDefaultSlots()">⚙ Setup Defaults</button>
+            <button class="btn btn-pu btn-sm" onclick="openAddCustomSlot()">+ Add Custom Slot</button>
+          `:''}
           <button class="btn btn-p btn-sm" onclick="slots()">↻ Refresh</button>
         </div>
       </div>
     </div>
 
-    ${isAdmin ? `
-    <!-- ADMIN SUMMARY STATS -->
-    <div class="stats-grid" style="margin-bottom:18px">
-      <div class="sc sc-a"><div class="sc-ico">🕐</div><div class="sc-lbl">Total Slots</div><div class="sc-val">${fixedSlots.length}</div></div>
-      <div class="sc sc-g"><div class="sc-ico">👥</div><div class="sc-lbl">Total Enrolled</div>
-        <div class="sc-val">${fixedSlots.reduce((sum,s)=>{const d=slotDocs.find(x=>x.slotId===s.id||x.id===s.id)||{};return sum+Math.max(Number(d.enrolledCount)||0,(d.enrolledClients||[]).length);},0)}</div>
-      </div>
-      <div class="sc sc-r"><div class="sc-ico">🔴</div><div class="sc-lbl">Full Slots</div>
-        <div class="sc-val">${fixedSlots.filter(s=>{const d=slotDocs.find(x=>x.slotId===s.id||x.id===s.id)||{};const cnt=Math.max(Number(d.enrolledCount)||0,(d.enrolledClients||[]).length);return cnt>=(Number(d.maxCapacity)||10);}).length}</div>
-      </div>
-      <div class="sc sc-b"><div class="sc-ico">✅</div><div class="sc-lbl">Open Slots</div>
-        <div class="sc-val">${fixedSlots.filter(s=>{const d=slotDocs.find(x=>x.slotId===s.id||x.id===s.id)||{};const cnt=Math.max(Number(d.enrolledCount)||0,(d.enrolledClients||[]).length);return cnt<(Number(d.maxCapacity)||10);}).length}</div>
-      </div>
-    </div>` : ''}
+    <!-- Stats -->
+    ${isAdmin?`<div class="stats-grid" style="margin-bottom:18px">
+      <div class="sc sc-a"><div class="sc-ico">🕐</div><div class="sc-lbl">Total Slots</div><div class="sc-val">${allSlots.length}</div><div class="sc-sub">${mergedFixed.length} fixed · ${customSlots.length} custom</div></div>
+      <div class="sc sc-g"><div class="sc-ico">👥</div><div class="sc-lbl">Total Enrolled</div><div class="sc-val">${totalEnrolled}</div></div>
+      <div class="sc sc-r"><div class="sc-ico">🔴</div><div class="sc-lbl">Full Slots</div><div class="sc-val">${fullSlots}</div></div>
+      <div class="sc sc-b"><div class="sc-ico">✅</div><div class="sc-lbl">Open Slots</div><div class="sc-val">${allSlots.length-fullSlots}</div></div>
+    </div>`:''}
 
-    ${renderSlotSection('🌅 Morning Slots', fixedSlots.filter(s=>s.period==='Morning'))}
-    ${renderSlotSection('🌇 Evening Slots', fixedSlots.filter(s=>s.period==='Evening'))}`;
+    <!-- Slot sections -->
+    ${renderPeriodSection('Morning Slots','🌅',morningSlots)}
+    ${renderPeriodSection('Evening Slots','🌇',eveningSlots)}
+    ${afternoonSlots.length?renderPeriodSection('Afternoon Slots','☀️',afternoonSlots):''}
+    ${nightSlots.length?renderPeriodSection('Night Slots','🌙',nightSlots):''}
+    ${otherCustom.length?renderPeriodSection('Custom Slots','⚡',otherCustom):''}
+  `;
 }
 
-// ── ENROLL (CLIENT) ─────────────────────────────────────────
-async function enrollSlotClient(slotId, slotTime){
-  const myUid = auth().currentUser.uid;
+// ── ADD CUSTOM SLOT ──────────────────────────────────────────
+async function openAddCustomSlot(){
+  const trainers=await fsGetAll('users',fn().where('role','==','trainer'));
+  openM1('ADD CUSTOM SLOT',`
+    <div style="background:var(--accent-dim);border:1px solid rgba(212,255,0,.3);border-radius:10px;padding:12px 14px;margin-bottom:16px">
+      <div style="font-weight:700;color:var(--accent);margin-bottom:4px">⚡ Custom Time Slot</div>
+      <div style="font-size:12px;color:var(--muted)">Add a new slot with any time and period. It will appear alongside fixed slots.</div>
+    </div>
+
+    <div class="fr">
+      <div class="fg">
+        <label class="fl">Slot Display Name *</label>
+        <input class="fi" id="cs-display" placeholder="e.g. 11:00 AM – 12:00 PM">
+      </div>
+      <div class="fg">
+        <label class="fl">Period *</label>
+        <select class="fs" id="cs-period">
+          <option value="">— Select period —</option>
+          <option value="Morning">🌅 Morning</option>
+          <option value="Afternoon">☀️ Afternoon</option>
+          <option value="Evening">🌇 Evening</option>
+          <option value="Night">🌙 Night</option>
+          <option value="Custom">⚡ Custom</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fr">
+      <div class="fg">
+        <label class="fl">Start Time *</label>
+        <input class="fi" id="cs-time" type="time">
+      </div>
+      <div class="fg">
+        <label class="fl">Max Capacity</label>
+        <input class="fi" id="cs-cap" type="number" value="10" min="1" max="100">
+      </div>
+    </div>
+
+    <div class="fr">
+      <div class="fg">
+        <label class="fl">Assign Trainer</label>
+        <select class="fs" id="cs-trainer">
+          <option value="">— Select trainer (optional) —</option>
+          ${trainers.map(t=>`<option value="${t.id}" data-gender="${t.gender||''}" data-name="${t.name||t.email}">${t.name||t.email} (${t.gender||'Any'})</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Trainer Gender Hint</label>
+        <select class="fs" id="cs-tgender-hint">
+          <option value="">None</option>
+          <option value="Female">♀ Female Preferred</option>
+          <option value="Male">♂ Male Preferred</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="fl">Notes / Description</label>
+      <input class="fi" id="cs-notes" placeholder="e.g. Yoga only · Corporate batch · Special timing…">
+    </div>
+
+    <div id="cs-err" class="alert alert-err"></div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
+      <button class="btn btn-pu" onclick="saveCustomSlot()">+ Add Slot</button>
+    </div>`);
+}
+
+async function saveCustomSlot(){
+  const display=$('cs-display')?.value.trim();
+  const period=$('cs-period')?.value;
+  const time=$('cs-time')?.value;
+  const cap=Number($('cs-cap')?.value)||10;
+  const notes=$('cs-notes')?.value.trim()||'';
+  const tgHint=$('cs-tgender-hint')?.value||'';
+  const trainerSel=$('cs-trainer');
+  const trainerId=trainerSel?.value||'';
+  const trainerOpt=trainerSel?.selectedIndex>0?trainerSel.options[trainerSel.selectedIndex]:null;
+  const trainerName=trainerOpt?trainerOpt.dataset.name||'':'';
+  const trainerGender=trainerOpt?trainerOpt.dataset.gender||'':'';
+  const errEl=$('cs-err');errEl.classList.remove('show');
+
+  if(!display){errEl.textContent='Slot display name is required.';errEl.classList.add('show');return;}
+  if(!period){errEl.textContent='Please select a period.';errEl.classList.add('show');return;}
+  if(!time){errEl.textContent='Start time is required.';errEl.classList.add('show');return;}
+
   try{
-    const slotRef = fn().doc(db(),'slots',slotId);
-    const snap    = await fn().getDoc(slotRef);
+    await fsAdd('slots',{
+      isCustom:true,
+      displayTime:display,
+      slotTime:time,
+      period,
+      maxCapacity:cap,
+      enrolledClients:[],
+      enrolledCount:0,
+      trainerId,
+      trainerName,
+      trainerGender,
+      trainerGenderHint:tgHint,
+      notes,
+      createdBy:auth().currentUser.uid,
+      createdByName:CU.name||'',
+    });
+    closeM1();
+    toast('✅ Custom slot added!','success');
+    slots();
+  }catch(e){
+    errEl.textContent='Error: '+e.message;errEl.classList.add('show');
+  }
+}
+
+async function deleteCustomSlot(slotId){
+  if(!confirm('Delete this custom slot? All bookings will be lost.'))return;
+  try{
+    await fsDel('slots',slotId);
+    toast('Slot deleted','success');
+    slots();
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+// ── ENROLL (CLIENT) ──────────────────────────────────────────
+async function enrollSlotClient(slotId,slotTime){
+  const myUid=auth().currentUser.uid;
+  try{
+    const slotRef=fn().doc(db(),'slots',slotId);
+    const snap=await fn().getDoc(slotRef);
     if(snap.exists()){
-      const d = snap.data();
-      const enrolled = d.enrolledClients||[];
-      const cap = Number(d.maxCapacity)||10;
-      if(enrolled.includes(myUid)){ toast('Already booked!','info'); return; }
-      if(enrolled.length>=cap){ toast('Slot is full!','error'); return; }
+      const d=snap.data();
+      const enrolled=d.enrolledClients||[];
+      const cap=Number(d.maxCapacity)||10;
+      if(enrolled.includes(myUid)){toast('Already booked!','info');return;}
+      if(enrolled.length>=cap){toast('Slot is full!','error');return;}
       await fn().updateDoc(slotRef,{
-        enrolledClients: [...enrolled, myUid],
-        enrolledCount: enrolled.length+1,
-        updatedAt: fn().serverTimestamp()
+        enrolledClients:[...enrolled,myUid],
+        enrolledCount:enrolled.length+1,
+        updatedAt:fn().serverTimestamp()
       });
-    } else {
+    }else{
       await fn().setDoc(slotRef,{
-        slotId, slotTime,
-        enrolledClients:[myUid], enrolledCount:1, maxCapacity:10,
-        trainerId:'', trainerName:'', trainerGender:'',
-        createdAt: fn().serverTimestamp()
+        slotId,slotTime,
+        enrolledClients:[myUid],enrolledCount:1,maxCapacity:10,
+        trainerId:'',trainerName:'',trainerGender:'',
+        createdAt:fn().serverTimestamp()
       });
     }
     toast(`✅ Booked: ${slotTime}`,'success');
     slots();
-  }catch(e){ toast('Error: '+e.message,'error'); }
+  }catch(e){toast('Error: '+e.message,'error');}
 }
 
-// ── UNENROLL (CLIENT) ───────────────────────────────────────
-async function unenrollSlotClient(slotId, slotTime){
-  if(!confirm(`Unbook "${slotTime}"?`)) return;
-  const myUid = auth().currentUser.uid;
+// ── UNENROLL (CLIENT) ────────────────────────────────────────
+async function unenrollSlotClient(slotId,slotTime){
+  if(!confirm(`Unbook "${slotTime}"?`))return;
+  const myUid=auth().currentUser.uid;
   try{
-    const slotRef  = fn().doc(db(),'slots',slotId);
-    const snap     = await fn().getDoc(slotRef);
-    if(!snap.exists()){ toast('Slot not found','error'); return; }
-    const d        = snap.data();
-    const enrolled = (d.enrolledClients||[]).filter(id=>id!==myUid);
+    const slotRef=fn().doc(db(),'slots',slotId);
+    const snap=await fn().getDoc(slotRef);
+    if(!snap.exists()){toast('Slot not found','error');return;}
+    const d=snap.data();
+    const enrolled=(d.enrolledClients||[]).filter(id=>id!==myUid);
     await fn().updateDoc(slotRef,{
-      enrolledClients: enrolled,
-      enrolledCount: enrolled.length,
-      updatedAt: fn().serverTimestamp()
+      enrolledClients:enrolled,
+      enrolledCount:enrolled.length,
+      updatedAt:fn().serverTimestamp()
     });
     toast(`Unbooked: ${slotTime}`,'info');
     slots();
-  }catch(e){ toast('Error: '+e.message,'error'); }
+  }catch(e){toast('Error: '+e.message,'error');}
 }
 
-// ── ADMIN REMOVE CLIENT FROM SLOT ──────────────────────────
-async function adminRemoveFromSlot(slotId, uid, clientName, event){
-  event && event.stopPropagation();
-  if(!confirm(`Remove "${clientName}" from this slot?`)) return;
+// ── ADMIN REMOVE CLIENT FROM SLOT ────────────────────────────
+async function adminRemoveFromSlot(slotId,uid,clientName,event){
+  event&&event.stopPropagation();
+  if(!confirm(`Remove "${clientName}" from this slot?`))return;
   try{
-    const slotRef  = fn().doc(db(),'slots',slotId);
-    const snap     = await fn().getDoc(slotRef);
-    if(!snap.exists()) return;
-    const d        = snap.data();
-    const enrolled = (d.enrolledClients||[]).filter(id=>id!==uid);
+    const slotRef=fn().doc(db(),'slots',slotId);
+    const snap=await fn().getDoc(slotRef);
+    if(!snap.exists())return;
+    const d=snap.data();
+    const enrolled=(d.enrolledClients||[]).filter(id=>id!==uid);
     await fn().updateDoc(slotRef,{
-      enrolledClients: enrolled,
-      enrolledCount: enrolled.length,
-      updatedAt: fn().serverTimestamp()
+      enrolledClients:enrolled,
+      enrolledCount:enrolled.length,
+      updatedAt:fn().serverTimestamp()
     });
     toast(`Removed ${clientName} from slot`,'success');
     slots();
-  }catch(e){ toast('Error: '+e.message,'error'); }
+  }catch(e){toast('Error: '+e.message,'error');}
 }
 
-// ── MANAGE SLOT (ADMIN) — unchanged but kept complete ───────
-async function manageSlot(slotId, slotTime){
-  const trainers = await fsGetAll('users',fn().where('role','==','trainer'));
-  let slotDoc = {};
+// ── MANAGE SLOT (ADMIN) ──────────────────────────────────────
+async function manageSlot(slotId,slotTime){
+  const trainers=await fsGetAll('users',fn().where('role','==','trainer'));
+  let slotDoc={};
   try{
-    const snap = await fn().getDoc(fn().doc(db(),'slots',slotId));
-    if(snap.exists()) slotDoc = snap.data();
+    const snap=await fn().getDoc(fn().doc(db(),'slots',slotId));
+    if(snap.exists())slotDoc=snap.data();
   }catch(e){}
-  const enrolled = slotDoc.enrolledClients||[];
-  openM1(`MANAGE SLOT: ${slotTime}`,`
-    <div class="fg"><label class="fl">Assign Trainer</label>
-      <select class="fs" id="ms-trainer">
-        <option value="">— Select trainer —</option>
-        ${trainers.map(t=>`<option value="${t.id}" data-gender="${t.gender||''}" ${slotDoc.trainerId===t.id?'selected':''}>${t.name||t.email} (${t.gender||'Any'})</option>`).join('')}
+  const enrolled=slotDoc.enrolledClients||[];
+
+  openM2(`MANAGE SLOT: ${slotTime}`,`
+    <div class="fr">
+      <div class="fg">
+        <label class="fl">Display Name</label>
+        <input class="fi" id="ms-display" value="${slotDoc.displayTime||slotTime||''}" placeholder="e.g. 6:00 – 7:00 AM">
+      </div>
+      <div class="fg">
+        <label class="fl">Period</label>
+        <select class="fs" id="ms-period">
+          <option value="Morning" ${slotDoc.period==='Morning'?'selected':''}>🌅 Morning</option>
+          <option value="Afternoon" ${slotDoc.period==='Afternoon'?'selected':''}>☀️ Afternoon</option>
+          <option value="Evening" ${slotDoc.period==='Evening'?'selected':''}>🌇 Evening</option>
+          <option value="Night" ${slotDoc.period==='Night'?'selected':''}>🌙 Night</option>
+          <option value="Custom" ${slotDoc.period==='Custom'?'selected':''}>⚡ Custom</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fr">
+      <div class="fg">
+        <label class="fl">Assign Trainer</label>
+        <select class="fs" id="ms-trainer">
+          <option value="">— Select trainer —</option>
+          ${trainers.map(t=>`<option value="${t.id}" data-gender="${t.gender||''}" ${slotDoc.trainerId===t.id?'selected':''}>${t.name||t.email} (${t.gender||'Any'})</option>`).join('')}
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Max Capacity</label>
+        <input class="fi" id="ms-cap" type="number" value="${slotDoc.maxCapacity||10}" min="1" max="100">
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="fl">Trainer Gender Hint</label>
+      <select class="fs" id="ms-tgender-hint">
+        <option value="" ${!slotDoc.trainerGenderHint?'selected':''}>None</option>
+        <option value="Female" ${slotDoc.trainerGenderHint==='Female'?'selected':''}>♀ Female Preferred</option>
+        <option value="Male" ${slotDoc.trainerGenderHint==='Male'?'selected':''}>♂ Male Preferred</option>
       </select>
     </div>
-    <div class="fg"><label class="fl">Max Capacity</label>
-      <input class="fi" id="ms-cap" type="number" value="${slotDoc.maxCapacity||10}" min="1" max="50">
+
+    <div class="fg">
+      <label class="fl">Notes</label>
+      <input class="fi" id="ms-notes" value="${slotDoc.notes||''}" placeholder="Optional description…">
     </div>
-    <div style="background:var(--bg);border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px;color:var(--muted)">
+
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--muted)">
       Currently enrolled: <strong style="color:var(--accent)">${enrolled.length}</strong> / ${slotDoc.maxCapacity||10}
     </div>
+
     <div id="ms-err" class="alert alert-err"></div>
     <div class="mo-foot">
-      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
-      <button class="btn btn-p" onclick="saveSlotConfig('${slotId}','${slotTime}')">Save Slot</button>
+      <button class="btn btn-g" onclick="closeM2()">Cancel</button>
+      <button class="btn btn-p" onclick="saveSlotConfig('${slotId}','${slotTime.replace(/'/g,"\\'")}')">Save Slot</button>
     </div>`);
 }
 
-async function saveSlotConfig(slotId, slotTime){
-  const trainerSel = $('ms-trainer');
-  if(!trainerSel){ toast('Form error','error'); return; }
-  const trainerId   = trainerSel.value;
-  const selectedOpt = trainerSel.options[trainerSel.selectedIndex];
-  const trainerName = trainerId ? selectedOpt.text.replace(/\s*\([^)]*\)\s*$/,'').trim() : '';
-  const trainerGender = trainerId ? selectedOpt.dataset.gender||'' : '';
-  const cap = Number($('ms-cap').value)||10;
-  try{
-    const slotRef = fn().doc(db(),'slots',slotId);
-    const snap    = await fn().getDoc(slotRef);
-    if(snap.exists()){
-      await fn().updateDoc(slotRef,{ trainerId, trainerName, trainerGender, maxCapacity:cap, slotTime, updatedAt:fn().serverTimestamp() });
-    } else {
-      await fn().setDoc(slotRef,{ slotId, trainerId, trainerName, trainerGender, maxCapacity:cap, slotTime, enrolledClients:[], enrolledCount:0, createdAt:fn().serverTimestamp() });
-    }
-    closeM1(); toast('Slot saved!','success'); slots();
-  }catch(e){
-    const errEl = $('ms-err');
-    if(errEl){ errEl.textContent='Error: '+e.message; errEl.classList.add('show'); }
-  }
-}
+async function saveSlotConfig(slotId,slotTime){
+  const trainerSel=$('ms-trainer');
+  if(!trainerSel){toast('Form error','error');return;}
+  const trainerId=trainerSel.value;
+  const selectedOpt=trainerSel.options[trainerSel.selectedIndex];
+  const trainerName=trainerId?selectedOpt.text.replace(/\s*\([^)]*\)\s*$/,'').trim():'';
+  const trainerGender=trainerId?selectedOpt.dataset.gender||'':'';
+  const cap=Number($('ms-cap').value)||10;
+  const display=$('ms-display')?.value.trim()||slotTime;
+  const period=$('ms-period')?.value||'Morning';
+  const notes=$('ms-notes')?.value.trim()||'';
+  const tgHint=$('ms-tgender-hint')?.value||'';
 
-async function setupDefaultSlots(){
-  const slotIds = ['s1','s2','s3','s4','s5','s6','s7','s8'];
-  const times   = ['6:00 – 7:00 AM','7:00 – 8:00 AM','8:00 – 9:00 AM','9:00 – 10:00 AM','4:30 – 5:30 PM','5:30 – 6:30 PM','6:30 – 7:30 PM','7:30 – 8:30 PM'];
   try{
-    for(let i=0;i<slotIds.length;i++){
-      const ref  = fn().doc(db(),'slots',slotIds[i]);
-      const snap = await fn().getDoc(ref);
-      if(!snap.exists()) await fn().setDoc(ref,{
-        slotId:slotIds[i], slotTime:times[i],
-        maxCapacity:10, enrolledClients:[], enrolledCount:0,
-        trainerId:'', trainerName:'', trainerGender:'',
+    const slotRef=fn().doc(db(),'slots',slotId);
+    const snap=await fn().getDoc(slotRef);
+    const existing=snap.exists()?snap.data():{};
+    if(snap.exists()){
+      await fn().updateDoc(slotRef,{
+        trainerId,trainerName,trainerGender,
+        maxCapacity:cap,slotTime,displayTime:display,
+        period,notes,trainerGenderHint:tgHint,
+        updatedAt:fn().serverTimestamp()
+      });
+    }else{
+      await fn().setDoc(slotRef,{
+        slotId,trainerId,trainerName,trainerGender,
+        maxCapacity:cap,slotTime,displayTime:display,
+        period,notes,trainerGenderHint:tgHint,
+        enrolledClients:[],enrolledCount:0,
+        isCustom:false,
         createdAt:fn().serverTimestamp()
       });
     }
-    toast('Default slots set up!','success'); slots();
-  }catch(e){ toast('Error: '+e.message,'error'); }
+    closeM2();toast('Slot saved!','success');slots();
+  }catch(e){
+    const errEl=$('ms-err');
+    if(errEl){errEl.textContent='Error: '+e.message;errEl.classList.add('show');}
+  }
 }
-// ── BATCHES ───────────────────────────────────────────────────
+
+// ── SETUP DEFAULT SLOTS ──────────────────────────────────────
+async function setupDefaultSlots(){
+  if(!confirm('This will create the 8 default fixed slots if they don\'t exist yet. Continue?'))return;
+  const defaults=[
+    {id:'s1',displayTime:'6:00 – 7:00 AM', slotTime:'06:00',period:'Morning',trainerGenderHint:''},
+    {id:'s2',displayTime:'7:00 – 8:00 AM', slotTime:'07:00',period:'Morning',trainerGenderHint:'Female'},
+    {id:'s3',displayTime:'8:00 – 9:00 AM', slotTime:'08:00',period:'Morning',trainerGenderHint:''},
+    {id:'s4',displayTime:'9:00 – 10:00 AM',slotTime:'09:00',period:'Morning',trainerGenderHint:'Female'},
+    {id:'s5',displayTime:'4:30 – 5:30 PM', slotTime:'16:30',period:'Evening',trainerGenderHint:'Female'},
+    {id:'s6',displayTime:'5:30 – 6:30 PM', slotTime:'17:30',period:'Evening',trainerGenderHint:''},
+    {id:'s7',displayTime:'6:30 – 7:30 PM', slotTime:'18:30',period:'Evening',trainerGenderHint:'Female'},
+    {id:'s8',displayTime:'7:30 – 8:30 PM', slotTime:'19:30',period:'Evening',trainerGenderHint:''},
+  ];
+  try{
+    for(const s of defaults){
+      const ref=fn().doc(db(),'slots',s.id);
+      const snap=await fn().getDoc(ref);
+      if(!snap.exists()){
+        await fn().setDoc(ref,{
+          slotId:s.id,displayTime:s.displayTime,slotTime:s.slotTime,
+          period:s.period,maxCapacity:10,enrolledClients:[],enrolledCount:0,
+          trainerId:'',trainerName:'',trainerGender:'',
+          trainerGenderHint:s.trainerGenderHint,notes:'',isCustom:false,
+          createdAt:fn().serverTimestamp()
+        });
+      }
+    }
+    toast('✅ Default slots set up!','success');slots();
+  }catch(e){toast('Error: '+e.message,'error');}
+}// ── BATCHES ───────────────────────────────────────────────────
 async function batches(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   const isAdmin=(CR==='admin'||CR==='coordinator'||CR==='coordinatorhead');
