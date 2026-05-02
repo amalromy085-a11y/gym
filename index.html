@@ -211,7 +211,6 @@ tbody tr:last-child td{border-bottom:none}
 .chat-input-area{padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--surface);align-items:flex-end}
 .chat-input{flex:1;padding:10px 14px;background:var(--bg);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;min-height:40px;max-height:120px;line-height:1.4}
 .chat-input:focus{border-color:var(--accent)}
-/* SLOTS */
 .slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:16px}
 .slot-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;transition:border-color .2s,background .2s}
 .slot-card:hover{border-color:var(--border2)}
@@ -523,111 +522,13 @@ function showMissedReasonPopup(sessionId,clientName,trainerName,date,time,reqId=
   const overlay=document.createElement('div');overlay.className='missed-reason-overlay';overlay.id='missed-reason-overlay';
   const safeClient=(clientName||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
   const safeTrainer=(trainerName||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
-  overlay.innerHTML=`<div class="missed-reason-box"><div style="text-align:center;margin-bottom:20px"><div style="font-size:48px;margin-bottom:8px">⚠️</div><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--red)">SESSION MISSED</div><div style="font-size:13px;color:var(--muted);margin-top:4px">Please enter the reason for this missed session</div></div><div class="missed-alert-box"><div style="font-weight:700;color:var(--red);margin-bottom:6px">📋 Session Details</div><div style="font-size:13px"><strong>${clientName||'—'}</strong> with trainer <strong>${trainerName||'—'}</strong></div><div style="font-size:12px;color:var(--muted);margin-top:3px">📅 ${date||'—'} at ${to12h(time)}</div></div><div class="fg"><label class="fl">Reason *</label><select class="fs" id="mrp-reason-sel" onchange="toggleMRPOtherReason()"><option value="">— Select reason —</option><option>Client not available</option><option>Trainer absent</option><option>Client emergency</option><option>Technical issues</option><option>Client sick</option><option>Scheduled holiday</option><option>Trainer on approved leave</option><option>Other</option></select></div><div class="fg" id="mrp-other-wrap" style="display:none"><label class="fl">Specify Reason *</label><textarea class="fta" id="mrp-other" placeholder="Enter the reason…" style="min-height:60px"></textarea></div><div class="fg"><label class="fl">Additional Notes</label><textarea class="fta" id="mrp-notes" placeholder="Follow-up actions needed?" style="min-height:60px"></textarea></div><div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px"><button class="btn btn-g" onclick="dismissMissedReasonPopup()">Skip for Now</button><button class="btn btn-d" onclick="async function submitMissedReasonPopup(sessionId, clientName, trainerName, date, time, reqId = '') {
-  const reasonSel = document.getElementById('mrp-reason-sel');
-  const reason = reasonSel ? reasonSel.value : '';
-  if (!reason) { toast('Please select a reason', 'error'); return; }
-
-  const finalReason = reason === 'Other'
-    ? (document.getElementById('mrp-other')?.value.trim() || 'Other')
-    : reason;
-  const notes = document.getElementById('mrp-notes')?.value.trim() || '';
-
-  const btn = document.querySelector('#missed-reason-overlay .btn-d');
-  if (btn) { btn.textContent = 'Saving…'; btn.disabled = true; }
-
-  try {
-    // 1. Save the missed reason report
-    await fsAdd('missedreasons', {
-      sessionId, clientName, trainerName, date, time,
-      reason: finalReason, notes,
-      reportedBy: auth().currentUser.uid,
-      reportedByName: CU.name || '',
-      reportedByRole: CR
-    });
-
-    // 2. Mark the request as resolved (if there was one)
-    if (reqId) {
-      try {
-        await fsUpdate('missedreasonrequests', reqId, {
-          resolved: true,
-          resolvedBy: auth().currentUser.uid,
-          resolvedByName: CU.name || ''
-        });
-      } catch (e) {}
-    }
-
-    // 3. Notify all admins via notification + chat message
-    const admins = await fsGetAll('users', fn().where('role', '==', 'admin'));
-    const myUid  = auth().currentUser.uid;
-
-    const notifBody =
-      `Reason: "${finalReason}"` +
-      (notes ? ` | Notes: "${notes}"` : '') +
-      `\nClient: ${clientName || '—'} | Trainer: ${trainerName || '—'}` +
-      ` | ${date || '—'} at ${to12h(time)}` +
-      `\nReported by: ${CU.name || ''} (${CR})`;
-
-    // In-app notifications for admins
-    await createNotifForUsers(
-      {
-        key: `missed_reason_submitted_${sessionId}_${Date.now()}`,
-        title: '📋 Missed Session — Reason Submitted',
-        body: notifBody,
-        type: 'missed_reason_submitted',
-        sessionId
-      },
-      admins.map(a => a.id)
-    );
-
-    // Chat message to each admin from the reporter
-    const chatMsg =
-      `📋 MISSED SESSION REASON SUBMITTED\n` +
-      `Client: ${clientName || '—'}\n` +
-      `Trainer: ${trainerName || '—'}\n` +
-      `Date/Time: ${date || '—'} at ${to12h(time)}\n` +
-      `Reason: ${finalReason}\n` +
-      (notes ? `Notes: ${notes}\n` : '') +
-      `Reported by: ${CU.name || ''} (${CR})`;
-
-    await Promise.all(
-      admins
-        .filter(a => a.id !== myUid)
-        .map(async admin => {
-          const chatId = getChatId(myUid, admin.id);
-          try {
-            await fn().addDoc(fn().collection(db(), `chats/${chatId}/messages`), {
-              senderId:   myUid,
-              senderName: CU.name || CU.email || '',
-              message:    chatMsg,
-              timestamp:  fn().serverTimestamp(),
-              read:       false,
-              type:       'missed_reason_report'
-            });
-            await fn().setDoc(fn().doc(db(), 'chats', chatId), {
-              participants:    [myUid, admin.id],
-              lastMessage:     `📋 Missed reason: ${clientName}`,
-              lastMessageTime: fn().serverTimestamp(),
-              lastSenderId:    myUid
-            }, { merge: true });
-          } catch (e) {}
-        })
-    );
-
-    dismissMissedReasonPopup();
-    toast('Reason submitted ✅ — Admins notified', 'success');
-
-    if (document.querySelector('.ni.active')?.id === 'ni-dash') {
-      setTimeout(() => dash(), 300);
-    }
-
-  } catch (e) {
-    toast('Error: ' + e.message, 'error');
-    if (btn) { btn.textContent = '⚠️ Submit Reason'; btn.disabled = false; }
-  }
+  overlay.innerHTML=`<div class="missed-reason-box"><div style="text-align:center;margin-bottom:20px"><div style="font-size:48px;margin-bottom:8px">⚠️</div><div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--red)">SESSION MISSED</div><div style="font-size:13px;color:var(--muted);margin-top:4px">Please enter the reason for this missed session</div></div><div class="missed-alert-box"><div style="font-weight:700;color:var(--red);margin-bottom:6px">📋 Session Details</div><div style="font-size:13px"><strong>${clientName||'—'}</strong> with trainer <strong>${trainerName||'—'}</strong></div><div style="font-size:12px;color:var(--muted);margin-top:3px">📅 ${date||'—'} at ${to12h(time)}</div></div><div class="fg"><label class="fl">Reason *</label><select class="fs" id="mrp-reason-sel" onchange="toggleMRPOtherReason()"><option value="">— Select reason —</option><option>Client not available</option><option>Trainer absent</option><option>Client emergency</option><option>Technical issues</option><option>Client sick</option><option>Scheduled holiday</option><option>Trainer on approved leave</option><option>Other</option></select></div><div class="fg" id="mrp-other-wrap" style="display:none"><label class="fl">Specify Reason *</label><textarea class="fta" id="mrp-other" placeholder="Enter the reason…" style="min-height:60px"></textarea></div><div class="fg"><label class="fl">Additional Notes</label><textarea class="fta" id="mrp-notes" placeholder="Follow-up actions needed?" style="min-height:60px"></textarea></div><div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px"><button class="btn btn-g" onclick="dismissMissedReasonPopup()">Skip for Now</button><button class="btn btn-d" onclick="submitMissedReasonPopup('${sessionId}','${safeClient}','${safeTrainer}','${date||''}','${time||''}','${reqId}')">⚠️ Submit Reason</button></div></div>`;
+  document.body.appendChild(overlay);
 }
 function toggleMRPOtherReason(){const sel=document.getElementById('mrp-reason-sel');const wrap=document.getElementById('mrp-other-wrap');if(wrap)wrap.style.display=(sel&&sel.value==='Other')?'block':'none';}
 function dismissMissedReasonPopup(){const o=document.getElementById('missed-reason-overlay');if(o)o.remove();}
+
+// ── SUBMIT MISSED REASON — notifies admins + coord heads via chat & notification ──
 async function submitMissedReasonPopup(sessionId,clientName,trainerName,date,time,reqId=''){
   const reasonSel=document.getElementById('mrp-reason-sel');const reason=reasonSel?reasonSel.value:'';
   if(!reason){toast('Please select a reason','error');return}
@@ -635,12 +536,74 @@ async function submitMissedReasonPopup(sessionId,clientName,trainerName,date,tim
   const notes=document.getElementById('mrp-notes')?.value.trim()||'';
   const btn=document.querySelector('#missed-reason-overlay .btn-d');if(btn){btn.textContent='Saving…';btn.disabled=true;}
   try{
-    await fsAdd('missedreasons',{sessionId,clientName,trainerName,date,time,reason:finalReason,notes,reportedBy:auth().currentUser.uid,reportedByName:CU.name||'',reportedByRole:CR});
-    if(reqId){try{await fsUpdate('missedreasonrequests',reqId,{resolved:true,resolvedBy:auth().currentUser.uid,resolvedByName:CU.name||''});}catch(e){}}
-    dismissMissedReasonPopup();toast('Reason submitted ✅','success');
+    // 1. Save the missed reason report
+    await fsAdd('missedreasons',{
+      sessionId,clientName,trainerName,date,time,
+      reason:finalReason,notes,
+      reportedBy:auth().currentUser.uid,
+      reportedByName:CU.name||'',
+      reportedByRole:CR
+    });
+
+    // 2. Mark the pending request as resolved
+    if(reqId){
+      try{await fsUpdate('missedreasonrequests',reqId,{resolved:true,resolvedBy:auth().currentUser.uid,resolvedByName:CU.name||''});}catch(e){}
+    }
+
+    // 3. Notify admins & coordinator heads — both in-app notification AND chat message
+    const myUid=auth().currentUser.uid;
+    const [admins,heads]=await Promise.all([
+      fsGetAll('users',fn().where('role','==','admin')),
+      fsGetAll('users',fn().where('role','==','coordinatorhead'))
+    ]);
+    const targets=[...admins,...heads].filter(u=>u.id!==myUid);
+    const targetIds=targets.map(u=>u.id);
+
+    const notifTitle=`📋 Missed Reason Submitted — ${clientName||'Client'}`;
+    const notifBody=`${CU.name||'Coordinator'} submitted reason for missed session.\nClient: ${clientName||'—'} | Trainer: ${trainerName||'—'}\nDate: ${date||'—'} at ${to12h(time)}\nReason: ${finalReason}${notes?`\nNotes: ${notes}`:''}`;
+
+    // In-app notifications
+    if(targetIds.length){
+      await createNotifForUsers({
+        key:`missed_reason_submitted_${sessionId}_${Date.now()}`,
+        title:notifTitle,
+        body:notifBody,
+        type:'missed_reason_submitted',
+        sessionId
+      },targetIds);
+    }
+
+    // Chat messages to each admin/coordinator head
+    const chatMsg=`📋 MISSED REASON SUBMITTED\n\nClient: ${clientName||'—'}\nTrainer: ${trainerName||'—'}\nDate: ${date||'—'} at ${to12h(time)}\nReason: ${finalReason}${notes?`\nNotes: ${notes}`:''}\n\nSubmitted by: ${CU.name||'Coordinator'} (${CR})`;
+    await Promise.all(targets.map(async u=>{
+      const chatId=getChatId(myUid,u.id);
+      try{
+        await fn().addDoc(fn().collection(db(),`chats/${chatId}/messages`),{
+          senderId:myUid,
+          senderName:CU.name||CU.email||'',
+          message:chatMsg,
+          timestamp:fn().serverTimestamp(),
+          read:false,
+          type:'missed_reason_report'
+        });
+        await fn().setDoc(fn().doc(db(),'chats',chatId),{
+          participants:[myUid,u.id],
+          lastMessage:`📋 Missed Reason: ${clientName}`,
+          lastMessageTime:fn().serverTimestamp(),
+          lastSenderId:myUid
+        },{merge:true});
+      }catch(e){console.warn('Chat send failed for',u.id,e);}
+    }));
+
+    dismissMissedReasonPopup();
+    toast('Reason submitted ✅ — Admins notified','success');
     if(document.querySelector('.ni.active')?.id==='ni-dash'){setTimeout(()=>dash(),300);}
-  }catch(e){toast('Error: '+e.message,'error');if(btn){btn.textContent='⚠️ Submit Reason';btn.disabled=false;}}
+  }catch(e){
+    toast('Error: '+e.message,'error');
+    if(btn){btn.textContent='⚠️ Submit Reason';btn.disabled=false;}
+  }
 }
+
 function openDotsMenu(menuId){document.querySelectorAll('.dots-dropdown').forEach(d=>{if(d.id!==menuId)d.classList.remove('open');});const dd=document.getElementById(menuId);if(dd)dd.classList.toggle('open');}
 document.addEventListener('click',e=>{if(!e.target.closest('.dots-menu-wrap')){document.querySelectorAll('.dots-dropdown').forEach(d=>d.classList.remove('open'));}});
 function toggleCollapsible(id){const hd=document.getElementById('col-hd-'+id);const body=document.getElementById('col-body-'+id);if(!hd||!body)return;const isOpen=body.classList.contains('open');hd.classList.toggle('open',!isOpen);body.classList.toggle('open',!isOpen);}
