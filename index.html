@@ -37,498 +37,6 @@ window.FN={
 };
 document.dispatchEvent(new Event('fbReady'));
 </script>
-
-:root {
-  --bg:          #000000;
-  --surface:     #0a0a0a;
-  --card:        #111111;
-  --border:      #1a1a1a;
-  --border2:     #222222;
-  --text:        #f5f5f5;
-  --muted:       #888888;
-  --muted2:      #444444;
-  --accent:      #ffffff;
-  --accent-dim:  rgba(255,255,255,0.07);
-  --green:       #cccccc;
-  --green-dim:   rgba(200,200,200,0.10);
-  --red:         #ff4455;
-  --red-dim:     rgba(255,68,85,0.12);
-  --yellow:      #e0e0e0;
-  --yellow-dim:  rgba(224,224,224,0.10);
-  --blue:        #b0b0b0;
-  --blue-dim:    rgba(176,176,176,0.10);
-  --purple:      #d0d0d0;
-  --purple-dim:  rgba(208,208,208,0.10);
-  --orange:      #c8c8c8;
-  --orange-dim:  rgba(200,200,200,0.10);
-  --pink:        #e8e8e8;
-  --pink-dim:    rgba(232,232,232,0.10);
-  --sw:          250px;
-}
-
-/* ── CANVAS ─────────────────────────────────────────────────── */
-#gym-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-}
-
-/* ── BODY ───────────────────────────────────────────────────── */
-body { background: #000000 !important; }
-.main { background: transparent !important; }
-.page { position: relative; z-index: 1; }
-
-/* ── KEYFRAMES ──────────────────────────────────────────────── */
-@keyframes shimmerBW {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200%  center; }
-}
-@keyframes glowPulse {
-  0%,100% { opacity: 0.6; }
-  50%      { opacity: 1.0; }
-}
-@keyframes scanLine {
-  0%   { transform: translateY(-100%); opacity: 0;   }
-  10%  { opacity: 1; }
-  90%  { opacity: 0.4; }
-  100% { transform: translateY(100vh);  opacity: 0;   }
-}
-@keyframes energyPulse {
-  0%,100% { opacity: 0; transform: scaleX(0); }
-  40%,60% { opacity: 1; transform: scaleX(1); }
-}
-@keyframes fadeFlicker {
-  0%,100% { opacity: 0.04; }
-  50%      { opacity: 0.09; }
-}
-
-/* ── SCANLINE OVERLAY ───────────────────────────────────────── */
-#gym-scanline {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 3px,
-    rgba(255,255,255,0.008) 3px,
-    rgba(255,255,255,0.008) 4px
-  );
-}
-
-/* ── LOADER ─────────────────────────────────────────────────── */
-#loader { background: #000000 !important; }
-.ld-logo {
-  filter: drop-shadow(0 0 20px rgba(255,255,255,0.5))
-          drop-shadow(0 0 60px rgba(255,255,255,0.15))
-          grayscale(1) brightness(2);
-  animation: ldpulse 1.4s ease-in-out infinite, glowPulse 2s ease-in-out infinite;
-}
-.ld-name {
-  background: linear-gradient(90deg, #666, #fff, #aaa, #fff, #666);
-  background-size: 300% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmerBW 2.5s linear infinite;
-}
-.ld-bar  { background: rgba(255,255,255,0.08) !important; }
-.ld-fill {
-  background: linear-gradient(90deg,#333,#fff,#aaa,#fff,#333);
-  background-size: 200% auto;
-  animation: ldfill 1.6s ease forwards, shimmerBW 1.6s linear infinite;
-}
-
-/* ── SIDEBAR ────────────────────────────────────────────────── */
-.sidebar {
-  background: rgba(5,5,5,0.97) !important;
-  border-right: 1px solid rgba(255,255,255,0.06) !important;
-  backdrop-filter: blur(24px);
-  box-shadow: 4px 0 48px rgba(0,0,0,0.9);
-}
-.sb-head {
-  background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, transparent 100%);
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-}
-.sb-brand {
-  background: linear-gradient(90deg,#888,#fff,#aaa,#fff,#888);
-  background-size: 300% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmerBW 5s linear infinite;
-}
-.ni.active {
-  background: linear-gradient(90deg,rgba(255,255,255,0.10),rgba(255,255,255,0.03)) !important;
-  border-left-color: #ffffff !important;
-  box-shadow: inset 0 0 30px rgba(255,255,255,0.03);
-}
-.ni:hover        { background: rgba(255,255,255,0.04) !important; }
-.sb-foot         { border-top: 1px solid rgba(255,255,255,0.05) !important; }
-.sb-user         { border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
-.nav-sec-lbl     { color: rgba(255,255,255,0.28) !important; }
-
-/* ── TOPBAR ─────────────────────────────────────────────────── */
-.topbar {
-  background: rgba(4,4,4,0.94) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-  backdrop-filter: blur(24px);
-  box-shadow: 0 4px 32px rgba(0,0,0,0.8);
-}
-.tb-title {
-  background: linear-gradient(90deg, #fff, #aaa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.tb-date  { color: rgba(255,255,255,0.35) !important; }
-.notif-btn,.theme-btn {
-  border-color: rgba(255,255,255,0.1) !important;
-  color: rgba(255,255,255,0.6) !important;
-}
-.notif-btn:hover,.theme-btn:hover {
-  border-color: rgba(255,255,255,0.5) !important;
-  color: #fff !important;
-}
-
-/* ── CARDS ──────────────────────────────────────────────────── */
-.card {
-  background: rgba(10,10,10,0.85) !important;
-  border: 1px solid rgba(255,255,255,0.055) !important;
-  backdrop-filter: blur(16px);
-  box-shadow:
-    0 8px 32px rgba(0,0,0,0.6),
-    inset 0 1px 0 rgba(255,255,255,0.04);
-  transition: border-color .3s, box-shadow .3s, transform .2s;
-}
-.card:hover {
-  border-color: rgba(255,255,255,0.12) !important;
-  box-shadow: 0 14px 44px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
-}
-.card-hd { border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
-.card-title { color: rgba(255,255,255,0.85) !important; }
-
-/* ── STAT CARDS ─────────────────────────────────────────────── */
-.sc {
-  background: rgba(8,8,8,0.90) !important;
-  border: 1px solid rgba(255,255,255,0.05) !important;
-  backdrop-filter: blur(14px);
-  transition: transform .2s, box-shadow .2s;
-}
-.sc:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.7); }
-.sc-a::before,.sc-g::before,.sc-b::before,
-.sc-p::before,.sc-y::before,.sc-o::before,
-.sc-r::before {
-  background: linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3)) !important;
-}
-.sc-r::before { background: linear-gradient(90deg, #ff4455, #cc2233) !important; }
-.sc-val {
-  background: linear-gradient(135deg, #ffffff, #aaaaaa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.sc-lbl { color: rgba(255,255,255,0.35) !important; }
-.sc-sub { color: rgba(255,255,255,0.3) !important; }
-.sc-ico { color: rgba(255,255,255,0.08) !important; }
-
-/* ── BUTTONS ────────────────────────────────────────────────── */
-.btn-p {
-  background: linear-gradient(135deg,#ffffff,#cccccc) !important;
-  box-shadow: 0 4px 20px rgba(255,255,255,0.18);
-  color: #000000 !important;
-}
-.btn-p:hover {
-  box-shadow: 0 6px 30px rgba(255,255,255,0.35);
-  filter: brightness(1.06) !important;
-}
-.btn-gr {
-  background: linear-gradient(135deg,#e0e0e0,#aaaaaa) !important;
-  color: #000 !important;
-  box-shadow: 0 4px 14px rgba(255,255,255,0.12);
-}
-.btn-d {
-  background: linear-gradient(135deg,#ff4455,#cc2233) !important;
-  box-shadow: 0 4px 14px rgba(255,68,85,0.22);
-}
-.btn-g {
-  background: transparent !important;
-  border-color: rgba(255,255,255,0.12) !important;
-  color: rgba(255,255,255,0.7) !important;
-}
-.btn-g:hover {
-  border-color: rgba(255,255,255,0.5) !important;
-  color: #fff !important;
-}
-.btn-bl,.btn-pu,.btn-or,.btn-yw,.btn-pk {
-  background: linear-gradient(135deg,#c0c0c0,#888888) !important;
-  color: #000 !important;
-}
-
-/* ── MODALS ─────────────────────────────────────────────────── */
-.mo { background: rgba(0,0,0,0.92) !important; backdrop-filter: blur(12px); }
-.mb {
-  background: rgba(8,8,8,0.99) !important;
-  border: 1px solid rgba(255,255,255,0.10) !important;
-  box-shadow:
-    0 40px 100px rgba(0,0,0,0.95),
-    0 0 0 1px rgba(255,255,255,0.04),
-    inset 0 1px 0 rgba(255,255,255,0.04);
-}
-.mo-title {
-  background: linear-gradient(90deg,#fff,#999);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.mo-x { color: rgba(255,255,255,0.4) !important; }
-.mo-x:hover { color: #fff !important; }
-
-/* ── INPUTS ─────────────────────────────────────────────────── */
-.fi,.fs,.fta {
-  background: rgba(5,5,5,0.85) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
-  color: #f0f0f0 !important;
-}
-.fi::placeholder { color: rgba(255,255,255,0.25) !important; }
-.fi:focus,.fs:focus,.fta:focus {
-  border-color: rgba(255,255,255,0.4) !important;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
-}
-.fs option { background: #111 !important; }
-label,.fl { color: rgba(255,255,255,0.45) !important; letter-spacing: 1px; }
-
-/* ── TABLE ──────────────────────────────────────────────────── */
-thead th {
-  background: rgba(255,255,255,0.025) !important;
-  color: rgba(255,255,255,0.4) !important;
-}
-tbody td { color: rgba(255,255,255,0.8) !important; }
-tbody tr:hover { background: rgba(255,255,255,0.03) !important; }
-tbody tr:last-child td { border-bottom: none; }
-
-/* ── BADGES ─────────────────────────────────────────────────── */
-.b-g,.b-y,.b-b,.b-p,.b-o,.b-pk,.b-a {
-  background: rgba(255,255,255,0.07) !important;
-  color: rgba(255,255,255,0.85) !important;
-}
-.b-gray {
-  background: rgba(255,255,255,0.05) !important;
-  color: rgba(255,255,255,0.45) !important;
-}
-.b-r {
-  background: rgba(255,68,85,0.12) !important;
-  color: #ff8899 !important;
-}
-
-/* ── TABS ───────────────────────────────────────────────────── */
-.tabs { border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
-.tab { color: rgba(255,255,255,0.35) !important; }
-.tab.active { color: #fff !important; border-bottom-color: #fff !important; }
-.tab:hover  { color: rgba(255,255,255,0.7) !important; }
-
-/* ── CHAT ───────────────────────────────────────────────────── */
-.chat-layout,.monitor-layout {
-  background: rgba(6,6,6,0.92) !important;
-  border-color: rgba(255,255,255,0.055) !important;
-  backdrop-filter: blur(16px);
-}
-.chat-sidebar,.chat-header,.chat-input-area,
-.monitor-sidebar,.monitor-header {
-  background: rgba(6,6,6,0.95) !important;
-  border-color: rgba(255,255,255,0.05) !important;
-}
-.msg-out {
-  background: linear-gradient(135deg,#ffffff,#dddddd) !important;
-  color: #000 !important;
-  box-shadow: 0 4px 18px rgba(255,255,255,0.12);
-}
-.msg-in {
-  background: rgba(16,16,16,0.92) !important;
-  border-color: rgba(255,255,255,0.07) !important;
-  color: #eee !important;
-}
-.chat-input {
-  background: rgba(5,5,5,0.85) !important;
-  border-color: rgba(255,255,255,0.08) !important;
-  color: #f0f0f0 !important;
-}
-.chat-input:focus { border-color: rgba(255,255,255,0.35) !important; }
-.chat-item:hover  { background: rgba(255,255,255,0.04) !important; }
-.chat-item.active { background: rgba(255,255,255,0.08) !important; border-left-color: #fff !important; }
-
-/* ── LEADERBOARD ────────────────────────────────────────────── */
-.lb-row {
-  background: rgba(10,10,10,0.85) !important;
-  border-color: rgba(255,255,255,0.05) !important;
-  backdrop-filter: blur(8px);
-  transition: all .2s;
-}
-.lb-row:hover { transform: translateX(5px); border-color: rgba(255,255,255,0.18) !important; }
-.lb-bar-fill  { background: linear-gradient(90deg,#888,#fff) !important; }
-.lb-stars     { color: #ccc !important; }
-
-/* ── STAFF & SLOT CARDS ─────────────────────────────────────── */
-.staff-card,.slot-card {
-  background: rgba(10,10,10,0.82) !important;
-  border-color: rgba(255,255,255,0.05) !important;
-  backdrop-filter: blur(8px);
-  transition: all .2s;
-}
-.staff-card:hover,.slot-card:hover {
-  border-color: rgba(255,255,255,0.16) !important;
-  transform: translateY(-3px);
-  box-shadow: 0 12px 36px rgba(0,0,0,0.7);
-}
-.slot-time { color: #fff !important; }
-
-/* ── PROGRESS BARS ──────────────────────────────────────────── */
-.pb        { background: rgba(255,255,255,0.06) !important; }
-.pb-fill   { background: linear-gradient(90deg,#666,#fff) !important; }
-
-/* ── TOASTS ─────────────────────────────────────────────────── */
-.toast {
-  background: rgba(8,8,8,0.99) !important;
-  border-color: rgba(255,255,255,0.06) !important;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 8px 36px rgba(0,0,0,0.8);
-  color: #eee !important;
-}
-.toast-ok   { border-left-color: #fff !important; }
-.toast-err  { border-left-color: #ff4455 !important; }
-.toast-info { border-left-color: #aaa !important; }
-.toast-warn { border-left-color: #ccc !important; }
-
-/* ── NOTIF PANEL ────────────────────────────────────────────── */
-.notif-panel {
-  background: rgba(6,6,6,0.99) !important;
-  border-color: rgba(255,255,255,0.08) !important;
-  backdrop-filter: blur(24px);
-  box-shadow: 0 24px 64px rgba(0,0,0,0.9);
-}
-.notif-item.unread { border-left: 3px solid #ffffff; }
-.notif-header { border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
-
-/* ── COLLAPSIBLE ────────────────────────────────────────────── */
-.collapsible-hd {
-  background: rgba(10,10,10,0.85) !important;
-  border-color: rgba(255,255,255,0.05) !important;
-  backdrop-filter: blur(8px);
-}
-.collapsible-hd:hover { border-color: rgba(255,255,255,0.12) !important; }
-.collapsible-body {
-  background: rgba(8,8,8,0.75) !important;
-  border-color: rgba(255,255,255,0.03) !important;
-}
-
-/* ── LOGIN ──────────────────────────────────────────────────── */
-#login-page {
-  background:
-    radial-gradient(ellipse 70% 60% at 85% 8%,  rgba(255,255,255,0.06) 0%,transparent 55%),
-    radial-gradient(ellipse 55% 70% at 10% 92%, rgba(255,255,255,0.03) 0%,transparent 55%),
-    #000000 !important;
-}
-.lc {
-  background: rgba(6,6,6,0.97) !important;
-  border: 1px solid rgba(255,255,255,0.10) !important;
-  backdrop-filter: blur(24px);
-  box-shadow:
-    0 40px 100px rgba(0,0,0,0.95),
-    0 0 0 1px rgba(255,255,255,0.04),
-    inset 0 1px 0 rgba(255,255,255,0.05);
-}
-.lc h2 {
-  background: linear-gradient(90deg,#fff,#aaa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ── DOTS DROPDOWN ──────────────────────────────────────────── */
-.dots-dropdown {
-  background: rgba(8,8,8,0.99) !important;
-  border-color: rgba(255,255,255,0.07) !important;
-  backdrop-filter: blur(24px);
-}
-.dots-item:hover { background: rgba(255,255,255,0.07) !important; color: #fff !important; }
-
-/* ── AC DROPDOWN ────────────────────────────────────────────── */
-.ac-dropdown {
-  background: rgba(8,8,8,0.99) !important;
-  border-color: rgba(255,255,255,0.07) !important;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.85);
-}
-.ac-item:hover,.ac-item.selected {
-  background: rgba(255,255,255,0.07) !important;
-  color: #fff !important;
-}
-
-/* ── REMINDER TOAST ─────────────────────────────────────────── */
-.reminder-toast {
-  background: rgba(6,6,6,0.99) !important;
-  border-color: rgba(255,255,255,0.2) !important;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 12px 48px rgba(255,255,255,0.08);
-}
-.reminder-toast-title { color: #ffffff !important; }
-
-/* ── MISSED BANNER ──────────────────────────────────────────── */
-.missed-reason-box {
-  background: rgba(8,8,8,0.99) !important;
-  border-color: rgba(255,68,85,0.5) !important;
-  backdrop-filter: blur(24px);
-}
-.missed-banner {
-  background: linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01)) !important;
-  border-color: rgba(255,255,255,0.1) !important;
-}
-
-/* ── STAR RATING ────────────────────────────────────────────── */
-.star-btn.active,.mini-star-btn.active {
-  color: #ffffff !important;
-  filter: none !important;
-}
-.star-rating-widget {
-  background: rgba(8,8,8,0.8) !important;
-  border-color: rgba(255,255,255,0.06) !important;
-}
-
-/* ── SCROLLBAR ──────────────────────────────────────────────── */
-::-webkit-scrollbar       { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg,rgba(255,255,255,0.3),rgba(255,255,255,0.1));
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
-
-/* ── ROLE COLORS OVERRIDE (monochrome) ──────────────────────── */
-.r-admin         { background:rgba(255,255,255,0.08)!important; color:rgba(255,255,255,0.9)!important; }
-.r-coordinator   { background:rgba(255,255,255,0.06)!important; color:rgba(255,255,255,0.75)!important; }
-.r-coordinatorhead{background:rgba(255,255,255,0.07)!important; color:rgba(255,255,255,0.8)!important; }
-.r-trainer       { background:rgba(255,255,255,0.05)!important; color:rgba(255,255,255,0.7)!important; }
-.r-client        { background:rgba(255,255,255,0.04)!important; color:rgba(255,255,255,0.65)!important; }
-
-/* ── SCANLINE ───────────────────────────────────────────────── */
-#gym-scanline {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 3px,
-    rgba(255,255,255,0.007) 3px, rgba(255,255,255,0.007) 4px
-  );
-}
-
-/* ── ENERGY LINES ───────────────────────────────────────────── */
-.gym-energy-line {
-  position: fixed; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg,transparent,rgba(255,255,255,0.12),rgba(255,255,255,0.25),rgba(255,255,255,0.12),transparent);
-  pointer-events: none; z-index: 0;
-  animation: energyPulse linear infinite;
-  transform-origin: left;
-}
 <style>
 :root{
   --bg:#0b0b0b;--surface:#141414;--card:#1c1c1c;--border:#272727;--border2:#333;
@@ -1787,9 +1295,53 @@ async function viewTrainerRatings(trainerId,trainerName){
 async function delRating(id){if(!confirm('Delete?'))return;try{await fsDel('trainerratings',id);toast('Deleted','success');trainerratings()}catch(e){toast('Error','error')}}
 
 // ══════════════════════════════════════════════════════════════
-// SESSIONS 
+// SESSIONS — FULL UPDATED BLOCK WITH ALL 8 EXTRA FEATURES
+// Find:   async function sessions(){
+// Select until closing } of async function delSession(id)
+// Replace entirely with this block
 // ══════════════════════════════════════════════════════════════
 
+// ── INJECT STYLES ─────────────────────────────────────────────
+(function injectSessionDetailStyles(){
+  if(document.getElementById('sd-styles'))return;
+  const s=document.createElement('style');s.id='sd-styles';
+  s.textContent=`
+.sd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);z-index:2000;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+.sd-box{background:var(--card);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:860px;margin:auto;animation:moslide .22s ease;box-shadow:0 40px 100px rgba(0,0,0,.7)}
+.sd-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sd-tabs{display:flex;border-bottom:1px solid var(--border);padding:0 22px;flex-wrap:wrap;gap:0;background:var(--surface)}
+.sd-tab{padding:11px 16px;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;color:var(--muted);white-space:nowrap;letter-spacing:.3px}
+.sd-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(212,255,0,.03)}
+.sd-tab:hover{color:var(--text)}
+.sd-body{padding:22px}
+.sd-panel{display:none}.sd-panel.active{display:block}
+.ex-header{display:grid;grid-template-columns:1fr 68px 80px 80px 68px 34px;gap:7px;padding:6px 10px;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.ex-row{display:grid;grid-template-columns:1fr 68px 80px 80px 68px 34px;gap:7px;align-items:center;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:9px;margin-bottom:6px;transition:border-color .15s}
+.ex-row:hover{border-color:var(--border2)}
+.ex-inp{width:100%;padding:6px 8px;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;text-align:center;transition:border-color .15s}
+.ex-inp:focus{border-color:var(--accent)}
+.ex-inp.name-inp{text-align:left}
+.ex-del-btn{background:var(--red-dim);border:1px solid rgba(255,68,68,.2);border-radius:6px;padding:5px 8px;color:var(--red);cursor:pointer;font-size:13px;transition:all .15s;line-height:1}
+.ex-del-btn:hover{background:var(--red);color:#fff}
+.chk-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;border-radius:0}
+.chk-item:first-child{border-radius:9px 9px 0 0}
+.chk-item:last-child{border-bottom:none;border-radius:0 0 9px 9px}
+.chk-item:hover{background:rgba(128,128,128,.04)}
+.chk-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.star-pick{display:flex;gap:6px;justify-content:center;margin:8px 0}
+.star-pick button{font-size:30px;background:none;border:none;cursor:pointer;transition:transform .15s,filter .15s;filter:grayscale(1);color:var(--muted2);line-height:1;padding:2px}
+.star-pick button.lit{filter:none;color:var(--accent);transform:scale(1.12)}
+.mini-star-pick{display:flex;gap:4px}
+.mini-star-pick button{font-size:20px;background:none;border:none;cursor:pointer;filter:grayscale(1);color:var(--muted2);transition:filter .1s,transform .1s;line-height:1}
+.mini-star-pick button.lit{filter:none;color:var(--yellow);transform:scale(1.1)}
+.qr-box{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:center}
+.rec-day-btn{padding:7px 12px;border-radius:7px;border:1px solid var(--border2);background:var(--bg);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;min-width:42px}
+.rec-day-btn.sel{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+  `;
+  document.head.appendChild(s);
+})();
+
+// ── SESSIONS LIST ─────────────────────────────────────────────
 async function sessions(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
   let coordClientIds=null;
@@ -1804,34 +1356,25 @@ async function sessions(){
     const tabEl=document.querySelector(`.tab[data-stab="${tab}"]`);
     if(tabEl)tabEl.classList.add('active');
     $('sess-list').innerHTML=`<div style="padding:30px;text-align:center;color:var(--muted)"><div class="spin" style="width:22px;height:22px;margin:0 auto"></div></div>`;
-
     let q=[];
     if(CR==='trainer')q=[fn().where('trainerId','==',auth().currentUser.uid)];
     if(CR==='client')q=[fn().where('clientId','==',auth().currentUser.uid)];
     let data=await fsGetAll('sessions',...q);
-    if(CR==='coordinator'&&coordClientIds){data=data.filter(s=>coordClientIds.includes(s.clientId));}
-
+    if(CR==='coordinator'&&coordClientIds)data=data.filter(s=>coordClientIds.includes(s.clientId));
     const today=new Date();today.setHours(0,0,0,0);
-    if(tab==='today')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()===today.getTime()});
-    else if(tab==='upcoming')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()>today.getTime()});
-    else if(tab==='past')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()<today.getTime()});
-
+    if(tab==='today')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()===today.getTime();});
+    else if(tab==='upcoming')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()>today.getTime();});
+    else if(tab==='past')data=data.filter(s=>{const d=s.date?new Date(s.date):null;if(!d)return false;d.setHours(0,0,0,0);return d.getTime()<today.getTime();});
     data.sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||''));
-
-    // ── Date range filter ──
+    // Date & status filter
     const fromDate=$('sess-date-from')?.value;
     const toDate=$('sess-date-to')?.value;
+    const statusF=$('sess-status-filter')?.value||'';
+    const searchV=($('sess-search')?.value||'').toLowerCase().trim();
     if(fromDate)data=data.filter(s=>(s.date||'')>=fromDate);
     if(toDate)data=data.filter(s=>(s.date||'')<=toDate);
-
-    // ── Status filter ──
-    const statusFilter=$('sess-status-filter')?.value||'';
-    if(statusFilter)data=data.filter(s=>s.status===statusFilter);
-
-    // ── Search filter ──
-    const search=($('sess-search')?.value||'').toLowerCase().trim();
-    if(search)data=data.filter(s=>(s.clientName||'').toLowerCase().includes(search)||(s.trainerName||'').toLowerCase().includes(search)||(s.type||'').toLowerCase().includes(search));
-
+    if(statusF)data=data.filter(s=>s.status===statusF);
+    if(searchV)data=data.filter(s=>(s.clientName||'').toLowerCase().includes(searchV)||(s.trainerName||'').toLowerCase().includes(searchV)||(s.type||'').toLowerCase().includes(searchV));
     $('sess-list').innerHTML=renderSessionsTable(data,tab);
   }
 
@@ -1844,38 +1387,28 @@ async function sessions(){
       </div>
       ${CR!=='client'?`<button class="btn btn-p" onclick="openAddSession()">+ Schedule Session</button>`:''}
     </div>
-
-    <!-- Filter bar -->
     <div class="card" style="padding:12px 16px;margin-bottom:14px">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">From</span>
-          <input class="fi" type="date" id="sess-date-from" style="max-width:148px;margin:0;padding:8px 10px;font-size:12px" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
+        <div style="display:flex;align-items:center;gap:5px">
+          <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">From</span>
+          <input class="fi" type="date" id="sess-date-from" style="max-width:145px;margin:0;padding:7px 10px;font-size:12px" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
         </div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">To</span>
-          <input class="fi" type="date" id="sess-date-to" style="max-width:148px;margin:0;padding:8px 10px;font-size:12px" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
+        <div style="display:flex;align-items:center;gap:5px">
+          <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px">To</span>
+          <input class="fi" type="date" id="sess-date-to" style="max-width:145px;margin:0;padding:7px 10px;font-size:12px" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
         </div>
-        <select class="fs" id="sess-status-filter" style="max-width:148px;padding:8px 10px;font-size:12px" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
+        <select class="fs" id="sess-status-filter" style="max-width:145px;padding:7px 10px;font-size:12px" onchange="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
           <option value="">All Statuses</option>
           <option value="not-started">⏳ Pending</option>
           <option value="onair">🟢 On Air</option>
           <option value="completed">✅ Completed</option>
           <option value="missed">❌ Missed</option>
         </select>
-        <input class="fi" type="text" id="sess-search" placeholder="🔍 Client / Trainer / Type…" style="max-width:200px;margin:0;padding:8px 10px;font-size:12px" oninput="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
-        <button class="btn btn-g btn-sm" onclick="
-          $('sess-date-from').value='';
-          $('sess-date-to').value='';
-          $('sess-status-filter').value='';
-          $('sess-search').value='';
-          window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')
-        ">✕ Clear</button>
+        <input class="fi" type="text" id="sess-search" placeholder="🔍 Client / Trainer / Type…" style="max-width:200px;margin:0;padding:7px 10px;font-size:12px" oninput="window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">
+        <button class="btn btn-g btn-sm" onclick="$('sess-date-from').value='';$('sess-date-to').value='';$('sess-status-filter').value='';$('sess-search').value='';window._sTab(document.querySelector('.tab.active[data-stab]')?.dataset?.stab||'all')">✕ Clear</button>
       </div>
     </div>
-
     <div class="card" style="padding:0"><div class="tbl-wrap" id="sess-list"></div></div>`;
-
   loadSTab('today');
 }
 
@@ -1884,7 +1417,9 @@ function renderSessionsTable(data,tab){
     const msgs={today:'No sessions today.',upcoming:'No upcoming sessions.',past:'No past sessions.',all:'No sessions found.'};
     return emptyState('📅',msgs[tab]||'No sessions',CR!=='client'?'Use the Schedule button to add sessions.':'Your coordinator will schedule sessions.',CR!=='client'&&tab!=='past'?'+ Schedule':'',CR!=='client'&&tab!=='past'?'openAddSession()':'');
   }
-  return`<table><thead><tr><th>Date</th><th>Time</th><th>Client</th><th>Trainer</th><th>Type</th><th>Status</th><th>Meet Link</th><th>Actions</th></tr></thead><tbody>
+  return`<table><thead><tr>
+    <th>Date</th><th>Time</th><th>Client</th><th>Trainer</th><th>Type</th><th>Status</th><th>Meet Link</th><th>Actions</th>
+  </tr></thead><tbody>
   ${data.map(s=>`<tr>
     <td style="font-size:12px">${s.date||'—'}</td>
     <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">${to12h(s.time)}</td>
@@ -1894,6 +1429,7 @@ function renderSessionsTable(data,tab){
     <td>${statusBadge(s.status)}</td>
     <td>${s.meetLink?`<a href="${s.meetLink}" target="_blank" style="color:var(--accent);font-size:12px">Join 🔗</a>`:'—'}</td>
     <td><div class="td-actions">
+      <button class="btn btn-bl btn-sm" onclick="openSessionDetail('${s.id}')">📋 Detail</button>
       ${CR!=='client'&&s.status==='not-started'?`<button class="btn btn-gr btn-sm" onclick="markSessionStatus('${s.id}','onair',true)">▶ Start</button>`:''}
       ${(CR==='coordinator'||CR==='coordinatorhead')&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed')">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}
       ${CR==='admin'&&s.status==='onair'?`<button class="btn btn-p btn-sm" onclick="markSessionStatus('${s.id}','completed',true)">✓ Done</button><button class="btn btn-d btn-sm" onclick="markSessionStatus('${s.id}','missed')">✗ Miss</button>`:''}
@@ -1905,31 +1441,634 @@ function renderSessionsTable(data,tab){
   </tbody></table>`;
 }
 
-function openAddSession(){loadSessionForm().then(html=>{openM2('SCHEDULE SESSION',html);initSessionFormAC()})}
+// ── SESSION DETAIL MODAL ───────────────────────────────────────
+async function openSessionDetail(sessionId){
+  // Remove any existing overlay
+  document.getElementById('sd-overlay')?.remove();
 
-async function openEditSession(id){
-  const s=await fsGet('sessions',id);
-  if(!s){toast('Not found','error');return}
-  loadSessionForm(s).then(html=>{openM2('EDIT SESSION',html);initSessionFormAC(s)})
-}
+  // Show loading overlay
+  const overlay=document.createElement('div');
+  overlay.className='sd-overlay';overlay.id='sd-overlay';
+  overlay.innerHTML=`<div class="sd-box" style="padding:40px;text-align:center"><div class="spin" style="width:28px;height:28px;margin:0 auto 12px"></div><div style="color:var(--muted);font-size:13px">Loading session…</div></div>`;
+  document.body.appendChild(overlay);
 
-async function initSessionFormAC(s={}){
-  const[clients,trainers]=await Promise.all([
-    fsGetAll('clients',fn().where('active','==',true)),
-    fsGetAll('users',fn().where('role','==','trainer'))
+  const[sess,workout,feedback,checklist]=await Promise.all([
+    fsGet('sessions',sessionId),
+    fsGet('sessionworkouts',sessionId),
+    fsGet('sessionfeedback',sessionId),
+    fsGet('sessionchecklist',sessionId)
   ]);
-  const clientInp=document.getElementById('sf-client-inp');
-  if(clientInp){
-    const items=clients.map(c=>({id:c.id,label:c.name||'',sub:c.phone||''}));
-    createAutocomplete(clientInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-client-id');if(hid)hid.value=it.id;}});
+  const stats=await fsGetAll('sessionstats',fn().where('sessionId','==',sessionId));
+
+  if(!sess){overlay.remove();toast('Session not found','error');return;}
+
+  const myUid=auth().currentUser.uid;
+  const isTrainer=CR==='trainer'&&sess.trainerId===myUid;
+  const isClient=CR==='client'&&sess.clientId===myUid;
+  const isAdmin=CR==='admin'||CR==='coordinatorhead'||CR==='coordinator';
+  const canEdit=isTrainer||isAdmin;
+
+  overlay.innerHTML=`
+  <div class="sd-box">
+    <!-- Header -->
+    <div class="sd-header">
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px">${sess.clientName||'—'} — ${sess.type||'Session'}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">
+          🧑‍🏫 ${sess.trainerName||'—'} &nbsp;·&nbsp; 📅 ${sess.date||'—'} &nbsp;·&nbsp; 🕐 ${to12h(sess.time)}
+        </div>
+      </div>
+      ${statusBadge(sess.status)}
+      ${sess.meetLink?`<a href="${sess.meetLink}" target="_blank" class="btn btn-p btn-sm">Join 🔗</a>`:''}
+      <button onclick="document.getElementById('sd-overlay').remove()" style="background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px;line-height:1">✕</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="sd-tabs">
+      <div class="sd-tab active" onclick="sdTab(this,'sdp-workout')">💪 Workout</div>
+      <div class="sd-tab" onclick="sdTab(this,'sdp-stats')">📊 Stats</div>
+      <div class="sd-tab" onclick="sdTab(this,'sdp-notes')">📝 Notes</div>
+      <div class="sd-tab" onclick="sdTab(this,'sdp-checklist')">✅ Checklist</div>
+      <div class="sd-tab" onclick="sdTab(this,'sdp-feedback')">💬 Feedback</div>
+      <div class="sd-tab" onclick="sdTab(this,'sdp-recurring')">🔄 Recurring</div>
+      <div class="sd-tab" onclick="sdTab(this,'sdp-qr')">📱 QR Attend</div>
+    </div>
+
+    <div class="sd-body">
+
+      <!-- ① WORKOUT BUILDER ───────────────────────────────── -->
+      <div id="sdp-workout" class="sd-panel active">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-weight:700;font-size:14px">💪 Exercise Plan</div>
+          ${canEdit?`<div style="display:flex;gap:7px">
+            <button class="btn btn-g btn-sm" onclick="addExRow()">+ Add Exercise</button>
+            <button class="btn btn-p btn-sm" onclick="saveWorkout('${sessionId}')">💾 Save Plan</button>
+          </div>`:''}
+        </div>
+        <div class="fg"><label class="fl">Warm Up</label>
+          <textarea class="fta" id="wb-warmup" style="min-height:48px" placeholder="e.g. 5 min treadmill, dynamic stretches" ${!canEdit?'disabled':''}>${workout?.warmup||''}</textarea>
+        </div>
+        <div class="ex-header"><div>Exercise Name</div><div>Sets</div><div>Reps</div><div>Weight</div><div>Rest(s)</div><div></div></div>
+        <div id="ex-rows">
+          ${(workout?.exercises?.length?workout.exercises:[{name:'',sets:'',reps:'',weight:'',rest:''}]).map((e,i)=>buildExRow(e,i,canEdit)).join('')}
+        </div>
+        <div class="fg" style="margin-top:8px"><label class="fl">Cool Down</label>
+          <textarea class="fta" id="wb-cooldown" style="min-height:48px" placeholder="e.g. Stretching, foam rolling" ${!canEdit?'disabled':''}>${workout?.cooldown||''}</textarea>
+        </div>
+        <div class="fg"><label class="fl">Workout Notes</label>
+          <textarea class="fta" id="wb-notes" style="min-height:60px" placeholder="Special instructions, tips…" ${!canEdit?'disabled':''}>${workout?.notes||''}</textarea>
+        </div>
+        ${sess.mediaLink||canEdit?`<div class="fg" style="margin-bottom:0"><label class="fl">🎬 Media Link (YouTube / Drive)</label>
+          <input class="fi" id="wb-media" value="${sess.mediaLink||''}" placeholder="https://youtube.com/… or Google Drive link" ${!canEdit?'disabled':''}></div>`:''}
+      </div>
+
+      <!-- ② BODY STATS ──────────────────────────────────────── -->
+      <div id="sdp-stats" class="sd-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-weight:700;font-size:14px">📊 Session Body Stats</div>
+          ${canEdit||isTrainer?`<button class="btn btn-p btn-sm" onclick="openAddStats('${sessionId}','${(sess.clientName||'').replace(/'/g,"\\'")}','${sess.clientId||''}')">+ Log Stats</button>`:''}
+        </div>
+        ${stats.length===0
+          ?`<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📊</div><div>No stats logged yet</div></div>`
+          :`<div style="overflow-x:auto"><table><thead><tr>
+              <th>Date</th><th>Weight(kg)</th><th>Sets</th><th>Reps</th><th>Max Wt</th><th>Calories</th><th>Duration</th><th>HR</th><th>Notes</th><th></th>
+            </tr></thead><tbody>
+            ${stats.map(st=>`<tr>
+              <td style="font-size:12px">${st.date||'—'}</td>
+              <td style="font-weight:600">${st.weight||'—'}</td>
+              <td>${st.totalSets||'—'}</td><td>${st.totalReps||'—'}</td>
+              <td style="color:var(--accent)">${st.maxWeight?st.maxWeight+'kg':'—'}</td>
+              <td>${st.calories||'—'}</td>
+              <td>${st.duration?st.duration+'min':'—'}</td>
+              <td>${st.heartRate?st.heartRate+'bpm':'—'}</td>
+              <td style="font-size:11px;max-width:110px">${st.notes||'—'}</td>
+              <td>${canEdit||isTrainer?`<button class="btn btn-d btn-sm" onclick="delStat('${st.id}','${sessionId}')">Del</button>`:'—'}</td>
+            </tr>`).join('')}
+            </tbody></table></div>`}
+      </div>
+
+      <!-- ③ NOTES & MEDIA ───────────────────────────────────── -->
+      <div id="sdp-notes" class="sd-panel">
+        <div style="font-weight:700;font-size:14px;margin-bottom:14px">📝 Session Notes</div>
+        <div class="fg"><label class="fl">Trainer Private Notes</label>
+          <textarea class="fta" id="sn-trainer" style="min-height:90px" placeholder="Observations, client progress, things to focus on next time…" ${!canEdit&&!isTrainer?'disabled':''}>${sess.trainerNotes||''}</textarea>
+        </div>
+        <div class="fg"><label class="fl">General Notes (Visible to Coordinator)</label>
+          <textarea class="fta" id="sn-general" style="min-height:70px" ${!canEdit&&!isTrainer?'disabled':''}>${sess.notes||''}</textarea>
+        </div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">🎬 Media / Video Link</label>
+          <input class="fi" id="sn-media" value="${sess.mediaLink||''}" placeholder="https://youtube.com/ or Google Drive link" ${!canEdit&&!isTrainer?'disabled':''}>
+        </div>
+        ${canEdit||isTrainer?`<div style="margin-top:14px;display:flex;justify-content:flex-end"><button class="btn btn-p" onclick="saveNotes('${sessionId}')">💾 Save Notes</button></div>`:''}
+        ${sess.mediaLink?`<div style="margin-top:14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:20px">🎬</span>
+          <div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px">Session Media</div><div style="font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sess.mediaLink}</div></div>
+          <a href="${sess.mediaLink}" target="_blank" class="btn btn-p btn-sm">Open ↗</a>
+        </div>`:''}
+      </div>
+
+      <!-- ④ CHECKLIST ───────────────────────────────────────── -->
+      <div id="sdp-checklist" class="sd-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-weight:700;font-size:14px">✅ Pre-Session Checklist</div>
+          ${canEdit||isTrainer?`<button class="btn btn-p btn-sm" onclick="saveChecklist('${sessionId}')">💾 Save</button>`:''}
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          ${[
+            {id:'equip',icon:'🏋️',label:'Equipment ready & sanitized'},
+            {id:'space',icon:'📐',label:'Training space cleared & set up'},
+            {id:'water',icon:'💧',label:'Water & towel prepared for client'},
+            {id:'plan', icon:'📋',label:'Workout plan reviewed & ready'},
+            {id:'health',icon:'❤️',label:'Client health check done'},
+            {id:'warmup',icon:'🔥',label:'Warm-up routine planned'},
+            {id:'timer',icon:'⏱️',label:'Timer / stopwatch ready'},
+            {id:'music', icon:'🎵',label:'Music & environment set'},
+          ].map(item=>`<label class="chk-item">
+            <input type="checkbox" id="chk-${item.id}" ${checklist&&checklist[item.id]?'checked':''} ${!canEdit&&!isTrainer?'disabled':''} style="accent-color:var(--accent)">
+            <span style="font-size:20px">${item.icon}</span>
+            <span style="font-size:13px;font-weight:500;flex:1">${item.label}</span>
+            <span class="badge ${checklist&&checklist[item.id]?'b-g':'b-gray'}" style="font-size:10px">${checklist&&checklist[item.id]?'✓ Done':'Pending'}</span>
+          </label>`).join('')}
+        </div>
+        <div style="margin-top:12px;background:var(--accent-dim);border:1px solid rgba(212,255,0,.15);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--accent)">
+          ⚡ ${checklist?[...document.querySelectorAll('[id^=chk-]:checked')].length:Object.values(checklist||{}).filter(Boolean).length} / 8 items confirmed before session
+        </div>
+      </div>
+
+      <!-- ⑤ CLIENT FEEDBACK ────────────────────────────────── -->
+      <div id="sdp-feedback" class="sd-panel">
+        <div style="font-weight:700;font-size:14px;margin-bottom:14px">💬 Session Feedback</div>
+        ${feedback
+          ?buildFeedbackView(feedback)
+          :(isClient&&sess.status==='completed')
+            ?buildFeedbackForm(sessionId,sess.trainerName||'',sess.clientName||'',sess.date||'')
+            :`<div style="text-align:center;padding:30px;color:var(--muted)">
+                <div style="font-size:36px;margin-bottom:10px">💬</div>
+                <div style="font-size:14px;font-weight:600">No feedback yet</div>
+                <div style="font-size:12px;margin-top:6px">${sess.status!=='completed'?'Feedback available after session is completed':'Client has not submitted feedback yet'}</div>
+              </div>`}
+      </div>
+
+      <!-- ⑥ RECURRING ──────────────────────────────────────── -->
+      <div id="sdp-recurring" class="sd-panel">
+        <div style="font-weight:700;font-size:14px;margin-bottom:14px">🔄 Recurring Sessions</div>
+        ${canEdit
+          ?buildRecurringForm(sess)
+          :`<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">🔄</div><div>Recurring setup is available for trainers, coordinators and admin.</div></div>`}
+      </div>
+
+      <!-- ⑦ QR ATTENDANCE ──────────────────────────────────── -->
+      <div id="sdp-qr" class="sd-panel">
+        <div style="font-weight:700;font-size:14px;margin-bottom:14px">📱 QR Code Attendance</div>
+        <div class="qr-box">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:16px">
+            Client scans this QR code to mark themselves <strong>Present</strong> for this session.
+          </div>
+          <div id="qr-render" style="display:inline-block;background:#fff;padding:16px;border-radius:12px;margin-bottom:16px"></div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Session ID: <code style="color:var(--accent);font-size:11px">${sessionId}</code></div>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+            <button class="btn btn-p btn-sm" onclick="downloadQR('${sessionId}')">📥 Download QR</button>
+            <button class="btn btn-g btn-sm" onclick="copyQRLink('${sessionId}')">🔗 Copy Link</button>
+            ${canEdit?`<button class="btn btn-g btn-sm" onclick="shareQRWA('${sessionId}','${(sess.clientName||'').replace(/'/g,"\\'")}','${sess.date||''}','${to12h(sess.time)}')">📲 Send via WA</button>`:''}
+          </div>
+          ${canEdit?`<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">Scanned Check-ins</div>
+            <div id="qr-checkins" style="font-size:12px;color:var(--muted)">Loading…</div>
+          </div>`:''}
+        </div>
+      </div>
+
+    </div><!-- end sd-body -->
+  </div><!-- end sd-box -->`;
+
+  // Generate QR after render
+  setTimeout(()=>renderQR(sessionId),150);
+
+  // Load QR check-ins if admin
+  if(canEdit)loadQRCheckins(sessionId);
+}
+
+function sdTab(tabEl,panelId){
+  const box=tabEl.closest('.sd-box');
+  box.querySelectorAll('.sd-tab').forEach(t=>t.classList.remove('active'));
+  tabEl.classList.add('active');
+  box.querySelectorAll('.sd-panel').forEach(p=>p.classList.remove('active'));
+  const panel=document.getElementById(panelId);if(panel)panel.classList.add('active');
+}
+
+// ── WORKOUT BUILDER ────────────────────────────────────────────
+let _exRowIdx=0;
+function buildExRow(e={},idx,canEdit=true){
+  _exRowIdx=Math.max(_exRowIdx,idx+1);
+  const dis=canEdit?'':'disabled';
+  return`<div class="ex-row" id="exrow-${idx}">
+    <input class="ex-inp name-inp" placeholder="Exercise name…" value="${e.name||''}" data-f="name" ${dis}>
+    <input class="ex-inp" placeholder="3" type="number" value="${e.sets||''}" data-f="sets" ${dis}>
+    <input class="ex-inp" placeholder="12 / 8-10" value="${e.reps||''}" data-f="reps" ${dis}>
+    <input class="ex-inp" placeholder="20kg / BW" value="${e.weight||''}" data-f="weight" ${dis}>
+    <input class="ex-inp" placeholder="60" type="number" value="${e.rest||''}" data-f="rest" ${dis}>
+    ${canEdit?`<button class="ex-del-btn" onclick="document.getElementById('exrow-${idx}').remove()">✕</button>`:'<div></div>'}
+  </div>`;
+}
+
+function addExRow(){
+  const container=document.getElementById('ex-rows');if(!container)return;
+  container.insertAdjacentHTML('beforeend',buildExRow({},_exRowIdx++,true));
+}
+
+async function saveWorkout(sessionId){
+  const rows=[...document.querySelectorAll('#ex-rows .ex-row')];
+  const exercises=rows.map(row=>({
+    name:row.querySelector('[data-f=name]')?.value.trim()||'',
+    sets:row.querySelector('[data-f=sets]')?.value||'',
+    reps:row.querySelector('[data-f=reps]')?.value||'',
+    weight:row.querySelector('[data-f=weight]')?.value||'',
+    rest:row.querySelector('[data-f=rest]')?.value||''
+  })).filter(e=>e.name);
+  const mediaLink=document.getElementById('wb-media')?.value.trim()||'';
+  try{
+    await fn().setDoc(fn().doc(db(),'sessionworkouts',sessionId),{
+      sessionId,exercises,
+      warmup:document.getElementById('wb-warmup')?.value||'',
+      cooldown:document.getElementById('wb-cooldown')?.value||'',
+      notes:document.getElementById('wb-notes')?.value||'',
+      savedBy:CU.name||'',updatedAt:fn().serverTimestamp()
+    });
+    if(mediaLink)await fsUpdate('sessions',sessionId,{mediaLink});
+    toast('💪 Workout plan saved!','success');
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+// ── SESSION NOTES ──────────────────────────────────────────────
+async function saveNotes(sessionId){
+  try{
+    await fsUpdate('sessions',sessionId,{
+      trainerNotes:document.getElementById('sn-trainer')?.value||'',
+      notes:document.getElementById('sn-general')?.value||'',
+      mediaLink:document.getElementById('sn-media')?.value.trim()||''
+    });
+    toast('📝 Notes saved!','success');
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+// ── BODY STATS ─────────────────────────────────────────────────
+function openAddStats(sessionId,clientName,clientId){
+  openM1(`📊 LOG STATS — ${clientName.toUpperCase()}`,`
+    <div class="fr">
+      <div class="fg"><label class="fl">Date</label><input class="fi" id="st-date" type="date" value="${getTodayStr()}"></div>
+      <div class="fg"><label class="fl">Body Weight (kg)</label><input class="fi" id="st-weight" type="number" step="0.1" placeholder="72.5"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Total Sets Done</label><input class="fi" id="st-sets" type="number"></div>
+      <div class="fg"><label class="fl">Total Reps Done</label><input class="fi" id="st-reps" type="number"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Max Weight Lifted (kg)</label><input class="fi" id="st-maxw" type="number" step="0.5"></div>
+      <div class="fg"><label class="fl">Calories Burned</label><input class="fi" id="st-cal" type="number"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Duration (min)</label><input class="fi" id="st-dur" type="number"></div>
+      <div class="fg"><label class="fl">Avg Heart Rate (bpm)</label><input class="fi" id="st-hr" type="number"></div>
+    </div>
+    <div class="fg"><label class="fl">Notes</label><textarea class="fta" id="st-notes" style="min-height:55px"></textarea></div>
+    <div class="mo-foot">
+      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
+      <button class="btn btn-p" onclick="saveStat('${sessionId}','${clientName.replace(/'/g,"\\'")}','${clientId}')">Save Stats</button>
+    </div>`);
+}
+
+async function saveStat(sessionId,clientName,clientId){
+  try{
+    await fsAdd('sessionstats',{
+      sessionId,clientId,clientName,
+      date:document.getElementById('st-date')?.value||getTodayStr(),
+      weight:document.getElementById('st-weight')?.value||'',
+      totalSets:document.getElementById('st-sets')?.value||'',
+      totalReps:document.getElementById('st-reps')?.value||'',
+      maxWeight:document.getElementById('st-maxw')?.value||'',
+      calories:document.getElementById('st-cal')?.value||'',
+      duration:document.getElementById('st-dur')?.value||'',
+      heartRate:document.getElementById('st-hr')?.value||'',
+      notes:document.getElementById('st-notes')?.value||'',
+      loggedBy:CU.name||''
+    });
+    closeM1();toast('📊 Stats logged!','success');
+    // refresh stats panel
+    const panel=document.getElementById('sdp-stats');
+    if(panel){const stats=await fsGetAll('sessionstats',fn().where('sessionId','==',sessionId));
+      // simple reload
+      document.getElementById('sd-overlay')?.remove();
+      openSessionDetail(sessionId);
+    }
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+async function delStat(id,sessionId){
+  if(!confirm('Delete this stat entry?'))return;
+  try{await fsDel('sessionstats',id);toast('Deleted','success');document.getElementById('sd-overlay')?.remove();openSessionDetail(sessionId);}
+  catch(e){toast('Error','error');}
+}
+
+// ── PRE-SESSION CHECKLIST ──────────────────────────────────────
+async function saveChecklist(sessionId){
+  const ids=['equip','space','water','plan','health','warmup','timer','music'];
+  const data={sessionId};
+  ids.forEach(id=>{data[id]=document.getElementById('chk-'+id)?.checked||false;});
+  try{
+    await fn().setDoc(fn().doc(db(),'sessionchecklist',sessionId),{...data,savedBy:CU.name||'',updatedAt:fn().serverTimestamp()});
+    toast('✅ Checklist saved!','success');
+    // update badges
+    ids.forEach(id=>{
+      const chk=document.getElementById('chk-'+id);
+      const badge=chk?.closest('.chk-item')?.querySelector('.badge');
+      if(badge){badge.className=`badge ${chk.checked?'b-g':'b-gray'}`;badge.textContent=chk.checked?'✓ Done':'Pending';}
+    });
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+// ── CLIENT FEEDBACK ────────────────────────────────────────────
+function buildFeedbackView(fb){
+  const col=['','#ff4444','#ff7700','var(--yellow)','#88cc00','var(--accent)'][fb.rating||0]||'var(--muted)';
+  return`<div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:18px">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+      <div style="text-align:center">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;color:${col};line-height:1">${fb.rating||'—'}</div>
+        <div style="font-size:20px;color:${col}">${'★'.repeat(fb.rating||0)}${'☆'.repeat(5-(fb.rating||0))}</div>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:14px">${fb.clientName||'Client'} rated this session</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">${fb.date||'—'}</div>
+      </div>
+    </div>
+    ${fb.comment?`<div style="background:var(--surface);border-radius:8px;padding:12px;font-size:13px;font-style:italic;margin-bottom:12px">"${fb.comment}"</div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      ${[['⚡ Energy',fb.energy],['💪 Difficulty',fb.difficulty],['🧑‍🏫 Trainer Help',fb.trainerHelp]].map(([label,val])=>
+        `<div style="background:var(--surface);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px">${label}</div>
+          <div style="font-size:15px;color:var(--yellow)">${val?'★'.repeat(val)+'☆'.repeat(5-val):'—'}</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function buildFeedbackForm(sessionId,trainerName,clientName,date){
+  return`<div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:18px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">How was your session with ${trainerName}?</div>
+      <div style="font-size:12px;color:var(--muted)">${date}</div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;text-align:center">Overall Rating *</div>
+      <div class="star-pick" id="fb-overall">
+        ${[1,2,3,4,5].map(n=>`<button data-v="${n}" onclick="fbRate('fb-overall',${n},this)">${n}★</button>`).join('')}
+      </div>
+      <input type="hidden" id="fb-rating" value="0">
+    </div>
+    <div class="fr" style="margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px">⚡ Energy Level</div>
+        <div class="mini-star-pick" id="fb-energy">${[1,2,3,4,5].map(n=>`<button data-v="${n}" onclick="fbMiniRate('fb-energy',${n},this)">★</button>`).join('')}</div>
+        <input type="hidden" id="fb-energy-val" value="0">
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px">💪 Difficulty</div>
+        <div class="mini-star-pick" id="fb-diff">${[1,2,3,4,5].map(n=>`<button data-v="${n}" onclick="fbMiniRate('fb-diff',${n},this)">★</button>`).join('')}</div>
+        <input type="hidden" id="fb-diff-val" value="0">
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px">🧑‍🏫 Trainer Help</div>
+        <div class="mini-star-pick" id="fb-help">${[1,2,3,4,5].map(n=>`<button data-v="${n}" onclick="fbMiniRate('fb-help',${n},this)">★</button>`).join('')}</div>
+        <input type="hidden" id="fb-help-val" value="0">
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:14px"><label class="fl">Comments (optional)</label>
+      <textarea class="fta" id="fb-comment" placeholder="How was the session? Any suggestions for the trainer?" style="min-height:80px"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-g" onclick="document.getElementById('sd-overlay').remove()">Skip</button>
+      <button class="btn btn-p" onclick="submitFeedback('${sessionId}','${trainerName.replace(/'/g,"\\'")}','${clientName.replace(/'/g,"\\'")}','${date}')">⭐ Submit Feedback</button>
+    </div>
+  </div>`;
+}
+
+function fbRate(containerId,n,btn){
+  document.getElementById(containerId)?.querySelectorAll('button').forEach((b,i)=>{
+    b.classList.toggle('lit',i<n);
+  });
+  document.getElementById('fb-rating').value=n;
+}
+
+function fbMiniRate(containerId,n,btn){
+  document.getElementById(containerId)?.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('lit',i<n));
+  const hiddenId=containerId.replace('fb-','fb-').replace('-','_');
+  const map={'fb-energy':'fb-energy-val','fb-diff':'fb-diff-val','fb-help':'fb-help-val'};
+  const hid=document.getElementById(map[containerId]);if(hid)hid.value=n;
+}
+
+async function submitFeedback(sessionId,trainerName,clientName,date){
+  const rating=Number(document.getElementById('fb-rating')?.value||0);
+  if(!rating){toast('Please select an overall rating','error');return;}
+  try{
+    await fn().setDoc(fn().doc(db(),'sessionfeedback',sessionId),{
+      sessionId,trainerName,clientName,date,rating,
+      energy:Number(document.getElementById('fb-energy-val')?.value)||null,
+      difficulty:Number(document.getElementById('fb-diff-val')?.value)||null,
+      trainerHelp:Number(document.getElementById('fb-help-val')?.value)||null,
+      comment:document.getElementById('fb-comment')?.value||'',
+      submittedBy:auth().currentUser.uid,submittedByName:CU.name||''
+    },{merge:true});
+    document.getElementById('sd-overlay')?.remove();
+    toast('🎉 Feedback submitted! Thank you!','success');
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+// ── RECURRING SESSIONS ─────────────────────────────────────────
+function buildRecurringForm(sess){
+  return`<div style="background:var(--accent-dim);border:1px solid rgba(212,255,0,.15);border-radius:10px;padding:14px;margin-bottom:16px">
+    <div style="font-weight:700;color:var(--accent);margin-bottom:4px">🔄 Auto-Schedule Repeating Sessions</div>
+    <div style="font-size:12px;color:var(--muted)">Automatically create multiple sessions for this client on a recurring schedule.</div>
+  </div>
+  <div class="fr">
+    <div class="fg">
+      <label class="fl">Frequency</label>
+      <select class="fs" id="rec-freq" onchange="toggleRecCustom()">
+        <option value="daily">Every Day</option>
+        <option value="alternate">Every Other Day</option>
+        <option value="weekly" selected>Every Week (same day)</option>
+        <option value="custom">Custom Days of Week</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label class="fl">Number of Sessions</label>
+      <input class="fi" id="rec-count" type="number" value="12" min="1" max="60">
+    </div>
+  </div>
+  <div class="fg"><label class="fl">Starting From</label>
+    <input class="fi" id="rec-start" type="date" value="${sess.date||getTodayStr()}">
+  </div>
+  <div id="rec-custom-wrap" style="display:none;margin-bottom:14px">
+    <label class="fl" style="margin-bottom:8px">Select Days</label>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`
+        <button class="rec-day-btn" data-day="${d}" onclick="this.classList.toggle('sel')">${d}</button>`).join('')}
+    </div>
+  </div>
+  <div style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px;margin-bottom:14px;font-size:12px">
+    <div style="color:var(--muted);margin-bottom:4px">Session details that will be copied:</div>
+    <div>👤 <strong>${sess.clientName||'—'}</strong> &nbsp;·&nbsp; 🧑‍🏫 ${sess.trainerName||'—'} &nbsp;·&nbsp; 🕐 ${to12h(sess.time)} &nbsp;·&nbsp; 📋 ${sess.type||'Session'}</div>
+  </div>
+  <div style="display:flex;justify-content:flex-end">
+    <button class="btn btn-p" onclick="createRecurring('${sess.id}','${(sess.clientId||'')}','${(sess.clientName||'').replace(/'/g,"\\'")}','${(sess.trainerId||'')}','${(sess.trainerName||'').replace(/'/g,"\\'")}','${sess.time||''}','${(sess.type||'').replace(/'/g,"\\'")}')">🔄 Create Sessions</button>
+  </div>`;
+}
+
+function toggleRecCustom(){
+  const v=document.getElementById('rec-freq')?.value;
+  const wrap=document.getElementById('rec-custom-wrap');
+  if(wrap)wrap.style.display=v==='custom'?'flex':'none';
+}
+
+async function createRecurring(sessionId,clientId,clientName,trainerId,trainerName,time,type){
+  const freq=document.getElementById('rec-freq')?.value||'weekly';
+  const count=Math.min(Number(document.getElementById('rec-count')?.value||12),60);
+  const startDate=document.getElementById('rec-start')?.value;
+  if(!startDate){toast('Set a start date','error');return;}
+
+  const dayMap={Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6,Sun:0};
+  const selectedDays=freq==='custom'
+    ?[...document.querySelectorAll('.rec-day-btn.sel')].map(b=>dayMap[b.dataset.day])
+    :[];
+  if(freq==='custom'&&!selectedDays.length){toast('Select at least one day','error');return;}
+
+  const dates=[];let cur=new Date(startDate);let attempts=0;
+  while(dates.length<count&&attempts<600){
+    attempts++;
+    const d=cur.toISOString().split('T')[0];
+    const dow=cur.getDay();
+    let inc=false;
+    if(freq==='daily')inc=true;
+    else if(freq==='alternate'){inc=dates.length===0||(new Date(d)-new Date(dates[dates.length-1]))/(86400000)>=2;}
+    else if(freq==='weekly'){inc=(new Date(d)-new Date(startDate))%(7*86400000)===0;}
+    else if(freq==='custom')inc=selectedDays.includes(dow);
+    if(inc)dates.push(d);
+    cur=new Date(cur.getTime()+86400000);
   }
-  const trainerInp=document.getElementById('sf-trainer-inp');
-  if(trainerInp){
-    const items=trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''}));
-    createAutocomplete(trainerInp,items,{minChars:0,onSelect(it){const hid=document.getElementById('sf-trainer-id');if(hid)hid.value=it.id;}});
+  if(!dates.length){toast('Could not generate dates — check frequency settings','error');return;}
+
+  const btn=document.querySelector('#sdp-recurring .btn-p');
+  if(btn){btn.textContent=`Creating ${dates.length} sessions…`;btn.disabled=true;}
+  try{
+    await Promise.all(dates.map(date=>fsAdd('sessions',{
+      clientId,clientName,trainerId,trainerName,date,time,type,
+      status:'not-started',meetLink:'',notes:'[Recurring]',recurringFrom:sessionId
+    })));
+    document.getElementById('sd-overlay')?.remove();
+    toast(`✅ ${dates.length} recurring sessions created!`,'success');
+    sessions();
+  }catch(e){
+    toast('Error: '+e.message,'error');
+    if(btn){btn.textContent='🔄 Create Sessions';btn.disabled=false;}
   }
 }
 
+// ── QR CODE ATTENDANCE ─────────────────────────────────────────
+function renderQR(sessionId){
+  const container=document.getElementById('qr-render');if(!container)return;
+  // Build check-in URL — points to the app with a special parameter
+  const baseUrl=window.location.href.split('?')[0];
+  const qrUrl=`${baseUrl}?qr_checkin=${sessionId}`;
+  // Use QR Server API (free, no library needed)
+  const img=document.createElement('img');
+  img.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrUrl)}&bgcolor=ffffff&color=000000&margin=10&format=png`;
+  img.alt='QR Code';img.style.cssText='width:200px;height:200px;display:block;border-radius:8px';
+  img.onerror=()=>{container.innerHTML=`<div style="width:200px;height:200px;background:var(--surface);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center;padding:20px">QR requires internet connection</div>`;};
+  container.innerHTML='';container.appendChild(img);
+  // Store URL for download
+  window._lastQRUrl=qrUrl;window._lastQRImg=img.src;
+}
+
+function downloadQR(sessionId){
+  const imgUrl=window._lastQRImg;
+  if(!imgUrl){toast('QR not ready yet','error');return;}
+  const a=document.createElement('a');a.href=imgUrl;a.download=`session_qr_${sessionId}.png`;a.click();
+  toast('QR downloaded!','success');
+}
+
+function copyQRLink(sessionId){
+  const url=window._lastQRUrl||`${window.location.href.split('?')[0]}?qr_checkin=${sessionId}`;
+  navigator.clipboard?.writeText(url).then(()=>toast('Link copied!','success')).catch(()=>{
+    prompt('Copy this link:',url);
+  });
+}
+
+function shareQRWA(sessionId,clientName,date,time){
+  const url=window._lastQRUrl||`${window.location.href.split('?')[0]}?qr_checkin=${sessionId}`;
+  const msg=`📱 *Session QR Check-in*\n\nHi ${clientName}! Please scan the QR code or click the link below to mark your attendance for today's session.\n\n📅 ${date} at ${time}\n\n🔗 ${url}\n\n_Gym At Your Home™_`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+async function loadQRCheckins(sessionId){
+  const el=document.getElementById('qr-checkins');if(!el)return;
+  try{
+    const checkins=await fsGetAll('qrcheckins',fn().where('sessionId','==',sessionId));
+    if(!checkins.length){el.innerHTML='<div style="color:var(--muted);font-size:12px">No QR check-ins yet</div>';return;}
+    el.innerHTML=checkins.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span class="badge b-g" style="font-size:10px">✓ Checked In</span>
+      <span style="font-size:12px;font-weight:600">${c.clientName||'—'}</span>
+      <span style="font-size:11px;color:var(--muted);margin-left:auto">${fmtFullTime(c.checkedInAt)}</span>
+    </div>`).join('');
+  }catch(e){el.innerHTML='<div style="color:var(--muted);font-size:12px">Could not load check-ins</div>';}
+}
+
+// Handle QR check-in on page load (client scans QR)
+(function handleQRCheckin(){
+  const params=new URLSearchParams(window.location.search);
+  const sessionId=params.get('qr_checkin');
+  if(!sessionId)return;
+  // Remove param from URL
+  window.history.replaceState({},'',window.location.pathname);
+  // Wait for auth
+  document.addEventListener('fbReady',()=>{
+    fn().onAuthStateChanged(window.FB.auth,async user=>{
+      if(!user)return;
+      const uDoc=await fsGet('users',user.uid)||await fsGet('clients',user.uid);
+      if(!uDoc)return;
+      // Check session exists
+      const sess=await fsGet('sessions',sessionId);
+      if(!sess){toast('Session not found','error');return;}
+      // Already checked in?
+      const existing=await fsGetAll('qrcheckins',fn().where('sessionId','==',sessionId),fn().where('clientId','==',user.uid));
+      if(existing.length){toast('✅ Already checked in for this session!','info');return;}
+      // Save check-in
+      await fsAdd('qrcheckins',{
+        sessionId,clientId:user.uid,
+        clientName:uDoc.name||uDoc.email||'',
+        checkedInAt:fn().serverTimestamp(),
+        sessionDate:sess.date||'',sessionTime:sess.time||''
+      });
+      // Mark attendance
+      await fsAdd('attendance',{
+        clientId:user.uid,clientName:uDoc.name||uDoc.email||'',
+        trainerId:sess.trainerId||'',trainerName:sess.trainerName||'',
+        date:sess.date||getTodayStr(),status:'present',
+        sessionType:sess.type||'',reason:'QR Check-in',
+        markedBy:user.uid
+      });
+      toast('✅ Attendance marked via QR!','success');
+    });
+  });
+})();
+
+// ── SCHEDULE / EDIT SESSION (unchanged) ───────────────────────
+function openAddSession(){loadSessionForm().then(html=>{openM2('SCHEDULE SESSION',html);initSessionFormAC()});}
+async function openEditSession(id){const s=await fsGet('sessions',id);if(!s){toast('Not found','error');return;}loadSessionForm(s).then(html=>{openM2('EDIT SESSION',html);initSessionFormAC(s)});}
+async function initSessionFormAC(s={}){
+  const[clients,trainers]=await Promise.all([fsGetAll('clients',fn().where('active','==',true)),fsGetAll('users',fn().where('role','==','trainer'))]);
+  const ci=document.getElementById('sf-client-inp');
+  if(ci){createAutocomplete(ci,clients.map(c=>({id:c.id,label:c.name||'',sub:c.phone||''})),{minChars:0,onSelect(it){const h=document.getElementById('sf-client-id');if(h)h.value=it.id;}});}
+  const ti=document.getElementById('sf-trainer-inp');
+  if(ti){createAutocomplete(ti,trainers.map(t=>({id:t.id,label:(t.name||t.email)+' ('+(t.gender||'Any')+')',sub:t.gender||''})),{minChars:0,onSelect(it){const h=document.getElementById('sf-trainer-id');if(h)h.value=it.id;}});}
+}
 async function loadSessionForm(s={}){
   return`<div class="fr">
     <div><label class="fl">Client *</label><input class="fi" id="sf-client-inp" placeholder="Type client name…" value="${s.clientName||''}" autocomplete="off"><input type="hidden" id="sf-client-id" value="${s.clientId||''}"></div>
@@ -1947,28 +2086,23 @@ async function loadSessionForm(s={}){
   <div style="margin-bottom:14px"><label class="fl">Notes</label><textarea class="fta" id="sf-notes">${s.notes||''}</textarea></div>
   <div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveSession('${s.id||''}')">Save Session</button></div>`;
 }
-
 async function saveSession(existingId=''){
-  const clientId=$('sf-client-id').value||$('sf-client-inp')?.dataset.selectedId||'';
-  const clientName=$('sf-client-inp')?.value||'';
-  const trainerId=$('sf-trainer-id').value||$('sf-trainer-inp')?.dataset.selectedId||'';
-  const trainerName=($('sf-trainer-inp')?.value||'').replace(/\s*\([^)]*\)\s*$/,'').trim();
+  const clientId=$('sf-client-id').value||'';const clientName=$('sf-client-inp')?.value||'';
+  const trainerId=$('sf-trainer-id').value||'';const trainerName=($('sf-trainer-inp')?.value||'').replace(/\s*\([^)]*\)\s*$/,'').trim();
   const date=$('sf-date').value,time=$('sf-time').value;
-  if(!clientName||!trainerName||!date||!time){toast('Client, trainer, date and time required','error');return}
+  if(!clientName||!trainerName||!date||!time){toast('Client, trainer, date and time required','error');return;}
   const data={clientId,clientName,trainerId,trainerName,date,time,type:$('sf-type').value,status:$('sf-status').value||'not-started',meetLink:$('sf-link').value.trim(),notes:$('sf-notes').value};
   try{
-    if(existingId){await fsUpdate('sessions',existingId,data);toast('Updated!','success')}
-    else{await fsAdd('sessions',data);toast('Scheduled!','success')}
+    if(existingId){await fsUpdate('sessions',existingId,data);toast('Updated!','success');}
+    else{await fsAdd('sessions',data);toast('Scheduled!','success');}
     closeM2();sessions();
-  }catch(e){toast('Error: '+e.message,'error')}
+  }catch(e){toast('Error: '+e.message,'error');}
 }
-
 async function delSession(id){
-  if(!confirm('Delete?'))return;
-  try{await fsDel('sessions',id);toast('Deleted','success');sessions()}
-  catch(e){toast('Error: '+e.message,'error')}
-}
-// ══════════════════════════════════════════════════════════════
+  if(!confirm('Delete this session?'))return;
+  try{await fsDel('sessions',id);toast('Deleted','success');sessions();}
+  catch(e){toast('Error: '+e.message,'error');}
+}// ══════════════════════════════════════════════════════════════
 // TIME CHART
 // ══════════════════════════════════════════════════════════════
 async function timechart(){
@@ -5028,297 +5162,6 @@ document.addEventListener('fbReady',()=>{
   });
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&$('login-page').style.display==='flex')doLogin()});
-
-(function initGymBWTheme(){
-
-  // ── SCANLINE OVERLAY ─────────────────────────────────────
-  const sl = document.createElement('div');
-  sl.id = 'gym-scanline';
-  document.body.prepend(sl);
-
-  // ── CANVAS ───────────────────────────────────────────────
-  const canvas = document.createElement('canvas');
-  canvas.id = 'gym-canvas';
-  document.body.prepend(canvas);
-  const ctx = canvas.getContext('2d');
-
-  function resize(){
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  const W = () => canvas.width;
-  const H = () => canvas.height;
-
-  // ── PARTICLES ────────────────────────────────────────────
-  const particles = Array.from({length:70}, () => ({
-    x  : Math.random() * window.innerWidth,
-    y  : Math.random() * window.innerHeight,
-    r  : Math.random() * 1.4 + 0.3,
-    vx : (Math.random()-0.5) * 0.22,
-    vy : (Math.random()-0.5) * 0.22,
-    a  : Math.random() * 0.35 + 0.08,
-  }));
-
-  // ── ENERGY SWEEP LINES ───────────────────────────────────
-  const sweepLines = Array.from({length:5}, () => ({
-    y    : Math.random() * window.innerHeight,
-    prog : Math.random(),
-    speed: 0.0003 + Math.random() * 0.0003,
-    alpha: 0.012 + Math.random() * 0.018,
-  }));
-
-  // ── HEX GRID ─────────────────────────────────────────────
-  function drawHexGrid(w, h){
-    const s = 48, hx = s*1.732, vy = s*1.5;
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255,255,255,0.022)';
-    ctx.lineWidth = 0.5;
-    for(let row=-1; row<h/vy+2; row++){
-      for(let col=-1; col<w/hx+2; col++){
-        const ox = row%2===0 ? 0 : hx/2;
-        const cx = col*hx+ox, cy = row*vy;
-        ctx.beginPath();
-        for(let i=0;i<6;i++){
-          const a=Math.PI/3*i-Math.PI/6;
-          const px=cx+s*Math.cos(a), py=cy+s*Math.sin(a);
-          i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
-        }
-        ctx.closePath(); ctx.stroke();
-      }
-    }
-    ctx.restore();
-  }
-
-  // ── DRAW DUMBBELL ─────────────────────────────────────────
-  function drawDumbbell(x, y, size, alpha, angle=0){
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = '#ffffff';
-    ctx.translate(x,y); ctx.rotate(angle);
-    // bar
-    ctx.lineWidth = size*0.055; ctx.lineCap='round';
-    ctx.beginPath(); ctx.moveTo(-size*.58,0); ctx.lineTo(size*.58,0); ctx.stroke();
-    // inner plates
-    ctx.lineWidth = size*0.16;
-    ctx.beginPath(); ctx.moveTo(-size*.42,-size*.20); ctx.lineTo(-size*.42,size*.20); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo( size*.42,-size*.20); ctx.lineTo( size*.42,size*.20); ctx.stroke();
-    // outer plates
-    ctx.lineWidth = size*0.22;
-    ctx.beginPath(); ctx.moveTo(-size*.58,-size*.28); ctx.lineTo(-size*.58,size*.28); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo( size*.58,-size*.28); ctx.lineTo( size*.58,size*.28); ctx.stroke();
-    ctx.restore();
-  }
-
-  // ── DRAW RUNNER ───────────────────────────────────────────
-  function drawRunner(x, y, size, alpha, phase=0){
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = size*0.065;
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    const legSwing = Math.sin(phase) * 0.25;
-    // head
-    ctx.beginPath(); ctx.arc(x, y-size*.44, size*.11, 0, Math.PI*2); ctx.stroke();
-    // body
-    ctx.beginPath(); ctx.moveTo(x, y-size*.33); ctx.lineTo(x-size*.04, y+size*.02); ctx.stroke();
-    // arms
-    ctx.beginPath(); ctx.moveTo(x, y-size*.22); ctx.lineTo(x-size*.24, y-size*.06+legSwing*size*.3); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x, y-size*.22); ctx.lineTo(x+size*.20, y-size*.34-legSwing*size*.2); ctx.stroke();
-    // legs
-    ctx.beginPath(); ctx.moveTo(x-size*.04,y+size*.02); ctx.lineTo(x-size*.22+legSwing*size*.3,y+size*.26); ctx.lineTo(x-size*.30,y+size*.46); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x-size*.04,y+size*.02); ctx.lineTo(x+size*.18-legSwing*size*.2,y+size*.22); ctx.lineTo(x+size*.24,y+size*.46); ctx.stroke();
-    ctx.restore();
-  }
-
-  // ── DRAW OVERHEAD PRESS ───────────────────────────────────
-  function drawLifter(x, y, size, alpha){
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = size*0.065;
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    // head
-    ctx.beginPath(); ctx.arc(x, y-size*.5, size*.11,0,Math.PI*2); ctx.stroke();
-    // body
-    ctx.beginPath(); ctx.moveTo(x,y-size*.39); ctx.lineTo(x,y+size*.02); ctx.stroke();
-    // arms up
-    ctx.beginPath(); ctx.moveTo(x,y-size*.28); ctx.lineTo(x-size*.28,y-size*.52); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x,y-size*.28); ctx.lineTo(x+size*.28,y-size*.52); ctx.stroke();
-    // barbell
-    drawDumbbell(x, y-size*.60, size*.68, 1.0, 0);
-    // legs
-    ctx.lineWidth = size*0.065;
-    ctx.beginPath(); ctx.moveTo(x,y+size*.02); ctx.lineTo(x-size*.20,y+size*.40); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x,y+size*.02); ctx.lineTo(x+size*.20,y+size*.40); ctx.stroke();
-    ctx.restore();
-  }
-
-  // ── DRAW KETTLEBELL ───────────────────────────────────────
-  function drawKettlebell(x, y, size, alpha){
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = size*0.065;
-    ctx.lineCap = 'round';
-    // ball
-    ctx.beginPath(); ctx.arc(x, y+size*.1, size*.28, 0, Math.PI*2); ctx.stroke();
-    // handle arch
-    ctx.beginPath();
-    ctx.arc(x, y-size*.08, size*.18, Math.PI, 0, false);
-    ctx.stroke();
-    // handle sides
-    ctx.lineWidth = size*0.07;
-    ctx.beginPath(); ctx.moveTo(x-size*.18, y-size*.08); ctx.lineTo(x-size*.22, y+size*.06); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x+size*.18, y-size*.08); ctx.lineTo(x+size*.22, y+size*.06); ctx.stroke();
-    ctx.restore();
-  }
-
-  // ── DRAW BARBELL ROW ──────────────────────────────────────
-  function drawBarbellRow(x, y, size, alpha){
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = size*0.065;
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    // person bent forward
-    ctx.beginPath(); ctx.arc(x-size*.28, y-size*.18, size*.10, 0, Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x-size*.28,y-size*.08); ctx.lineTo(x+size*.12,y); ctx.stroke(); // torso
-    ctx.beginPath(); ctx.moveTo(x-size*.28,y-size*.08); ctx.lineTo(x-size*.22,y+size*.38); ctx.stroke(); // left leg
-    ctx.beginPath(); ctx.moveTo(x+size*.12,y); ctx.lineTo(x+size*.18,y+size*.38); ctx.stroke(); // right leg
-    // arms pulling bar
-    ctx.beginPath(); ctx.moveTo(x-size*.1,y+size*.05); ctx.lineTo(x-size*.06,y-.3); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x+size*.05,y+size*.04); ctx.lineTo(x+size*.08,y+size*.28); ctx.stroke();
-    // barbell
-    drawDumbbell(x+size*.04, y+size*.30, size*.75, 1);
-    ctx.restore();
-  }
-
-  // ── DRAW JUMP ROPE ────────────────────────────────────────
-  function drawJumpRope(x, y, size, alpha, phase){
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = size*0.06;
-    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    // person
-    ctx.beginPath(); ctx.arc(x,y-size*.48,size*.10,0,Math.PI*2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x,y-size*.38); ctx.lineTo(x,y); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x,y-size*.22); ctx.lineTo(x-size*.28,y-size*.14); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x,y-size*.22); ctx.lineTo(x+size*.28,y-size*.14); ctx.stroke();
-    // jumping legs
-    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-size*.14,y+size*.30); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+size*.14,y+size*.30); ctx.stroke();
-    // rope curve
-    ctx.lineWidth = size*0.04;
-    ctx.beginPath();
-    ctx.moveTo(x-size*.28,y-size*.14);
-    ctx.quadraticCurveTo(x+Math.sin(phase)*size*.05, y+size*.50+Math.cos(phase)*size*.1, x+size*.28,y-size*.14);
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // ── FIGURE DEFINITIONS ────────────────────────────────────
-  const FIGURES = [
-    {type:'lifter',   xr:.88, yr:.22, size:88,  aBase:.05,  phase:0,   speed:.006},
-    {type:'runner',   xr:.07, yr:.68, size:82,  aBase:.045, phase:1.2, speed:.012},
-    {type:'dumbbell', xr:.10, yr:.20, size:64,  aBase:.04,  phase:0.5, speed:.005, angle: Math.PI/12},
-    {type:'kettlebell',xr:.82,yr:.70, size:72,  aBase:.04,  phase:2.0, speed:.007},
-    {type:'lifter',   xr:.48, yr:.85, size:70,  aBase:.035, phase:1.5, speed:.006},
-    {type:'dumbbell', xr:.65, yr:.15, size:52,  aBase:.032, phase:3.0, speed:.004, angle:-Math.PI/10},
-    {type:'runner',   xr:.30, yr:.40, size:58,  aBase:.03,  phase:2.8, speed:.010},
-    {type:'barbellrow',xr:.72,yr:.48, size:68,  aBase:.033, phase:0.8, speed:.005},
-    {type:'jumprope', xr:.18, yr:.88, size:66,  aBase:.035, phase:1.0, speed:.018},
-    {type:'kettlebell',xr:.55,yr:.50, size:48,  aBase:.025, phase:3.5, speed:.006},
-    {type:'dumbbell', xr:.92, yr:.45, size:44,  aBase:.025, phase:2.2, speed:.004, angle:Math.PI/6},
-  ];
-
-  let t = 0;
-
-  function draw(){
-    const w=W(), h=H();
-    ctx.clearRect(0,0,w,h);
-
-    // ── radial glows ──
-    const makeGlow=(x,y,r,a)=>{
-      const g=ctx.createRadialGradient(x,y,0,x,y,r);
-      g.addColorStop(0,`rgba(255,255,255,${a})`);
-      g.addColorStop(1,'transparent');
-      ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
-    };
-    makeGlow(w*.88, h*.06, w*.55, 0.05);
-    makeGlow(w*.08, h*.92, w*.45, 0.03);
-    makeGlow(w*.50, h*.50, w*.40, 0.015);
-
-    // ── hex grid ──
-    drawHexGrid(w,h);
-
-    // ── sweep lines ──
-    sweepLines.forEach(line=>{
-      line.prog += line.speed;
-      if(line.prog>1) line.prog=0;
-      const p=line.prog;
-      const g=ctx.createLinearGradient(0,0,w,0);
-      g.addColorStop(Math.max(0,p-.28),'transparent');
-      g.addColorStop(p, `rgba(255,255,255,${line.alpha})`);
-      g.addColorStop(Math.min(1,p+.28),'transparent');
-      ctx.fillStyle=g; ctx.fillRect(0,line.y,w,1.5);
-    });
-
-    // ── particles ──
-    particles.forEach(p=>{
-      p.x+=p.vx; p.y+=p.vy;
-      if(p.x<0)p.x=w; if(p.x>w)p.x=0;
-      if(p.y<0)p.y=h; if(p.y>h)p.y=0;
-      const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4);
-      g.addColorStop(0,`rgba(255,255,255,${p.a})`);
-      g.addColorStop(1,'transparent');
-      ctx.fillStyle=g;
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r*4,0,Math.PI*2); ctx.fill();
-    });
-
-    // ── gym figures ──
-    t += 0.01;
-    FIGURES.forEach(f=>{
-      const floatY = Math.sin(t*f.speed*160 + f.phase) * 12;
-      const alpha  = f.aBase + Math.sin(t*80*f.speed*.6 + f.phase) * 0.012;
-      const x=f.xr*w, y=f.yr*h+floatY;
-      ctx.save();
-      if(f.type==='dumbbell')       drawDumbbell(x,y,f.size,alpha,f.angle||0);
-      else if(f.type==='runner')    drawRunner(x,y,f.size,alpha,t*f.speed*200+f.phase);
-      else if(f.type==='lifter')    drawLifter(x,y,f.size,alpha);
-      else if(f.type==='kettlebell')drawKettlebell(x,y,f.size,alpha);
-      else if(f.type==='barbellrow')drawBarbellRow(x,y,f.size,alpha);
-      else if(f.type==='jumprope')  drawJumpRope(x,y,f.size,alpha,t*f.speed*200+f.phase);
-      ctx.restore();
-    });
-
-    requestAnimationFrame(draw);
-  }
-
-  draw();
-
-  // ── CORNER GLOWS (DOM) ────────────────────────────────────
-  [
-    'position:fixed;top:0;right:0;width:600px;height:600px;background:radial-gradient(ellipse at top right,rgba(255,255,255,0.055) 0%,transparent 65%);pointer-events:none;z-index:0',
-    'position:fixed;bottom:0;left:0;width:500px;height:500px;background:radial-gradient(ellipse at bottom left,rgba(255,255,255,0.035) 0%,transparent 65%);pointer-events:none;z-index:0',
-  ].forEach(css=>{ const d=document.createElement('div'); d.style.cssText=css; document.body.appendChild(d); });
-
-  // ── ENERGY LINES (DOM) ────────────────────────────────────
-  [[22,8],[52,3.5],[80,6]].forEach(([pct,dur],i)=>{
-    const el=document.createElement('div');
-    el.className='gym-energy-line';
-    el.style.cssText=`top:${pct}%;animation-duration:${dur}s;animation-delay:${i*1.5}s`;
-    document.body.appendChild(el);
-  });
-
-  console.log('%c🏋️ GYM AT YOUR HOME — Black & White Theme Active','color:#fff;font-weight:bold;font-size:13px;background:#000;padding:4px 14px;border:1px solid #333;border-radius:4px');
-
-})();
-
-*/
 </script>
 </body>
 </html>
