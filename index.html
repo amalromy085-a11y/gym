@@ -2603,120 +2603,1310 @@ async function saveFeedback(){
 }
 async function delFeedback(id){if(!confirm('Delete?'))return;try{await fsDel('feedback',id);toast('Deleted','success');feedback()}catch(e){toast('Error','error')}}
 
-// ── CHAT ──────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+// ENHANCED CHAT — Full replacement
+// Find:   async function chat(){
+// Select until closing } of function chatEnterSend(...)
+// Replace entirely with this block
+// ══════════════════════════════════════════════════════════════
+
+// ── CHAT STATE ───────────────────────────────────────────────
+let _chatContacts      = [];
+let _chatMyUid         = '';
+let _activeChatId      = '';
+let _activeChatContactId = '';
+let _typingTimer       = null;
+let _typingUnsub       = null;
+let _presenceUnsub     = null;
+let _onlineUsers       = new Set();
+let _unreadCounts      = {};
+let _activeGroupId     = null;
+
+// ── STYLES (injected once) ───────────────────────────────────
+function injectChatStyles(){
+  if(document.getElementById('chat-styles'))return;
+  const s=document.createElement('style');s.id='chat-styles';
+  s.textContent=`
+.chat-layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 104px);gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.chat-sidebar{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--surface)}
+.chat-sidebar-tabs{display:flex;border-bottom:1px solid var(--border)}
+.chat-sidebar-tab{flex:1;padding:9px 6px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;text-align:center;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s}
+.chat-sidebar-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.chat-list{flex:1;overflow-y:auto}
+.chat-item{padding:10px 12px;cursor:pointer;border-bottom:1px solid rgba(128,128,128,.05);transition:background .15s;display:flex;align-items:center;gap:9px;position:relative}
+.chat-item:hover{background:rgba(128,128,128,.07)}
+.chat-item.active{background:var(--accent-dim);border-left:3px solid var(--accent)}
+.chat-item-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-item-preview{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.chat-main{display:flex;flex-direction:column;background:var(--bg)}
+.chat-header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface);flex-shrink:0}
+.chat-messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.chat-messages::-webkit-scrollbar{width:4px}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+.msg-wrap{display:flex;flex-direction:column}
+.msg-wrap.out{align-items:flex-end}
+.msg-wrap.in{align-items:flex-start}
+.msg-sender-lbl{font-size:10px;font-weight:700;color:var(--accent);letter-spacing:.5px;margin-bottom:2px;padding:0 4px}
+.msg{max-width:70%;padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.55;word-break:break-word;white-space:pre-wrap;position:relative}
+.msg-out{background:var(--accent);color:#000;border-bottom-right-radius:4px}
+.msg-in{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--text)}
+.msg-system{align-self:center;background:rgba(128,128,128,.1);border-radius:20px;padding:4px 14px;font-size:11px;color:var(--muted);font-style:italic}
+.msg-meta{font-size:10px;margin-top:4px;opacity:.65;display:flex;align-items:center;gap:5px}
+.msg-wrap.out .msg-meta{justify-content:flex-end}
+.msg-wrap.in .msg-meta{justify-content:flex-start}
+.read-tick{font-size:11px}
+.read-tick.read{color:var(--secondary,#4d9fff)}
+.msg-img{max-width:220px;max-height:200px;border-radius:10px;cursor:pointer;display:block;margin-top:4px;object-fit:cover}
+.msg-file{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.12);border-radius:8px;padding:8px 12px;margin-top:4px;cursor:pointer;text-decoration:none;color:inherit}
+.msg-file-icon{font-size:20px;flex-shrink:0}
+.msg-file-info{min-width:0}
+.msg-file-name{font-size:12px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.msg-file-size{font-size:10px;opacity:.7}
+.typing-wrap{align-self:flex-start;padding:2px 0}
+.typing-bubble{background:var(--surface);border:1px solid var(--border);border-radius:16px;border-bottom-left-radius:4px;padding:10px 14px;display:flex;gap:4px;align-items:center}
+.typing-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:tdot 1.2s infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+.chat-input-area{padding:10px 12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px;background:var(--surface);flex-shrink:0}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end}
+.chat-input{flex:1;padding:10px 14px;background:var(--bg);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;min-height:42px;max-height:120px;line-height:1.4;transition:border-color .2s}
+.chat-input:focus{border-color:var(--accent)}
+.chat-icon-btn{background:transparent;border:1px solid var(--border2);border-radius:9px;padding:8px 10px;cursor:pointer;color:var(--text);font-size:15px;transition:border-color .2s,color .2s;flex-shrink:0}
+.chat-icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.file-preview-bar{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:12px}
+.file-preview-name{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:600}
+.online-badge{display:inline-block;width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.online-badge.online{background:var(--green);box-shadow:0 0 0 2px rgba(0,230,118,.25)}
+.online-badge.offline{background:var(--muted2)}
+.presence-dot{position:absolute;bottom:7px;left:36px;width:10px;height:10px;border-radius:50%;border:2px solid var(--surface)}
+.presence-dot.online{background:var(--green)}
+.presence-dot.offline{background:var(--muted2)}
+.unread-badge{background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:10px;padding:1px 6px;min-width:17px;text-align:center;flex-shrink:0}
+.group-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:border-color .2s}
+.group-card:hover,.group-card.active-g{border-color:var(--accent);background:var(--accent-dim)}
+.online-panel{padding:10px 12px}
+.online-user-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(128,128,128,.07);font-size:13px}
+.online-user-row:last-child{border-bottom:none}
+@media(max-width:768px){.chat-layout{grid-template-columns:1fr;height:auto}.chat-sidebar{height:220px}}
+  `;
+  document.head.appendChild(s);
+}
+
+// ── PRESENCE HELPERS ─────────────────────────────────────────
+async function setPresenceOnline(){
+  if(!auth().currentUser)return;
+  try{
+    await fn().setDoc(fn().doc(db(),'presence',auth().currentUser.uid),{
+      uid:auth().currentUser.uid,name:CU.name||CU.email||'',role:CR,
+      online:true,lastSeen:fn().serverTimestamp()
+    },{merge:true});
+  }catch(e){}
+}
+async function setPresenceOffline(){
+  if(!auth().currentUser)return;
+  try{await fn().updateDoc(fn().doc(db(),'presence',auth().currentUser.uid),{online:false,lastSeen:fn().serverTimestamp()});}catch(e){}
+}
+function listenPresence(){
+  if(_presenceUnsub){_presenceUnsub();_presenceUnsub=null;}
+  try{
+    _presenceUnsub=fn().onSnapshot(fn().collection(db(),'presence'),snap=>{
+      _onlineUsers=new Set();
+      snap.forEach(d=>{if(d.data().online)_onlineUsers.add(d.id);});
+      // refresh presence dots in sidebar
+      document.querySelectorAll('.presence-dot').forEach(dot=>{
+        const uid=dot.dataset.uid;
+        if(uid)dot.className=`presence-dot ${_onlineUsers.has(uid)?'online':'offline'}`;
+      });
+      document.querySelectorAll('.online-badge[data-uid]').forEach(b=>{
+        const uid=b.dataset.uid;
+        if(uid)b.className=`online-badge ${_onlineUsers.has(uid)?'online':'offline'}`;
+      });
+      // update header status line
+      const sl=$('chat-status-line');
+      if(sl&&_activeChatContactId){
+        const isOnline=_onlineUsers.has(_activeChatContactId);
+        sl.innerHTML=isOnline?`<span style="color:var(--green);font-size:11px">● Online now</span>`:`<span style="color:var(--muted);font-size:11px">○ Offline</span>`;
+      }
+    });
+  }catch(e){}
+}
+
+// ── MAIN CHAT FUNCTION ────────────────────────────────────────
 async function chat(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
-  if(_chatUnsub){_chatUnsub();_chatUnsub=null}
-  let contacts=[];const myUid=auth().currentUser.uid;
-  if(CR==='trainer'){const[myClients,coords,heads,admins]=await Promise.all([fsGetAll('clients',fn().where('trainerId','==',myUid),fn().where('active','==',true)),fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','coordinatorhead')),fsGetAll('users',fn().where('role','==','admin'))]);contacts=[...myClients.map(c=>({...c,_chatRole:'client',_chatLabel:'Client'})),...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'})),...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))]}
-  else if(CR==='client'){const myDocs=await fsGetAll('clients',fn().where('email','==',CU.email));const myDoc=myDocs[0];if(myDoc?.trainerId){const trainer=await fsGet('users',myDoc.trainerId);if(trainer)contacts=[{...trainer,_chatRole:'trainer',_chatLabel:'Your Trainer'}]}}
-  else if(CR==='coordinator'){const[trainers,heads,admins]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('users',fn().where('role','==','coordinatorhead')),fsGetAll('users',fn().where('role','==','admin'))]);contacts=[...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'})),...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))]}
-  else if(CR==='coordinatorhead'){const[coords,trainers,admins]=await Promise.all([fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('users',fn().where('role','==','admin'))]);contacts=[...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))]}
-  else if(CR==='admin'){const[trainers,coords,heads]=await Promise.all([fsGetAll('users',fn().where('role','==','trainer')),fsGetAll('users',fn().where('role','==','coordinator')),fsGetAll('users',fn().where('role','==','coordinatorhead'))]);contacts=[...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'}))]}
+  injectChatStyles();
+  if(_chatUnsub){_chatUnsub();_chatUnsub=null;}
+  if(_typingUnsub){_typingUnsub();_typingUnsub=null;}
+  await setPresenceOnline();
+  listenPresence();
+
+  const myUid=auth().currentUser.uid;
+  _chatMyUid=myUid;
+  _activeChatId='';_activeChatContactId='';_activeGroupId=null;
+
+  let contacts=[];
+  if(CR==='trainer'){
+    const[myClients,coords,heads,admins]=await Promise.all([
+      fsGetAll('clients',fn().where('trainerId','==',myUid),fn().where('active','==',true)),
+      fsGetAll('users',fn().where('role','==','coordinator')),
+      fsGetAll('users',fn().where('role','==','coordinatorhead')),
+      fsGetAll('users',fn().where('role','==','admin'))
+    ]);
+    contacts=[...myClients.map(c=>({...c,_chatRole:'client',_chatLabel:'Client'})),
+              ...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),
+              ...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'})),
+              ...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))];
+  }else if(CR==='client'){
+    const myDocs=await fsGetAll('clients',fn().where('email','==',CU.email));
+    const myDoc=myDocs[0];
+    if(myDoc?.trainerId){const t=await fsGet('users',myDoc.trainerId);if(t)contacts=[{...t,_chatRole:'trainer',_chatLabel:'Your Trainer'}];}
+  }else if(CR==='coordinator'){
+    const[trainers,heads,admins]=await Promise.all([
+      fsGetAll('users',fn().where('role','==','trainer')),
+      fsGetAll('users',fn().where('role','==','coordinatorhead')),
+      fsGetAll('users',fn().where('role','==','admin'))
+    ]);
+    contacts=[...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),
+              ...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'})),
+              ...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))];
+  }else if(CR==='coordinatorhead'){
+    const[coords,trainers,admins]=await Promise.all([
+      fsGetAll('users',fn().where('role','==','coordinator')),
+      fsGetAll('users',fn().where('role','==','trainer')),
+      fsGetAll('users',fn().where('role','==','admin'))
+    ]);
+    contacts=[...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),
+              ...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),
+              ...admins.map(u=>({...u,_chatRole:'admin',_chatLabel:'Admin'}))];
+  }else if(CR==='admin'){
+    const[trainers,coords,heads]=await Promise.all([
+      fsGetAll('users',fn().where('role','==','trainer')),
+      fsGetAll('users',fn().where('role','==','coordinator')),
+      fsGetAll('users',fn().where('role','==','coordinatorhead'))
+    ]);
+    contacts=[...trainers.map(u=>({...u,_chatRole:'trainer',_chatLabel:'Trainer'})),
+              ...coords.map(u=>({...u,_chatRole:'coordinator',_chatLabel:'Coordinator'})),
+              ...heads.map(u=>({...u,_chatRole:'coordinatorhead',_chatLabel:'Coord. Head'}))];
+  }
   contacts=contacts.filter(c=>c.id!==myUid);
+  _chatContacts=contacts;
+
+  // Load unread counts
+  _unreadCounts={};
+  await Promise.all(contacts.map(async c=>{
+    const chatId=getChatId(myUid,c.id);
+    try{
+      const q=fn().query(fn().collection(db(),`chats/${chatId}/messages`),fn().where('senderId','!=',myUid),fn().where('read','==',false));
+      const snap=await fn().getDocs(q);
+      if(snap.size>0)_unreadCounts[c.id]=snap.size;
+    }catch(e){}
+  }));
+
   $('page').innerHTML=`
-    <div class="chat-layout" id="chat-layout">
-      <div class="chat-sidebar">
-        <div class="chat-search"><input class="fi" id="chat-search-inp" placeholder="🔍 Search…" style="margin:0" oninput="filterChatContacts()"></div>
-        <div class="chat-list" id="chat-contact-list"></div>
+  <div class="chat-layout" id="chat-layout">
+    <!-- SIDEBAR -->
+    <div class="chat-sidebar">
+      <div class="chat-sidebar-tabs">
+        <div class="chat-sidebar-tab active" id="stab-dm" onclick="switchSidebarTab('dm')">💬 DMs</div>
+        <div class="chat-sidebar-tab" id="stab-groups" onclick="switchSidebarTab('groups')">👥 Groups</div>
+        <div class="chat-sidebar-tab" id="stab-online" onclick="switchSidebarTab('online')">🟢 Online</div>
       </div>
-      <div class="chat-main" id="chat-main">
-        <div class="chat-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%"><div style="font-size:40px">💬</div><div style="font-size:13px;color:var(--muted)">Select a contact to start chatting</div></div>
+      <div style="padding:8px 10px;border-bottom:1px solid var(--border)">
+        <input class="fi" id="chat-search-inp" placeholder="🔍 Search…" style="margin:0;padding:7px 10px;font-size:12px" oninput="filterChatContacts()">
       </div>
+      <!-- DM list -->
+      <div class="chat-list" id="sidebar-dm">${buildDMList(contacts,myUid)}</div>
+      <!-- Groups list -->
+      <div class="chat-list" id="sidebar-groups" style="display:none"></div>
+      <!-- Online list -->
+      <div class="chat-list" id="sidebar-online" style="display:none"></div>
+    </div>
+
+    <!-- MAIN AREA -->
+    <div class="chat-main" id="chat-main">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--muted)">
+        <div style="font-size:52px">💬</div>
+        <div style="font-weight:700;font-size:16px;color:var(--text)">Your Messages</div>
+        <div style="font-size:13px">Select a conversation or group to start chatting</div>
+        ${CR==='admin'||CR==='coordinatorhead'||CR==='coordinator'?`<button class="btn btn-p btn-sm" onclick="switchSidebarTab('groups');openCreateGroup()">+ Create Group</button>`:''}
+      </div>
+    </div>
+  </div>`;
+
+  // load groups sidebar
+  loadGroupsSidebar();
+}
+
+// ── SIDEBAR TABS ─────────────────────────────────────────────
+function switchSidebarTab(tab){
+  ['dm','groups','online'].forEach(t=>{
+    const tabEl=$(`stab-${t}`);const panelEl=$(`sidebar-${t}`);
+    if(tabEl)tabEl.classList.toggle('active',t===tab);
+    if(panelEl)panelEl.style.display=t===tab?'block':'none';
+  });
+  if(tab==='online')renderOnlinePanel();
+}
+
+// ── DM LIST ──────────────────────────────────────────────────
+function buildDMList(contacts,myUid){
+  if(!contacts.length)return`<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No contacts</div>`;
+  return contacts.map(c=>{
+    const rc=roleColorForChat(c._chatRole||c.role);
+    const ini=(c.name||c.email||'?')[0].toUpperCase();
+    const unread=_unreadCounts[c.id]||0;
+    const isOnline=_onlineUsers.has(c.id);
+    return`<div class="chat-item" id="ci-${c.id}" onclick="openChatWith('${c.id}','${(c.name||c.email||'').replace(/'/g,"\\'")}','${c._chatLabel||c.role}','${c._chatRole||c.role}')">
+      <div style="position:relative;flex-shrink:0">
+        <div style="width:38px;height:38px;border-radius:50%;background:${rc.bg};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:${rc.fg}">${ini}</div>
+        <div class="presence-dot ${isOnline?'online':'offline'}" data-uid="${c.id}"></div>
+      </div>
+      <div style="min-width:0;flex:1">
+        <div class="chat-item-name">${c.name||c.email||'—'}</div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:${rc.fg};margin-top:1px">${c._chatLabel||c.role}</div>
+      </div>
+      ${unread>0?`<div class="unread-badge">${unread>99?'99+':unread}</div>`:''}
     </div>`;
-  window._chatContacts=contacts;window._chatMyUid=myUid;
-  renderChatContacts(contacts);
+  }).join('');
 }
-function roleColorForChat(role){const map={admin:'var(--purple)',coordinatorhead:'var(--orange)',coordinator:'var(--blue)',trainer:'var(--green)',client:'var(--yellow)'};return{bg:(map[role]||'var(--muted)').replace(')',',0.15)').replace('var','rgba').replace('(--','('),fg:map[role]||'var(--muted)'}}
-function renderChatContacts(contacts){
-  const list=$('chat-contact-list');if(!list)return;
-  if(!contacts.length){list.innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No contacts.</div>`;return}
-  list.innerHTML=contacts.map(c=>{const rl=c._chatLabel||c.role||'';const rc=roleColorForChat(c._chatRole||c.role);
-    return`<div class="chat-item" id="ci-${c.id}" onclick="openChatWith('${c.id}','${(c.name||c.email||'').replace(/'/g,"\\'")}','${rl}','${c._chatRole||c.role}')">
-      <div style="width:36px;height:36px;border-radius:50%;background:${rc.bg};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;color:${rc.fg}">${(c.name||c.email||'?')[0].toUpperCase()}</div>
-      <div style="min-width:0;flex:1"><div class="chat-item-name">${c.name||c.email}</div><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${rc.fg};margin-top:2px">${rl}</div></div>
-    </div>`;}).join('');
+
+function filterChatContacts(){
+  const v=($('chat-search-inp')?.value||'').toLowerCase();
+  const filtered=(_chatContacts||[]).filter(c=>(c.name||'').toLowerCase().includes(v)||(c.email||'').toLowerCase().includes(v));
+  const list=$('sidebar-dm');
+  if(list)list.innerHTML=buildDMList(filtered,_chatMyUid);
 }
-function filterChatContacts(){const v=($('chat-search-inp').value||'').toLowerCase();const filtered=(window._chatContacts||[]).filter(c=>(c.name||'').toLowerCase().includes(v)||(c.email||'').toLowerCase().includes(v));renderChatContacts(filtered)}
-function getChatId(uid1,uid2){return[uid1,uid2].sort().join('_')}
+
+function roleColorForChat(role){
+  const m={admin:'var(--purple)',coordinatorhead:'var(--orange)',coordinator:'var(--blue)',trainer:'var(--green)',client:'var(--yellow)'};
+  const fg=m[role]||'var(--muted)';
+  return{fg,bg:fg.replace('var(--','rgba(').replace(')',',0.15)').replace('rgba(purple','rgba(170,102,255').replace('rgba(orange','rgba(255,140,0').replace('rgba(blue','rgba(77,159,255').replace('rgba(green','rgba(0,230,118').replace('rgba(yellow','rgba(255,187,0').replace('rgba(muted','rgba(136,136,136')};
+}
+
+// ── ONLINE PANEL ─────────────────────────────────────────────
+function renderOnlinePanel(){
+  const panel=$('sidebar-online');if(!panel)return;
+  const onlineContacts=(_chatContacts||[]).filter(c=>_onlineUsers.has(c.id));
+  if(!onlineContacts.length){
+    panel.innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted);font-size:13px">No one online right now</div>`;return;
+  }
+  panel.innerHTML=`<div class="online-panel">
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin-bottom:10px">● ${onlineContacts.length} Online Now</div>
+    ${onlineContacts.map(c=>{
+      const rc=roleColorForChat(c._chatRole||c.role);
+      const ini=(c.name||c.email||'?')[0].toUpperCase();
+      return`<div class="online-user-row" onclick="openChatWith('${c.id}','${(c.name||c.email||'').replace(/'/g,"\\'")}','${c._chatLabel||c.role}','${c._chatRole||c.role}');switchSidebarTab('dm')" style="cursor:pointer">
+        <div style="width:32px;height:32px;border-radius:50%;background:${rc.bg};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:${rc.fg};flex-shrink:0">${ini}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:13px">${c.name||c.email||'—'}</div>
+          <div style="font-size:10px;color:var(--green)">● Active now</div>
+        </div>
+        <div style="width:9px;height:9px;border-radius:50%;background:var(--green);flex-shrink:0"></div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ── GROUP CHAT ────────────────────────────────────────────────
+async function loadGroupsSidebar(){
+  const panel=$('sidebar-groups');if(!panel)return;
+  try{
+    const myUid=_chatMyUid||auth().currentUser.uid;
+    const groups=await fsGetAll('groupchats',fn().where('memberIds','array-contains',myUid));
+    groups.sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));
+    const canCreate=CR==='admin'||CR==='coordinatorhead'||CR==='coordinator';
+    panel.innerHTML=`
+      ${canCreate?`<div style="padding:10px 12px;border-bottom:1px solid var(--border)"><button class="btn btn-p btn-sm btn-w" onclick="openCreateGroup()">+ Create Group</button></div>`:''}
+      ${groups.length===0?`<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No groups yet${canCreate?'<br><span style="font-size:12px">Create one above</span>':''}</div>`
+      :groups.map(g=>`<div class="chat-item ${_activeGroupId===g.id?'active':''}" id="gci-${g.id}" onclick="openGroupChat('${g.id}','${(g.name||'Group').replace(/'/g,"\\'")}')">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--purple-dim);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👥</div>
+        <div style="min-width:0;flex:1">
+          <div class="chat-item-name">${g.name||'Unnamed Group'}</div>
+          <div class="chat-item-preview">${g.memberIds?.length||0} members${g.lastMessage?` · ${(g.lastMessage||'').substring(0,20)}`:''}</div>
+        </div>
+      </div>`).join('')}`;
+  }catch(e){const panel=$('sidebar-groups');if(panel)panel.innerHTML=`<div style="padding:16px;font-size:12px;color:var(--muted)">Could not load groups</div>`;}
+}
+
+function openCreateGroup(){
+  const contacts=_chatContacts||[];
+  openM2('CREATE GROUP CHAT',`
+    <div class="fg"><label class="fl">Group Name *</label><input class="fi" id="grp-name" placeholder="e.g. Morning Team, Corporate Batch…"></div>
+    <div class="fg"><label class="fl">Group Description</label><input class="fi" id="grp-desc" placeholder="What is this group for?"></div>
+    <div class="fg"><label class="fl">Add Members *</label>
+      <div style="max-height:220px;overflow-y:auto;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px">
+        <div style="margin-bottom:8px;display:flex;gap:6px">
+          <button class="btn btn-g btn-sm" onclick="document.querySelectorAll('.grp-chk').forEach(c=>c.checked=true)">All</button>
+          <button class="btn btn-g btn-sm" onclick="document.querySelectorAll('.grp-chk').forEach(c=>c.checked=false)">None</button>
+        </div>
+        ${contacts.map(c=>`<label style="display:flex;align-items:center;gap:8px;padding:7px;cursor:pointer;border-radius:7px;transition:background .15s" onmouseover="this.style.background='var(--card)'" onmouseout="this.style.background=''">
+          <input type="checkbox" class="grp-chk" value="${c.id}" data-name="${(c.name||c.email||'').replace(/"/g,'&quot;')}">
+          <div style="flex:1"><div style="font-weight:600;font-size:13px">${c.name||c.email||'—'}</div><div style="font-size:10px;color:var(--muted)">${c._chatLabel||c.role||''}</div></div>
+        </label>`).join('')}
+      </div>
+    </div>
+    <div id="grp-err" class="alert alert-err"></div>
+    <div class="mo-foot"><button class="btn btn-g" onclick="closeM2()">Cancel</button><button class="btn btn-p" onclick="saveCreateGroup()">Create Group</button></div>`);
+}
+
+async function saveCreateGroup(){
+  const name=$('grp-name')?.value.trim();
+  const desc=$('grp-desc')?.value.trim()||'';
+  const checked=[...document.querySelectorAll('.grp-chk:checked')].map(c=>({id:c.value,name:c.dataset.name}));
+  const errEl=$('grp-err');errEl.classList.remove('show');
+  if(!name){errEl.textContent='Group name is required.';errEl.classList.add('show');return;}
+  if(!checked.length){errEl.textContent='Select at least one member.';errEl.classList.add('show');return;}
+  const myUid=_chatMyUid||auth().currentUser.uid;
+  const memberIds=[myUid,...checked.map(c=>c.id)];
+  const memberNames={[myUid]:CU.name||CU.email||''};
+  checked.forEach(c=>{memberNames[c.id]=c.name||'';});
+  try{
+    const ref=await fsAdd('groupchats',{name,description:desc,memberIds,memberNames,createdBy:myUid,createdByName:CU.name||'',lastMessage:'',avatar:'👥'});
+    // System message
+    await fn().addDoc(fn().collection(db(),`groupchats/${ref.id}/messages`),{
+      senderId:'system',senderName:'System',message:`Group "${name}" created by ${CU.name||'Admin'}`,
+      timestamp:fn().serverTimestamp(),type:'system',read:false
+    });
+    closeM2();toast('✅ Group created!','success');
+    loadGroupsSidebar();
+    switchSidebarTab('groups');
+  }catch(e){errEl.textContent='Error: '+e.message;errEl.classList.add('show');}
+}
+
+async function openGroupChat(groupId,groupName){
+  _activeGroupId=groupId;
+  _activeChatId=`group_${groupId}`;
+  _activeChatContactId='';
+  if(_chatUnsub){_chatUnsub();_chatUnsub=null;}
+  if(_typingUnsub){_typingUnsub();_typingUnsub=null;}
+  document.querySelectorAll('.chat-item').forEach(i=>i.classList.remove('active'));
+  const gci=$(`gci-${groupId}`);if(gci)gci.classList.add('active');
+
+  const myUid=_chatMyUid||auth().currentUser.uid;
+  let groupData={};
+  try{const snap=await fn().getDoc(fn().doc(db(),'groupchats',groupId));if(snap.exists())groupData=snap.data();}catch(e){}
+
+  const memberCount=groupData.memberIds?.length||0;
+  const isAdmin2=groupData.createdBy===myUid||CR==='admin';
+
+  $('chat-main').innerHTML=`
+    <div class="chat-header">
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--purple-dim);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">👥</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:14px">${groupName}</div>
+        <div id="chat-status-line" style="font-size:11px;color:var(--muted)">${memberCount} members${groupData.description?` · ${groupData.description}`:''}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        ${isAdmin2?`<button class="btn btn-g btn-sm" onclick="manageGroup('${groupId}','${groupName.replace(/'/g,"\\'")}')">⚙ Manage</button>`:''}
+      </div>
+    </div>
+    <div class="chat-messages" id="chat-msgs"></div>
+    <div class="typing-wrap" id="typing-wrap" style="display:none;padding:0 16px 6px">
+      <div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+    </div>
+    ${buildInputArea(groupId,myUid,'',true)}`;
+
+  setupInputListeners(groupId,myUid,'',true);
+  listenGroupTyping(groupId,myUid);
+
+  try{
+    const msgsRef=fn().collection(db(),`groupchats/${groupId}/messages`);
+    const q=fn().query(msgsRef,fn().orderBy('timestamp','asc'));
+    _chatUnsub=fn().onSnapshot(q,snapshot=>{
+      const msgs=$('chat-msgs');if(!msgs)return;
+      const atBottom=msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight<80;
+      msgs.innerHTML='';
+      snapshot.forEach(docSnap=>{
+        const m={id:docSnap.id,...docSnap.data()};
+        msgs.appendChild(buildMsgEl(m,myUid,true));
+      });
+      if(atBottom||snapshot.size===1)msgs.scrollTop=msgs.scrollHeight;
+    });
+  }catch(e){const msgs=$('chat-msgs');if(msgs)msgs.innerHTML=`<div style="padding:20px;color:var(--red);font-size:13px">⚠️ ${e.message}</div>`;}
+}
+
+async function manageGroup(groupId,groupName){
+  const snap=await fn().getDoc(fn().doc(db(),'groupchats',groupId));
+  if(!snap.exists()){toast('Group not found','error');return;}
+  const g=snap.data();
+  const memberList=Object.entries(g.memberNames||{}).map(([uid,name])=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)"><div style="font-weight:600;font-size:13px;flex:1">${name||uid}</div>${uid!==(_chatMyUid||auth().currentUser.uid)?`<button class="btn btn-d btn-sm" onclick="removeMemberFromGroup('${groupId}','${uid}','${(name||'').replace(/'/g,"\\'")}')">Remove</button>`:''}</div>`).join('');
+  openM1(`MANAGE: ${groupName}`,`
+    <div class="fg"><label class="fl">Group Name</label><input class="fi" id="mg-name" value="${g.name||''}"></div>
+    <div class="fg"><label class="fl">Description</label><input class="fi" id="mg-desc" value="${g.description||''}"></div>
+    <div style="margin-bottom:14px"><label class="fl" style="margin-bottom:8px">Members (${Object.keys(g.memberNames||{}).length})</label><div style="max-height:180px;overflow-y:auto">${memberList}</div></div>
+    <div class="mo-foot">
+      <button class="btn btn-d btn-sm" onclick="deleteGroup('${groupId}')">🗑 Delete Group</button>
+      <button class="btn btn-g" onclick="closeM1()">Cancel</button>
+      <button class="btn btn-p" onclick="updateGroup('${groupId}')">Save</button>
+    </div>`);
+}
+async function updateGroup(groupId){
+  const name=$('mg-name')?.value.trim();const desc=$('mg-desc')?.value.trim()||'';
+  if(!name){toast('Name required','error');return;}
+  try{await fsUpdate('groupchats',groupId,{name,description:desc});closeM1();toast('Updated!','success');loadGroupsSidebar();}
+  catch(e){toast('Error: '+e.message,'error');}
+}
+async function removeMemberFromGroup(groupId,uid,name){
+  if(!confirm(`Remove ${name} from group?`))return;
+  try{
+    const snap=await fn().getDoc(fn().doc(db(),'groupchats',groupId));
+    if(!snap.exists())return;
+    const g=snap.data();
+    const newIds=(g.memberIds||[]).filter(i=>i!==uid);
+    const newNames={...g.memberNames};delete newNames[uid];
+    await fn().updateDoc(fn().doc(db(),'groupchats',groupId),{memberIds:newIds,memberNames:newNames});
+    toast(`${name} removed`,'success');closeM1();
+  }catch(e){toast('Error','error');}
+}
+async function deleteGroup(groupId){
+  if(!confirm('Delete this group permanently?'))return;
+  try{await fsDel('groupchats',groupId);closeM1();toast('Group deleted','success');loadGroupsSidebar();$('chat-main').innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px">Group deleted</div>`;}
+  catch(e){toast('Error','error');}
+}
+
+// ── OPEN DM ───────────────────────────────────────────────────
+function getChatId(uid1,uid2){return[uid1,uid2].sort().join('_');}
+
 async function openChatWith(contactId,contactName,contactRole,rawRole){
   document.querySelectorAll('.chat-item').forEach(i=>i.classList.remove('active'));
   const ci=$(`ci-${contactId}`);if(ci)ci.classList.add('active');
-  const myUid=window._chatMyUid||auth().currentUser.uid;
+  if(_chatUnsub){_chatUnsub();_chatUnsub=null;}
+  if(_typingUnsub){_typingUnsub();_typingUnsub=null;}
+
+  const myUid=_chatMyUid||auth().currentUser.uid;
   const chatId=getChatId(myUid,contactId);
-  window._activeChatId=chatId;window._activeChatContactId=contactId;
+  _activeChatId=chatId;_activeChatContactId=contactId;_activeGroupId=null;
+
   const rc=roleColorForChat(rawRole);
+  const ini=(contactName||'?')[0].toUpperCase();
+  const isOnline=_onlineUsers.has(contactId);
+
   $('chat-main').innerHTML=`
     <div class="chat-header">
-      <div style="width:36px;height:36px;border-radius:50%;background:${rc.bg};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:${rc.fg}">${(contactName||'?')[0].toUpperCase()}</div>
-      <div><div style="font-weight:600;font-size:14px">${contactName}</div><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:${rc.fg}">${contactRole}</div></div>
+      <div style="position:relative;flex-shrink:0">
+        <div style="width:40px;height:40px;border-radius:50%;background:${rc.bg};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:${rc.fg}">${ini}</div>
+        <div class="presence-dot ${isOnline?'online':'offline'}" data-uid="${contactId}"></div>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:14px">${contactName}</div>
+        <div id="chat-status-line" style="font-size:11px">${isOnline?`<span style="color:var(--green)">● Online now</span>`:`<span style="color:var(--muted)">○ Offline</span>`}</div>
+      </div>
     </div>
     <div class="chat-messages" id="chat-msgs"></div>
-    <div class="chat-input-area">
-      <textarea class="chat-input" id="chat-inp" placeholder="Type a message… (Enter to send)" rows="1" onkeydown="chatEnterSend(event,'${chatId}','${myUid}','${contactId}')"></textarea>
-      <button class="btn btn-p" onclick="sendChatMsg('${chatId}','${myUid}','${contactId}')">Send</button>
-    </div>`;
-  if(_chatUnsub){_chatUnsub();_chatUnsub=null}
+    <div class="typing-wrap" id="typing-wrap" style="display:none;padding:0 16px 6px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${contactName} is typing</div>
+      <div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+    </div>
+    ${buildInputArea(chatId,myUid,contactId,false)}`;
+
+  setupInputListeners(chatId,myUid,contactId,false);
+  listenTypingIndicator(chatId,myUid);
+
+  // clear unread badge
+  delete _unreadCounts[contactId];
+  const badge=document.querySelector(`#ci-${contactId} .unread-badge`);if(badge)badge.remove();
+
   try{
     const msgsRef=fn().collection(db(),`chats/${chatId}/messages`);
     const q=fn().query(msgsRef,fn().orderBy('timestamp','asc'));
     _chatUnsub=fn().onSnapshot(q,snapshot=>{
       const msgs=$('chat-msgs');if(!msgs)return;
+      const atBottom=msgs.scrollHeight-msgs.scrollTop-msgs.clientHeight<80;
       msgs.innerHTML='';
-      if(snapshot.empty){msgs.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Start the conversation! 👋</div>`;return}
-      snapshot.forEach(doc=>{const m={id:doc.id,...doc.data()};const isMe=m.senderId===myUid;const ts=m.timestamp?fmtFullTime(m.timestamp):'';const div=document.createElement('div');div.className=`msg ${isMe?'msg-out':'msg-in'}`;div.innerHTML=`${m.message}<div class="msg-meta">${ts}${isMe?` · ${m.read?'✓✓':'✓'}`:''}</div>`;msgs.appendChild(div)});
-      msgs.scrollTop=msgs.scrollHeight;markMsgsRead(chatId,myUid);
+      if(snapshot.empty){msgs.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">Start the conversation! 👋</div>`;return;}
+      snapshot.forEach(docSnap=>msgs.appendChild(buildMsgEl({id:docSnap.id,...docSnap.data()},myUid,false)));
+      if(atBottom)msgs.scrollTop=msgs.scrollHeight;
+      markMsgsRead(chatId,myUid);
     });
-  }catch(e){const msgs=$('chat-msgs');if(msgs)msgs.innerHTML=`<div style="padding:20px;color:var(--red);font-size:13px">⚠️ ${e.message}</div>`}
+  }catch(e){const msgs=$('chat-msgs');if(msgs)msgs.innerHTML=`<div style="padding:20px;color:var(--red);font-size:13px">⚠️ ${e.message}</div>`;}
 }
-async function markMsgsRead(chatId,myUid){try{const msgsRef=fn().collection(db(),`chats/${chatId}/messages`);const q=fn().query(msgsRef,fn().where('senderId','!=',myUid),fn().where('read','==',false));const snap=await fn().getDocs(q);const updates=[];snap.forEach(doc=>updates.push(fn().updateDoc(doc.ref,{read:true})));await Promise.all(updates)}catch(e){}}
-async function sendChatMsg(chatId,myUid,contactId){
-  const inp=$('chat-inp');if(!inp)return;const message=inp.value.trim();if(!message)return;inp.value='';inp.style.height='auto';
-  try{
-    await fn().addDoc(fn().collection(db(),`chats/${chatId}/messages`),{senderId:myUid,senderName:CU.name||CU.email||'',message,timestamp:fn().serverTimestamp(),read:false});
-    await fn().setDoc(fn().doc(db(),'chats',chatId),{participants:[myUid,contactId],lastMessage:message,lastMessageTime:fn().serverTimestamp(),lastSenderId:myUid},{merge:true});
-  }catch(e){toast('Send failed: '+e.message,'error')}
-}
-function chatEnterSend(e,chatId,myUid,contactId){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatMsg(chatId,myUid,contactId)}}
 
-// ── CHAT MONITOR ──────────────────────────────────────────────
+// ── MESSAGE ELEMENT ───────────────────────────────────────────
+function buildMsgEl(m,myUid,isGroup){
+  const isMe=m.senderId===myUid;
+  const isSystem=m.senderId==='system'||m.type==='system';
+  const ts=m.timestamp?fmtFullTime(m.timestamp):'';
+
+  const wrap=document.createElement('div');
+  if(isSystem){
+    wrap.className='msg-system';
+    wrap.textContent=m.message||'';
+    return wrap;
+  }
+
+  wrap.className=`msg-wrap ${isMe?'out':'in'}`;
+
+  // Sender label for group chats
+  if(isGroup&&!isMe&&m.senderName){
+    const lbl=document.createElement('div');
+    lbl.className='msg-sender-lbl';lbl.textContent=m.senderName;
+    wrap.appendChild(lbl);
+  }
+
+  const msgDiv=document.createElement('div');
+  msgDiv.className=`msg ${isMe?'msg-out':'msg-in'}`;
+
+  if(m.type==='image'&&m.fileUrl){
+    msgDiv.innerHTML=`<img src="${m.fileUrl}" class="msg-img" onclick="window.open('${m.fileUrl}','_blank')" alt="Image">
+      <div class="msg-meta"><span>${ts}</span>${isMe?`<span class="read-tick ${m.read?'read':''}">✓${m.read?'✓':''}</span>`:''}</div>`;
+  }else if(m.type==='file'&&m.fileUrl){
+    const ext=(m.fileName||'').split('.').pop().toUpperCase();
+    const fileIcons={PDF:'📄',DOC:'📝',DOCX:'📝',XLS:'📊',XLSX:'📊',PPT:'📋',ZIP:'📦',MP4:'🎥',MP3:'🎵'};
+    const icon=fileIcons[ext]||'📎';
+    msgDiv.innerHTML=`<a href="${m.fileUrl}" target="_blank" class="msg-file" style="${isMe?'color:#000':''}">
+      <span class="msg-file-icon">${icon}</span>
+      <div class="msg-file-info">
+        <div class="msg-file-name">${m.fileName||'File'}</div>
+        <div class="msg-file-size">${ext} ${m.fileSize?`· ${(m.fileSize/1024).toFixed(1)}KB`:''}</div>
+      </div>
+      <span style="font-size:13px;opacity:.7">↗</span>
+    </a>
+    <div class="msg-meta"><span>${ts}</span>${isMe?`<span class="read-tick ${m.read?'read':''}">✓${m.read?'✓':''}</span>`:''}</div>`;
+  }else{
+    let txt=m.message||'';
+    if(m.type==='missed_session_alert')txt='⚠️ '+txt;
+    if(m.type==='missed_reason_report')txt='📋 '+txt;
+    if(m.type==='broadcast')txt=txt;
+    msgDiv.innerHTML=`<div>${escHtml(txt)}</div>
+      <div class="msg-meta">
+        <span>${ts}</span>
+        ${isMe?`<span class="read-tick ${m.read?'read':''}" title="${m.read?'Read':'Delivered'}">✓${m.read?'✓':''}</span>`:''}
+      </div>`;
+  }
+
+  wrap.appendChild(msgDiv);
+  return wrap;
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
+
+// ── INPUT AREA ────────────────────────────────────────────────
+function buildInputArea(chatId,myUid,contactId,isGroup){
+  return`
+    <div id="file-preview-bar" class="file-preview-bar" style="display:none;margin:0 12px 0">
+      <span id="file-preview-icon" style="font-size:20px">📎</span>
+      <div class="file-preview-name" id="file-preview-name">No file</div>
+      <button onclick="clearFileAttachment()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px">✕</button>
+    </div>
+    <div class="chat-input-area">
+      <input type="file" id="file-inp" style="display:none" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.mp4,.mp3" onchange="handleFileSelect(event)">
+      <div class="chat-input-row">
+        <button class="chat-icon-btn" onclick="$('file-inp').click()" title="Attach file or image">📎</button>
+        <textarea class="chat-input" id="chat-inp" placeholder="Type a message… (Enter to send)" rows="1"
+          oninput="handleTyping('${chatId}','${myUid}');autoRes(this)"
+          onkeydown="chatEnterSend(event,'${chatId}','${myUid}','${contactId}','${isGroup}')"></textarea>
+        <button class="btn btn-p btn-sm" onclick="sendMsg('${chatId}','${myUid}','${contactId}','${isGroup}')" style="padding:9px 16px;font-size:13px">Send ↗</button>
+      </div>
+    </div>`;
+}
+
+function setupInputListeners(chatId,myUid,contactId,isGroup){
+  // nothing extra needed, all handled inline
+}
+
+function autoRes(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+
+// ── FILE HANDLING ─────────────────────────────────────────────
+let _attachedFile=null;
+
+function handleFileSelect(event){
+  const file=event.target.files[0];if(!file)return;
+  _attachedFile=file;
+  const bar=$('file-preview-bar');const nameEl=$('file-preview-name');const iconEl=$('file-preview-icon');
+  if(bar)bar.style.display='flex';
+  if(nameEl)nameEl.textContent=`${file.name} (${(file.size/1024).toFixed(1)}KB)`;
+  const isImg=file.type.startsWith('image/');
+  if(iconEl)iconEl.textContent=isImg?'🖼':'📎';
+  toast(`📎 ${file.name} attached`,'info');
+}
+
+function clearFileAttachment(){
+  _attachedFile=null;
+  const bar=$('file-preview-bar');if(bar)bar.style.display='none';
+  const inp=$('file-inp');if(inp)inp.value='';
+}
+
+// Convert file to base64 data URL (stored in Firestore as string — suitable for small files)
+// For large files we store file name and size only with a note
+async function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const reader=new FileReader();
+    reader.onload=()=>res(reader.result);
+    reader.onerror=()=>rej(new Error('Read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── SEND MESSAGE ──────────────────────────────────────────────
+async function sendMsg(chatId,myUid,contactId,isGroup){
+  const inp=$('chat-inp');if(!inp)return;
+  const text=inp.value.trim();
+  if(!text&&!_attachedFile)return;
+  inp.value='';inp.style.height='auto';
+  clearTyping(chatId,myUid);
+
+  const isGrp=isGroup==='true'||isGroup===true;
+  const grpId=isGrp?chatId.replace('group_',''):null;
+  const collPath=isGrp?`groupchats/${grpId}/messages`:`chats/${chatId}/messages`;
+
+  let msgData={
+    senderId:myUid,senderName:CU.name||CU.email||'',
+    timestamp:fn().serverTimestamp(),read:false,type:'text',message:text||''
+  };
+
+  if(_attachedFile){
+    const file=_attachedFile;
+    const isImg=file.type.startsWith('image/');
+    msgData.type=isImg?'image':'file';
+    msgData.fileName=file.name;
+    msgData.fileSize=file.size;
+    msgData.message=text||'';
+
+    // Only embed if file < 500KB (Firestore 1MB doc limit)
+    if(file.size<500*1024){
+      try{
+        const b64=await fileToBase64(file);
+        msgData.fileUrl=b64;
+      }catch(e){msgData.fileUrl='';msgData.message=`[Attached: ${file.name}] ${text}`;}
+    }else{
+      msgData.fileUrl='';
+      msgData.message=`📎 [File too large to embed: ${file.name} · ${(file.size/1024/1024).toFixed(1)}MB]\n${text}`;
+      msgData.type='text';
+      toast('⚠️ File >500KB — sent as text note. Use a link to share large files.','warn');
+    }
+    clearFileAttachment();
+  }
+
+  try{
+    await fn().addDoc(fn().collection(db(),collPath),msgData);
+    const lastMsg=_attachedFile?`📎 ${_attachedFile?.name||'File'}`:text.length>40?text.substring(0,40)+'…':text;
+    if(isGrp){
+      await fn().updateDoc(fn().doc(db(),'groupchats',grpId),{lastMessage:lastMsg,lastSenderId:myUid,updatedAt:fn().serverTimestamp()});
+    }else{
+      await fn().setDoc(fn().doc(db(),'chats',chatId),{
+        participants:[myUid,contactId],lastMessage:lastMsg,
+        lastMessageTime:fn().serverTimestamp(),lastSenderId:myUid
+      },{merge:true});
+      // notification
+      await createNotifForUsers({
+        key:`chat_${chatId}_${Date.now()}`,
+        title:`💬 ${CU.name||'Someone'}`,
+        body:text||'Sent a file',type:'chat_message'
+      },[contactId]);
+    }
+  }catch(e){toast('Send failed: '+e.message,'error');}
+}
+
+// ── TYPING INDICATOR ──────────────────────────────────────────
+function handleTyping(chatId,myUid){
+  clearTimeout(_typingTimer);
+  const isGrp=chatId.startsWith('group_');
+  const docPath=isGrp?`groupTyping/${chatId}_${myUid}`:`typing/${chatId}_${myUid}`;
+  fn().setDoc(fn().doc(db(),docPath),{uid:myUid,name:CU.name||'',chatId,at:fn().serverTimestamp()},{merge:true}).catch(()=>{});
+  _typingTimer=setTimeout(()=>clearTyping(chatId,myUid),3000);
+}
+
+function clearTyping(chatId,myUid){
+  clearTimeout(_typingTimer);
+  const isGrp=chatId.startsWith('group_');
+  const docPath=isGrp?`groupTyping/${chatId}_${myUid}`:`typing/${chatId}_${myUid}`;
+  fn().deleteDoc(fn().doc(db(),docPath)).catch(()=>{});
+}
+
+function listenTypingIndicator(chatId,myUid){
+  if(_typingUnsub){_typingUnsub();_typingUnsub=null;}
+  try{
+    _typingUnsub=fn().onSnapshot(fn().collection(db(),'typing'),snap=>{
+      const wrap=$('typing-wrap');if(!wrap)return;
+      const someoneTyping=snap.docs.some(d=>d.id.startsWith(chatId)&&d.data().uid!==myUid);
+      wrap.style.display=someoneTyping?'flex':'none';
+      const msgs=$('chat-msgs');if(msgs&&someoneTyping)msgs.scrollTop=msgs.scrollHeight;
+    });
+  }catch(e){}
+}
+
+function listenGroupTyping(groupId,myUid){
+  if(_typingUnsub){_typingUnsub();_typingUnsub=null;}
+  try{
+    _typingUnsub=fn().onSnapshot(fn().collection(db(),'groupTyping'),snap=>{
+      const wrap=$('typing-wrap');if(!wrap)return;
+      const typingNames=snap.docs
+        .filter(d=>d.data().chatId===`group_${groupId}`&&d.data().uid!==myUid)
+        .map(d=>d.data().name||'Someone');
+      wrap.style.display=typingNames.length?'flex':'none';
+      if(typingNames.length){
+        const lbl=wrap.querySelector('div');
+        if(lbl)lbl.textContent=typingNames.join(', ')+(typingNames.length>1?' are ':' is ')+'typing';
+        const msgs=$('chat-msgs');if(msgs)msgs.scrollTop=msgs.scrollHeight;
+      }
+    });
+  }catch(e){}
+}
+
+// ── READ RECEIPTS ─────────────────────────────────────────────
+async function markMsgsRead(chatId,myUid){
+  try{
+    const q=fn().query(fn().collection(db(),`chats/${chatId}/messages`),fn().where('senderId','!=',myUid),fn().where('read','==',false));
+    const snap=await fn().getDocs(q);
+    await Promise.all(snap.docs.map(d=>fn().updateDoc(d.ref,{read:true})));
+  }catch(e){}
+}
+
+// ── ENTER TO SEND ─────────────────────────────────────────────
+function chatEnterSend(e,chatId,myUid,contactId,isGroup){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg(chatId,myUid,contactId,isGroup);}
+}
+// ══════════════════════════════════════════════════════════════
+// ENHANCED CHAT MONITOR — Full replacement
+// Find:   async function chatmonitor(){
+// Select until closing } of async function adminViewChat(...)
+// Replace entirely with this block
+// ══════════════════════════════════════════════════════════════
+
 async function chatmonitor(){
   $('page').innerHTML=`<div style="text-align:center;padding:40px;color:var(--muted)"><div class="spin" style="width:28px;height:28px;margin:0 auto"></div></div>`;
-  const chats=await fsGetAll('chats');const users=await fsGetAll('users');
-  function getUserName(uid){const u=users.find(x=>x.id===uid);return u?u.name||u.email:uid.substring(0,8)+'…'}
+
+  // inject monitor styles once
+  if(!document.getElementById('monitor-styles')){
+    const s=document.createElement('style');s.id='monitor-styles';
+    s.textContent=`
+.monitor-layout{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 108px);gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.monitor-sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.monitor-sidebar-tabs{display:flex;border-bottom:1px solid var(--border)}
+.monitor-sidebar-tab{flex:1;padding:9px 4px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;text-align:center;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s}
+.monitor-sidebar-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.monitor-list{flex:1;overflow-y:auto}
+.monitor-chat-item{padding:11px 14px;cursor:pointer;border-bottom:1px solid rgba(128,128,128,.05);transition:background .15s;display:flex;align-items:center;gap:9px;position:relative}
+.monitor-chat-item:hover{background:rgba(128,128,128,.07)}
+.monitor-chat-item.active{background:var(--accent-dim);border-left:3px solid var(--accent)}
+.monitor-main{display:flex;flex-direction:column;background:var(--bg)}
+.monitor-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface);flex-shrink:0;flex-wrap:wrap;gap:8px}
+.monitor-messages{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.monitor-msg-wrap{display:flex;flex-direction:column}
+.monitor-msg{max-width:72%;padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.55;word-break:break-word;white-space:pre-wrap;border:1px solid var(--border)}
+.monitor-msg-system{align-self:center;background:rgba(128,128,128,.1);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--muted);font-style:italic}
+.monitor-msg-img{max-width:200px;max-height:180px;border-radius:8px;display:block;margin-top:4px;object-fit:cover}
+.monitor-msg-file{display:flex;align-items:center;gap:7px;background:rgba(128,128,128,.1);border-radius:8px;padding:7px 11px;margin-top:4px;font-size:12px}
+.monitor-stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.monitor-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden}
+.monitor-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.flag-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.flag-missed{background:var(--red-dim);color:var(--red)}
+.flag-broadcast{background:var(--orange-dim);color:var(--orange)}
+.flag-system{background:var(--blue-dim);color:var(--blue)}
+.flag-file{background:var(--purple-dim);color:var(--purple)}
+.flag-normal{background:rgba(128,128,128,.12);color:var(--muted)}
+.search-hl{background:var(--accent);color:#000;border-radius:2px;padding:0 2px}
+.activity-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(128,128,128,.06);font-size:12px}
+.activity-row:last-child{border-bottom:none}
+    `;
+    document.head.appendChild(s);
+  }
+
+  const[chats,users,groupchats]=await Promise.all([
+    fsGetAll('chats'),
+    fsGetAll('users'),
+    fsGetAll('groupchats')
+  ]);
+
+  const userMap={};users.forEach(u=>{userMap[u.id]=u;});
+  function getUser(uid){return userMap[uid]||{name:uid?.substring(0,8)+'…',role:'—'};}
+  function getUserName(uid){const u=getUser(uid);return u.name||u.email||uid?.substring(0,8)+'…';}
+
+  // Build stats
+  let totalDMMessages=0,totalFlagged=0,totalFiles=0;
+  // We'll compute these when loading messages — show as 0 for now and let detail view update
+
+  // Recent activity — all chats sorted by lastMessageTime
+  const sortedChats=[...chats].sort((a,b)=>(b.lastMessageTime?.seconds||0)-(a.lastMessageTime?.seconds||0));
+  const sortedGroups=[...groupchats].sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));
+
+  // Stats from chats data
+  const totalConvos=chats.length;
+  const totalGroups=groupchats.length;
+  const activeToday=chats.filter(c=>{
+    if(!c.lastMessageTime)return false;
+    const d=c.lastMessageTime.toDate?c.lastMessageTime.toDate():new Date(c.lastMessageTime);
+    return d.toDateString()===new Date().toDateString();
+  }).length;
+
   $('page').innerHTML=`
-    <div class="card" style="margin-bottom:18px;background:var(--purple-dim);border-color:rgba(170,102,255,.3)">
-      <div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px">👁</span><div><div style="font-weight:700;color:var(--purple)">Admin Chat Monitor</div><div style="font-size:12px;color:var(--muted)">Read-only access to all conversations</div></div></div>
+    <!-- Top alert bar -->
+    <div class="card" style="background:var(--purple-dim);border-color:rgba(170,102,255,.3);margin-bottom:14px;padding:12px 16px">
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:22px">👁</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;color:var(--purple);font-size:14px">Admin Chat Monitor</div>
+          <div style="font-size:12px;color:var(--muted)">Read-only surveillance of all DMs and group conversations. All activity is logged.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-g btn-sm" onclick="exportChatReport()">📥 Export Report</button>
+          <button class="btn btn-g btn-sm" onclick="chatmonitor()">↻ Refresh</button>
+        </div>
+      </div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <input class="fi" id="cm-search" placeholder="🔍 Search chats…" oninput="filterMonitorChats()" style="max-width:280px;margin:0">
-      <span style="color:var(--muted);font-size:13px">${chats.length} conversation${chats.length!==1?'s':''}</span>
+
+    <!-- Stats -->
+    <div class="monitor-stats-grid">
+      <div class="monitor-stat" style="--ac:var(--accent)"><div class="monitor-stat::before" style="background:var(--accent)"></div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">DM Conversations</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--accent)">${totalConvos}</div>
+      </div>
+      <div class="monitor-stat">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Group Chats</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--purple)">${totalGroups}</div>
+      </div>
+      <div class="monitor-stat">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Active Today</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--green)">${activeToday}</div>
+      </div>
+      <div class="monitor-stat">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Total Users</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--blue)">${users.length}</div>
+      </div>
     </div>
-    <div id="chat-monitor-list">
-      ${chats.length===0?emptyState('💬','No chats yet','','','')
-      :`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">${chats.map(c=>{const parts=(c.participants||[]).map(uid=>getUserName(uid)).join(' ↔ ');return`<div class="card" style="cursor:pointer" onclick="adminViewChat('${c.id}')" onmouseover="this.style.borderColor='var(--purple)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-weight:600;font-size:13px;margin-bottom:6px">${parts}</div><div style="font-size:12px;color:var(--muted);overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${c.lastMessage||'No messages'}</div><div style="font-size:10px;color:var(--muted2);margin-top:5px">${c.lastMessageTime?fmtFullTime(c.lastMessageTime):''}</div></div>`;}).join('')}</div>`}
+
+    <!-- Main monitor layout -->
+    <div class="monitor-layout">
+      <!-- Sidebar -->
+      <div class="monitor-sidebar">
+        <div class="monitor-sidebar-tabs">
+          <div class="monitor-sidebar-tab active" id="mtab-dms" onclick="switchMonitorTab('dms')">💬 DMs</div>
+          <div class="monitor-sidebar-tab" id="mtab-groups" onclick="switchMonitorTab('groups')">👥 Groups</div>
+          <div class="monitor-sidebar-tab" id="mtab-activity" onclick="switchMonitorTab('activity')">📊 Activity</div>
+        </div>
+
+        <!-- Search + filter -->
+        <div style="padding:8px 10px;border-bottom:1px solid var(--border);display:flex;gap:6px">
+          <input class="fi" id="monitor-search" placeholder="🔍 Search…" style="margin:0;padding:7px 10px;font-size:12px;flex:1" oninput="filterMonitorList()">
+        </div>
+
+        <!-- DMs tab -->
+        <div class="monitor-list" id="mpanel-dms">
+          ${sortedChats.length===0?`<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No conversations yet</div>`:
+          sortedChats.map(c=>{
+            const parts=(c.participants||[]);
+            const names=parts.map(uid=>getUserName(uid)).join(' ↔ ');
+            const lastTime=c.lastMessageTime?fmtDate(c.lastMessageTime):'—';
+            const isToday=c.lastMessageTime&&(c.lastMessageTime.toDate?c.lastMessageTime.toDate():new Date(c.lastMessageTime)).toDateString()===new Date().toDateString();
+            return`<div class="monitor-chat-item" id="mci-${c.id}" data-names="${names.toLowerCase()}" onclick="adminViewChat('${c.id}','dm')">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--purple-dim);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💬</div>
+              <div style="min-width:0;flex:1">
+                <div style="font-size:12px;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${names}</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${c.lastMessage||'No messages'}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
+                <div style="font-size:9px;color:var(--muted)">${lastTime}</div>
+                ${isToday?`<span class="badge b-g" style="font-size:9px;padding:1px 5px">Today</span>`:''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <!-- Groups tab -->
+        <div class="monitor-list" id="mpanel-groups" style="display:none">
+          ${sortedGroups.length===0?`<div style="padding:24px;text-align:center;color:var(--muted);font-size:13px">No group chats</div>`:
+          sortedGroups.map(g=>{
+            return`<div class="monitor-chat-item" id="mci-g-${g.id}" data-names="${(g.name||'').toLowerCase()}" onclick="adminViewChat('${g.id}','group')">
+              <div style="width:36px;height:36px;border-radius:50%;background:var(--purple-dim);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👥</div>
+              <div style="min-width:0;flex:1">
+                <div style="font-size:12px;font-weight:600">${g.name||'Unnamed Group'}</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">${g.memberIds?.length||0} members · ${g.lastMessage||'No messages'}</div>
+              </div>
+              <span class="badge b-p" style="font-size:9px;flex-shrink:0">Group</span>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <!-- Activity tab -->
+        <div class="monitor-list" id="mpanel-activity" style="display:none">
+          <div style="padding:12px 14px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Recent Activity</div>
+            ${sortedChats.slice(0,20).map(c=>{
+              const parts=(c.participants||[]).map(uid=>getUserName(uid)).join(' ↔ ');
+              const lastTime=c.lastMessageTime?fmtFullTime(c.lastMessageTime):'—';
+              return`<div class="activity-row">
+                <span style="font-size:16px">💬</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-weight:600;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${parts}</div>
+                  <div style="font-size:10px;color:var(--muted)">${lastTime}</div>
+                </div>
+                <button class="btn btn-g btn-sm" style="font-size:10px;padding:3px 8px" onclick="adminViewChat('${c.id}','dm')">View</button>
+              </div>`;
+            }).join('')}
+            ${sortedGroups.slice(0,10).map(g=>`<div class="activity-row">
+              <span style="font-size:16px">👥</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:600;font-size:12px">${g.name||'Unnamed Group'}</div>
+                <div style="font-size:10px;color:var(--muted)">${g.memberIds?.length||0} members</div>
+              </div>
+              <button class="btn btn-g btn-sm" style="font-size:10px;padding:3px 8px" onclick="adminViewChat('${g.id}','group')">View</button>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- Main panel -->
+      <div class="monitor-main" id="monitor-main">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:var(--muted)">
+          <div style="font-size:48px">👁</div>
+          <div style="font-weight:700;font-size:15px;color:var(--text)">Select a conversation to monitor</div>
+          <div style="font-size:13px">All messages are read-only. No actions can be taken from here.</div>
+        </div>
+      </div>
     </div>`;
-  window._monitorChats=chats;window._monitorUsers=users;
-}
-function filterMonitorChats(){if(!window._monitorChats)return;const v=($('cm-search').value||'').toLowerCase();function getUserName(uid){const u=(window._monitorUsers||[]).find(x=>x.id===uid);return u?u.name||u.email:uid}const filtered=window._monitorChats.filter(c=>{const parts=(c.participants||[]).map(getUserName).join(' ').toLowerCase();return parts.includes(v)||(c.lastMessage||'').toLowerCase().includes(v)});const container=$('chat-monitor-list');if(!container)return;container.innerHTML=filtered.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px">${filtered.map(c=>{const parts=(c.participants||[]).map(getUserName).join(' ↔ ');return`<div class="card" style="cursor:pointer" onclick="adminViewChat('${c.id}')"><div style="font-weight:600;font-size:13px;margin-bottom:6px">${parts}</div><div style="font-size:12px;color:var(--muted)">${c.lastMessage||'No messages'}</div></div>`;}).join('')}</div>`:emptyState('🔍','No results','','','');}
-async function adminViewChat(chatId){
-  const users=window._monitorUsers||await fsGetAll('users');
-  function getUserName(uid){const u=users.find(x=>x.id===uid);return u?`${u.name||u.email} (${u.role})`:uid}
-  openM3('CHAT MONITOR',`
-    <div style="background:var(--purple-dim);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--purple)">👁 Admin read-only view</div>
-    <div id="admin-chat-msgs" style="background:var(--bg);border-radius:10px;padding:14px;min-height:300px;max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:8px">
-      <div style="text-align:center;color:var(--muted)"><div class="spin" style="width:20px;height:20px;margin:0 auto"></div></div>
-    </div>
-    <div class="mo-foot"><button class="btn btn-g" onclick="closeM3()">Close</button></div>`);
-  try{
-    const msgsRef=fn().collection(db(),`chats/${chatId}/messages`);const q=fn().query(msgsRef,fn().orderBy('timestamp','asc'));const snap=await fn().getDocs(q);
-    const container=$('admin-chat-msgs');if(!container)return;container.innerHTML='';
-    if(snap.empty){container.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px">No messages.</div>`;return}
-    snap.forEach(doc=>{const m={id:doc.id,...doc.data()};const ts=m.timestamp?fmtFullTime(m.timestamp):'';const div=document.createElement('div');div.style.cssText='padding:10px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--border);font-size:13px';div.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:4px"><strong style="color:var(--accent)">${getUserName(m.senderId)}</strong><span style="font-size:10px;color:var(--muted)">${ts}</span></div>${m.message}`;container.appendChild(div)});
-    container.scrollTop=container.scrollHeight;
-  }catch(e){const c=$('admin-chat-msgs');if(c)c.innerHTML=`<div style="color:var(--red);font-size:13px">⚠️ ${e.message}</div>`}
+
+  // store data globally for filtering
+  window._monitorChats=sortedChats;
+  window._monitorGroups=sortedGroups;
+  window._monitorUsers=users;
+  window._monitorUserMap=userMap;
 }
 
+// ── MONITOR TAB SWITCH ────────────────────────────────────────
+function switchMonitorTab(tab){
+  ['dms','groups','activity'].forEach(t=>{
+    const tabEl=$(`mtab-${t}`);const panelEl=$(`mpanel-${t}`);
+    if(tabEl)tabEl.classList.toggle('active',t===tab);
+    if(panelEl)panelEl.style.display=t===tab?'block':'none';
+  });
+}
+
+// ── SEARCH / FILTER ───────────────────────────────────────────
+function filterMonitorList(){
+  const v=($('monitor-search')?.value||'').toLowerCase().trim();
+  document.querySelectorAll('.monitor-chat-item').forEach(item=>{
+    const names=item.dataset.names||'';
+    item.style.display=(!v||names.includes(v))?'flex':'none';
+  });
+}
+
+// ── ADMIN VIEW CHAT ───────────────────────────────────────────
+async function adminViewChat(chatId,type='dm'){
+  // highlight active
+  document.querySelectorAll('.monitor-chat-item').forEach(i=>i.classList.remove('active'));
+  const activeItem=$(`mci-${type==='group'?'g-':''}${chatId}`);
+  if(activeItem)activeItem.classList.add('active');
+
+  const userMap=window._monitorUserMap||{};
+  function getUserName(uid){
+    if(!uid)return'—';
+    const u=userMap[uid];return u?u.name||u.email||uid.substring(0,8)+'…':uid.substring(0,8)+'…';
+  }
+  function getRoleBadge(uid){
+    const u=userMap[uid];if(!u)return'';
+    const cols={admin:'b-p',coordinatorhead:'b-o',coordinator:'b-b',trainer:'b-g',client:'b-y'};
+    return`<span class="badge ${cols[u.role]||'b-gray'}" style="font-size:9px">${u.role||'—'}</span>`;
+  }
+
+  const main=$('monitor-main');
+  main.innerHTML=`<div style="text-align:center;padding:30px;color:var(--muted)"><div class="spin" style="width:22px;height:22px;margin:0 auto"></div><div style="margin-top:10px;font-size:12px">Loading messages…</div></div>`;
+
+  try{
+    let chatData={};let participants=[];let groupName='';let memberIds=[];let memberNames={};
+
+    if(type==='group'){
+      const snap=await fn().getDoc(fn().doc(db(),'groupchats',chatId));
+      if(snap.exists()){chatData=snap.data();groupName=chatData.name||'Group';memberIds=chatData.memberIds||[];memberNames=chatData.memberNames||{};}
+    }else{
+      const snap=await fn().getDoc(fn().doc(db(),'chats',chatId));
+      if(snap.exists()){chatData=snap.data();participants=chatData.participants||[];}
+    }
+
+    const collPath=type==='group'?`groupchats/${chatId}/messages`:`chats/${chatId}/messages`;
+    const msgsSnap=await fn().getDocs(fn().query(fn().collection(db(),collPath),fn().orderBy('timestamp','asc')));
+    const msgs=[];msgsSnap.forEach(d=>msgs.push({id:d.id,...d.data()}));
+
+    // Compute stats
+    const totalMsgs=msgs.length;
+    const flagged=msgs.filter(m=>['missed_session_alert','missed_reason_report','broadcast'].includes(m.type)).length;
+    const files=msgs.filter(m=>['image','file'].includes(m.type)).length;
+    const senders=[...new Set(msgs.map(m=>m.senderId).filter(Boolean))];
+
+    // Message type classifier
+    function getMsgFlag(m){
+      if(m.type==='missed_session_alert')return`<span class="flag-badge flag-missed">⚠️ Alert</span>`;
+      if(m.type==='missed_reason_report')return`<span class="flag-badge flag-missed">📋 Report</span>`;
+      if(m.type==='broadcast')return`<span class="flag-badge flag-broadcast">📢 Broadcast</span>`;
+      if(m.type==='system')return`<span class="flag-badge flag-system">⚙️ System</span>`;
+      if(m.type==='image')return`<span class="flag-badge flag-file">🖼 Image</span>`;
+      if(m.type==='file')return`<span class="flag-badge flag-file">📎 File</span>`;
+      return'';
+    }
+
+    // Build header info
+    let headerInfo='';
+    if(type==='group'){
+      const memberList=Object.entries(memberNames).map(([uid,name])=>`<span class="badge b-gray" style="font-size:10px">${name||uid.substring(0,6)}</span>`).join(' ');
+      headerInfo=`<div style="font-size:11px;color:var(--muted);margin-top:3px">${memberIds.length} members · ${memberList}</div>`;
+    }else{
+      const pInfo=participants.map(uid=>`<span>${getUserName(uid)} ${getRoleBadge(uid)}</span>`).join(' <span style="color:var(--muted)">↔</span> ');
+      headerInfo=`<div style="font-size:12px;margin-top:3px">${pInfo}</div>`;
+    }
+
+    const searchId=`msearch-${chatId.replace(/[^a-z0-9]/gi,'')}-${Date.now()}`;
+
+    main.innerHTML=`
+      <!-- Monitor header -->
+      <div class="monitor-header">
+        <div style="font-size:22px">${type==='group'?'👥':'💬'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:14px">${type==='group'?groupName:participants.map(getUserName).join(' ↔ ')}</div>
+          ${headerInfo}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-g btn-sm" onclick="toggleMonitorSearch('${searchId}')">🔍 Search</button>
+          <button class="btn btn-g btn-sm" onclick="exportConvoPDF('${chatId}','${type}','${type==='group'?groupName:participants.map(getUserName).join(' and ')}')">📥 Export</button>
+          ${type==='dm'&&CR==='admin'?`<button class="btn btn-d btn-sm" onclick="adminClearDMChat('${chatId}')">🗑 Clear</button>`:''}
+        </div>
+      </div>
+
+      <!-- Mini stats -->
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);display:flex;gap:14px;flex-wrap:wrap;background:var(--surface)">
+        <div style="font-size:11px"><span style="color:var(--muted)">Messages:</span> <strong>${totalMsgs}</strong></div>
+        <div style="font-size:11px"><span style="color:var(--muted)">Flagged:</span> <strong style="color:${flagged>0?'var(--red)':'var(--green)'}">${flagged}</strong></div>
+        <div style="font-size:11px"><span style="color:var(--muted)">Files/Images:</span> <strong style="color:var(--purple)">${files}</strong></div>
+        <div style="font-size:11px"><span style="color:var(--muted)">Participants:</span> <strong>${senders.length}</strong></div>
+        ${msgs.length>0?`<div style="font-size:11px"><span style="color:var(--muted)">First:</span> <strong>${fmtDate(msgs[0].timestamp)}</strong></div>`:''}
+        ${msgs.length>1?`<div style="font-size:11px"><span style="color:var(--muted)">Last:</span> <strong>${fmtDate(msgs[msgs.length-1].timestamp)}</strong></div>`:''}
+      </div>
+
+      <!-- Search bar -->
+      <div id="${searchId}" style="display:none;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--surface)">
+        <input class="fi" placeholder="🔍 Search messages…" style="margin:0;padding:7px 12px;font-size:13px" oninput="monitorSearchMessages(this.value,'${chatId}','${type}')">
+        <div id="monitor-search-results-${chatId.replace(/[^a-z0-9]/gi,'')}" style="margin-top:6px;max-height:160px;overflow-y:auto"></div>
+      </div>
+
+      <!-- Messages -->
+      <div class="monitor-messages" id="monitor-msgs">
+        ${msgs.length===0?`<div style="text-align:center;color:var(--muted);font-size:13px;padding:30px">No messages in this conversation</div>`
+        :msgs.map(m=>{
+          const isSystem=m.senderId==='system'||m.type==='system';
+          if(isSystem)return`<div class="monitor-msg-system">${m.message||''}</div>`;
+          const sName=m.senderName||getUserName(m.senderId)||'—';
+          const ts=m.timestamp?fmtFullTime(m.timestamp):'—';
+          const flag=getMsgFlag(m);
+          const senderUser=userMap[m.senderId];
+          const rc={admin:'var(--purple)',coordinatorhead:'var(--orange)',coordinator:'var(--blue)',trainer:'var(--green)',client:'var(--yellow)'};
+          const sColor=rc[senderUser?.role]||'var(--muted)';
+          return`<div class="monitor-msg-wrap" style="align-items:flex-start">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;padding:0 4px">
+              <div style="width:22px;height:22px;border-radius:50%;background:${sColor}22;color:${sColor};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">${sName[0]?.toUpperCase()}</div>
+              <span style="font-size:11px;font-weight:700;color:${sColor}">${sName}</span>
+              ${senderUser?`<span class="badge ${['b-p','b-o','b-b','b-g','b-y'][['admin','coordinatorhead','coordinator','trainer','client'].indexOf(senderUser.role)]||'b-gray'}" style="font-size:9px">${senderUser.role}</span>`:''}
+              <span style="font-size:10px;color:var(--muted)">${ts}</span>
+              ${flag}
+              ${m.read?`<span style="font-size:10px;color:var(--blue)">✓✓ Read</span>`:`<span style="font-size:10px;color:var(--muted)">✓ Sent</span>`}
+              ${m.edited?`<span style="font-size:10px;color:var(--muted);font-style:italic">edited</span>`:''}
+            </div>
+            <div class="monitor-msg" style="background:${m.deleted?'rgba(255,68,68,.05)':'var(--card)'};border-color:${m.deleted?'rgba(255,68,68,.2)':'var(--border)'}">
+              ${m.deleted?`<span style="color:var(--muted);font-style:italic">🚫 Message deleted</span>`
+              :m.type==='image'&&m.fileUrl?`<img src="${m.fileUrl}" class="monitor-msg-img" onclick="window.open('${m.fileUrl}','_blank')" alt="Image"><div style="font-size:11px;color:var(--muted);margin-top:4px">${m.message||''}</div>`
+              :m.type==='file'&&m.fileUrl?`<div class="monitor-msg-file"><span style="font-size:18px">📎</span><div><div style="font-weight:600">${m.fileName||'File'}</div><div style="font-size:10px;opacity:.7">${m.fileSize?(m.fileSize/1024).toFixed(1)+'KB':''}</div></div><a href="${m.fileUrl}" target="_blank" style="color:var(--accent);font-size:12px;margin-left:auto">Open ↗</a></div><div style="font-size:12px;margin-top:4px">${m.message||''}</div>`
+              :`<div>${(m.message||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')}</div>`}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+
+    // scroll to bottom
+    const msgEl=$('monitor-msgs');if(msgEl)msgEl.scrollTop=msgEl.scrollHeight;
+
+    // store for search
+    window._monitorCurrentMsgs=msgs;
+    window._monitorCurrentUserMap=userMap;
+
+  }catch(e){
+    main.innerHTML=`<div style="padding:24px;color:var(--red);font-size:13px">⚠️ Error loading: ${e.message}</div>`;
+  }
+}
+
+// ── MONITOR SEARCH ────────────────────────────────────────────
+function toggleMonitorSearch(searchId){
+  const el=document.getElementById(searchId);
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+}
+
+function monitorSearchMessages(query,chatId,type){
+  const safeId=chatId.replace(/[^a-z0-9]/gi,'');
+  const resultsEl=document.getElementById(`monitor-search-results-${safeId}`);
+  if(!resultsEl)return;
+  const msgs=window._monitorCurrentMsgs||[];
+  const q=query.toLowerCase().trim();
+  if(!q){resultsEl.innerHTML='';return;}
+  const matches=msgs.filter(m=>!m.deleted&&(m.message||'').toLowerCase().includes(q));
+  if(!matches.length){resultsEl.innerHTML=`<div style="font-size:12px;color:var(--muted);padding:6px">No results</div>`;return;}
+  const userMap=window._monitorCurrentUserMap||{};
+  function getName(uid){const u=userMap[uid];return u?u.name||u.email||uid.substring(0,8):'—';}
+  const hl=s=>{const re=new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(re,'<mark class="search-hl">$1</mark>');};
+  resultsEl.innerHTML=matches.slice(0,15).map(m=>`
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px 10px;margin-bottom:5px;cursor:pointer" onclick="scrollToMonitorMsg('${m.id}')">
+      <div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:3px">${getName(m.senderId)} · ${m.timestamp?fmtFullTime(m.timestamp):''}</div>
+      <div style="font-size:12px">${hl((m.message||'').substring(0,120))}</div>
+    </div>`).join('');
+}
+
+function scrollToMonitorMsg(msgId){
+  // find the msg in the monitor view by searching content — approximate scroll
+  const msgs=$('monitor-msgs');if(!msgs)return;
+  const allWraps=msgs.querySelectorAll('.monitor-msg-wrap');
+  // try to find matching content
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ── ADMIN CLEAR DM ────────────────────────────────────────────
+async function adminClearDMChat(chatId){
+  if(!confirm('⚠️ Permanently clear ALL messages in this conversation? This cannot be undone.'))return;
+  try{
+    const snap=await fn().getDocs(fn().collection(db(),`chats/${chatId}/messages`));
+    await Promise.all(snap.docs.map(d=>fn().deleteDoc(d.ref)));
+    toast('Chat cleared','success');
+    // reload view
+    const main=$('monitor-main');
+    if(main)main.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:13px">Chat cleared successfully</div>`;
+  }catch(e){toast('Error: '+e.message,'error');}
+}
+
+// ── EXPORT CONVERSATION PDF ───────────────────────────────────
+async function exportConvoPDF(chatId,type,titleStr){
+  toast('Generating conversation PDF…','info');
+  const collPath=type==='group'?`groupchats/${chatId}/messages`:`chats/${chatId}/messages`;
+  const userMap=window._monitorUserMap||{};
+  function getName(uid){const u=userMap[uid];return u?u.name||u.email||uid.substring(0,8):'—';}
+  try{
+    const snap=await fn().getDocs(fn().query(fn().collection(db(),collPath),fn().orderBy('timestamp','asc')));
+    const msgs=[];snap.forEach(d=>msgs.push({id:d.id,...d.data()}));
+    const{jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pw=doc.internal.pageSize.getWidth();
+    const ph=doc.internal.pageSize.getHeight();
+    let y=0;
+    // Cover
+    doc.setFillColor(11,11,11);doc.rect(0,0,pw,ph,'F');
+    doc.setFillColor(212,255,0);doc.rect(0,0,4,ph,'F');
+    doc.setTextColor(212,255,0);doc.setFontSize(16);doc.setFont('helvetica','bold');
+    doc.text('GYM AT YOUR HOME™',pw/2,18,{align:'center'});
+    doc.setTextColor(200,200,210);doc.setFontSize(10);doc.setFont('helvetica','normal');
+    doc.text('CHAT MONITOR — CONVERSATION EXPORT',pw/2,25,{align:'center'});
+    doc.setFillColor(22,28,40);doc.roundedRect(10,32,pw-20,20,2,2,'F');
+    doc.setTextColor(240,242,248);doc.setFontSize(11);doc.setFont('helvetica','bold');
+    doc.text(titleStr.substring(0,60),pw/2,42,{align:'center'});
+    doc.setTextColor(160,168,185);doc.setFontSize(8);doc.setFont('helvetica','normal');
+    doc.text(`${msgs.length} messages · Exported: ${new Date().toLocaleString('en-IN')} · By: ${CU.name||'Admin'}`,pw/2,48,{align:'center'});
+    y=62;
+    // Messages
+    const roleColors={admin:[170,102,255],coordinatorhead:[255,140,0],coordinator:[77,159,255],trainer:[0,200,110],client:[255,187,0]};
+    msgs.forEach((m,i)=>{
+      if(y>ph-20){doc.addPage();doc.setFillColor(11,11,11);doc.rect(0,0,pw,ph,'F');doc.setFillColor(212,255,0);doc.rect(0,0,4,ph,'F');y=16;}
+      const isSystem=m.senderId==='system'||m.type==='system';
+      if(isSystem){
+        doc.setFillColor(30,38,55);doc.roundedRect(20,y,pw-40,8,2,2,'F');
+        doc.setTextColor(100,110,130);doc.setFontSize(7.5);doc.setFont('helvetica','italic');
+        doc.text(m.message||'',pw/2,y+5.5,{align:'center'});y+=12;return;
+      }
+      const u=userMap[m.senderId];const name=getName(m.senderId);
+      const ts=m.timestamp?fmtFullTime(m.timestamp):'—';
+      const rc=roleColors[u?.role]||[136,136,136];
+      const msgText=m.deleted?'[Deleted]':m.type==='image'?'[Image]':m.type==='file'?`[File: ${m.fileName||''}]`:(m.message||'');
+      const lines=doc.splitTextToSize(msgText,pw-38);
+      const bh=Math.max(lines.length*5.5+12,16);
+      if(y+bh>ph-16){doc.addPage();doc.setFillColor(11,11,11);doc.rect(0,0,pw,ph,'F');doc.setFillColor(212,255,0);doc.rect(0,0,4,ph,'F');y=16;}
+      doc.setFillColor(18,24,36);doc.roundedRect(6,y,pw-12,bh,2,2,'F');
+      doc.setFillColor(...rc);doc.roundedRect(6,y,3,bh,1,1,'F');
+      doc.setTextColor(...rc);doc.setFontSize(7.5);doc.setFont('helvetica','bold');doc.text(name,12,y+6);
+      doc.setTextColor(100,110,130);doc.setFont('helvetica','normal');doc.text(ts,pw-10,y+6,{align:'right'});
+      if(u?.role){doc.setTextColor(80,90,110);doc.text(u.role,12+doc.getTextWidth(name)+3,y+6);}
+      doc.setTextColor(220,225,235);doc.setFont('helvetica','normal');doc.setFontSize(8);
+      doc.text(lines,12,y+12);
+      y+=bh+4;
+    });
+    // Footer
+    const total=doc.internal.getNumberOfPages();
+    for(let p=1;p<=total;p++){
+      doc.setPage(p);
+      doc.setFillColor(16,20,30);doc.rect(0,ph-10,pw,10,'F');
+      doc.setTextColor(90,100,118);doc.setFontSize(6);doc.setFont('helvetica','normal');
+      doc.text('Gym At Your Home™ — Admin Chat Monitor Export — Confidential',6,ph-4);
+      doc.setTextColor(212,255,0);doc.text(`${p}/${total}`,pw-6,ph-4,{align:'right'});
+    }
+    const safeName=titleStr.replace(/[^a-z0-9]/gi,'_').substring(0,30);
+    doc.save(`GYH_Chat_${safeName}_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast('✅ Conversation exported!','success');
+  }catch(e){toast('Export error: '+e.message,'error');}
+}
+
+// ── EXPORT FULL CHAT REPORT ───────────────────────────────────
+async function exportChatReport(){
+  toast('Building chat activity report…','info');
+  const chats=window._monitorChats||[];
+  const groups=window._monitorGroups||[];
+  const users=window._monitorUsers||[];
+  const userMap=window._monitorUserMap||{};
+  try{
+    const{jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+    const pw=doc.internal.pageSize.getWidth();const ph=doc.internal.pageSize.getHeight();
+    let y=0;
+    function newPage(){doc.addPage();doc.setFillColor(11,11,11);doc.rect(0,0,pw,ph,'F');doc.setFillColor(212,255,0);doc.rect(0,0,4,ph,'F');y=18;}
+    function chk(n=20){if(y+n>ph-14)newPage();}
+    // Cover
+    doc.setFillColor(11,11,11);doc.rect(0,0,pw,ph,'F');
+    doc.setFillColor(212,255,0);doc.rect(0,0,4,ph,'F');
+    doc.setTextColor(212,255,0);doc.setFontSize(20);doc.setFont('helvetica','bold');
+    doc.text('CHAT ACTIVITY REPORT',pw/2,50,{align:'center'});
+    doc.setTextColor(200,200,210);doc.setFontSize(10);doc.setFont('helvetica','normal');
+    doc.text('GYM AT YOUR HOME™ — ADMIN MONITOR',pw/2,60,{align:'center'});
+    doc.setFillColor(22,28,40);doc.roundedRect(15,70,pw-30,30,3,3,'F');
+    const statsTexts=[`Total DM Conversations: ${chats.length}`,`Total Group Chats: ${groups.length}`,`Total Registered Users: ${users.length}`,`Report Generated: ${new Date().toLocaleString('en-IN')}`];
+    statsTexts.forEach((t,i)=>{doc.setTextColor(200,210,220);doc.setFontSize(9);doc.text(t,pw/2,82+i*5,{align:'center'});});
+    newPage();
+    // DM Conversations table
+    doc.setFillColor(22,28,40);doc.roundedRect(4,y,pw-8,12,1,1,'F');
+    doc.setTextColor(212,255,0);doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('DM CONVERSATIONS',8,y+9);y+=16;
+    doc.setFillColor(30,38,55);doc.rect(4,y,pw-8,8,'F');
+    doc.setTextColor(160,168,185);doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text('PARTICIPANTS',8,y+5.5);doc.text('LAST MESSAGE',110,y+5.5);doc.text('DATE',pw-10,y+5.5,{align:'right'});y+=9;
+    chats.forEach((c,i)=>{
+      chk(8);
+      if(i%2===0){doc.setFillColor(16,22,33);doc.rect(4,y,pw-8,8,'F');}
+      const parts=(c.participants||[]).map(uid=>{const u=userMap[uid];return u?u.name||u.email||uid.substring(0,6):uid.substring(0,6);}).join(' ↔ ');
+      doc.setTextColor(220,225,235);doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+      doc.text(parts.substring(0,50),8,y+5.5);
+      doc.setTextColor(160,168,185);
+      doc.text((c.lastMessage||'—').substring(0,30),110,y+5.5);
+      doc.text(c.lastMessageTime?fmtDate(c.lastMessageTime):'—',pw-6,y+5.5,{align:'right'});
+      y+=8;
+    });
+    y+=8;chk(12);
+    doc.setFillColor(22,28,40);doc.roundedRect(4,y,pw-8,12,1,1,'F');
+    doc.setTextColor(170,102,255);doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text('GROUP CHATS',8,y+9);y+=16;
+    doc.setFillColor(30,38,55);doc.rect(4,y,pw-8,8,'F');
+    doc.setTextColor(160,168,185);doc.setFontSize(7);doc.setFont('helvetica','bold');
+    doc.text('GROUP NAME',8,y+5.5);doc.text('DESCRIPTION',70,y+5.5);doc.text('MEMBERS',140,y+5.5);doc.text('CREATED BY',160,y+5.5);y+=9;
+    groups.forEach((g,i)=>{
+      chk(8);
+      if(i%2===0){doc.setFillColor(16,22,33);doc.rect(4,y,pw-8,8,'F');}
+      doc.setTextColor(220,225,235);doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+      doc.text((g.name||'—').substring(0,25),8,y+5.5);
+      doc.setTextColor(160,168,185);
+      doc.text((g.description||'—').substring(0,28),70,y+5.5);
+      doc.text(String(g.memberIds?.length||0),148,y+5.5);
+      doc.text((g.createdByName||'—').substring(0,16),160,y+5.5);
+      y+=8;
+    });
+    // Footer
+    const total=doc.internal.getNumberOfPages();
+    for(let p=1;p<=total;p++){
+      doc.setPage(p);
+      doc.setFillColor(16,20,30);doc.rect(0,ph-10,pw,10,'F');
+      doc.setTextColor(90,100,118);doc.setFontSize(6);doc.setFont('helvetica','normal');
+      doc.text('Gym At Your Home™ — Chat Activity Report — Confidential',6,ph-4);
+      doc.setTextColor(212,255,0);doc.text(`${p}/${total}`,pw-6,ph-4,{align:'right'});
+    }
+    doc.save(`GYH_Chat_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+    toast('✅ Report exported!','success');
+  }catch(e){toast('Export error: '+e.message,'error');}
+}
 // ══════════════════════════════════════════════════════════════
 // TIME SLOTS — Full updated section
 // Find:   async function slots(){
