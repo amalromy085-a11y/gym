@@ -37,6 +37,498 @@ window.FN={
 };
 document.dispatchEvent(new Event('fbReady'));
 </script>
+
+:root {
+  --bg:          #000000;
+  --surface:     #0a0a0a;
+  --card:        #111111;
+  --border:      #1a1a1a;
+  --border2:     #222222;
+  --text:        #f5f5f5;
+  --muted:       #888888;
+  --muted2:      #444444;
+  --accent:      #ffffff;
+  --accent-dim:  rgba(255,255,255,0.07);
+  --green:       #cccccc;
+  --green-dim:   rgba(200,200,200,0.10);
+  --red:         #ff4455;
+  --red-dim:     rgba(255,68,85,0.12);
+  --yellow:      #e0e0e0;
+  --yellow-dim:  rgba(224,224,224,0.10);
+  --blue:        #b0b0b0;
+  --blue-dim:    rgba(176,176,176,0.10);
+  --purple:      #d0d0d0;
+  --purple-dim:  rgba(208,208,208,0.10);
+  --orange:      #c8c8c8;
+  --orange-dim:  rgba(200,200,200,0.10);
+  --pink:        #e8e8e8;
+  --pink-dim:    rgba(232,232,232,0.10);
+  --sw:          250px;
+}
+
+/* ── CANVAS ─────────────────────────────────────────────────── */
+#gym-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* ── BODY ───────────────────────────────────────────────────── */
+body { background: #000000 !important; }
+.main { background: transparent !important; }
+.page { position: relative; z-index: 1; }
+
+/* ── KEYFRAMES ──────────────────────────────────────────────── */
+@keyframes shimmerBW {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200%  center; }
+}
+@keyframes glowPulse {
+  0%,100% { opacity: 0.6; }
+  50%      { opacity: 1.0; }
+}
+@keyframes scanLine {
+  0%   { transform: translateY(-100%); opacity: 0;   }
+  10%  { opacity: 1; }
+  90%  { opacity: 0.4; }
+  100% { transform: translateY(100vh);  opacity: 0;   }
+}
+@keyframes energyPulse {
+  0%,100% { opacity: 0; transform: scaleX(0); }
+  40%,60% { opacity: 1; transform: scaleX(1); }
+}
+@keyframes fadeFlicker {
+  0%,100% { opacity: 0.04; }
+  50%      { opacity: 0.09; }
+}
+
+/* ── SCANLINE OVERLAY ───────────────────────────────────────── */
+#gym-scanline {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(255,255,255,0.008) 3px,
+    rgba(255,255,255,0.008) 4px
+  );
+}
+
+/* ── LOADER ─────────────────────────────────────────────────── */
+#loader { background: #000000 !important; }
+.ld-logo {
+  filter: drop-shadow(0 0 20px rgba(255,255,255,0.5))
+          drop-shadow(0 0 60px rgba(255,255,255,0.15))
+          grayscale(1) brightness(2);
+  animation: ldpulse 1.4s ease-in-out infinite, glowPulse 2s ease-in-out infinite;
+}
+.ld-name {
+  background: linear-gradient(90deg, #666, #fff, #aaa, #fff, #666);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerBW 2.5s linear infinite;
+}
+.ld-bar  { background: rgba(255,255,255,0.08) !important; }
+.ld-fill {
+  background: linear-gradient(90deg,#333,#fff,#aaa,#fff,#333);
+  background-size: 200% auto;
+  animation: ldfill 1.6s ease forwards, shimmerBW 1.6s linear infinite;
+}
+
+/* ── SIDEBAR ────────────────────────────────────────────────── */
+.sidebar {
+  background: rgba(5,5,5,0.97) !important;
+  border-right: 1px solid rgba(255,255,255,0.06) !important;
+  backdrop-filter: blur(24px);
+  box-shadow: 4px 0 48px rgba(0,0,0,0.9);
+}
+.sb-head {
+  background: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+}
+.sb-brand {
+  background: linear-gradient(90deg,#888,#fff,#aaa,#fff,#888);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerBW 5s linear infinite;
+}
+.ni.active {
+  background: linear-gradient(90deg,rgba(255,255,255,0.10),rgba(255,255,255,0.03)) !important;
+  border-left-color: #ffffff !important;
+  box-shadow: inset 0 0 30px rgba(255,255,255,0.03);
+}
+.ni:hover        { background: rgba(255,255,255,0.04) !important; }
+.sb-foot         { border-top: 1px solid rgba(255,255,255,0.05) !important; }
+.sb-user         { border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
+.nav-sec-lbl     { color: rgba(255,255,255,0.28) !important; }
+
+/* ── TOPBAR ─────────────────────────────────────────────────── */
+.topbar {
+  background: rgba(4,4,4,0.94) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+  backdrop-filter: blur(24px);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.8);
+}
+.tb-title {
+  background: linear-gradient(90deg, #fff, #aaa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.tb-date  { color: rgba(255,255,255,0.35) !important; }
+.notif-btn,.theme-btn {
+  border-color: rgba(255,255,255,0.1) !important;
+  color: rgba(255,255,255,0.6) !important;
+}
+.notif-btn:hover,.theme-btn:hover {
+  border-color: rgba(255,255,255,0.5) !important;
+  color: #fff !important;
+}
+
+/* ── CARDS ──────────────────────────────────────────────────── */
+.card {
+  background: rgba(10,10,10,0.85) !important;
+  border: 1px solid rgba(255,255,255,0.055) !important;
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 8px 32px rgba(0,0,0,0.6),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: border-color .3s, box-shadow .3s, transform .2s;
+}
+.card:hover {
+  border-color: rgba(255,255,255,0.12) !important;
+  box-shadow: 0 14px 44px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04);
+}
+.card-hd { border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
+.card-title { color: rgba(255,255,255,0.85) !important; }
+
+/* ── STAT CARDS ─────────────────────────────────────────────── */
+.sc {
+  background: rgba(8,8,8,0.90) !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+  backdrop-filter: blur(14px);
+  transition: transform .2s, box-shadow .2s;
+}
+.sc:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(0,0,0,0.7); }
+.sc-a::before,.sc-g::before,.sc-b::before,
+.sc-p::before,.sc-y::before,.sc-o::before,
+.sc-r::before {
+  background: linear-gradient(90deg, rgba(255,255,255,0.6), rgba(255,255,255,0.3)) !important;
+}
+.sc-r::before { background: linear-gradient(90deg, #ff4455, #cc2233) !important; }
+.sc-val {
+  background: linear-gradient(135deg, #ffffff, #aaaaaa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.sc-lbl { color: rgba(255,255,255,0.35) !important; }
+.sc-sub { color: rgba(255,255,255,0.3) !important; }
+.sc-ico { color: rgba(255,255,255,0.08) !important; }
+
+/* ── BUTTONS ────────────────────────────────────────────────── */
+.btn-p {
+  background: linear-gradient(135deg,#ffffff,#cccccc) !important;
+  box-shadow: 0 4px 20px rgba(255,255,255,0.18);
+  color: #000000 !important;
+}
+.btn-p:hover {
+  box-shadow: 0 6px 30px rgba(255,255,255,0.35);
+  filter: brightness(1.06) !important;
+}
+.btn-gr {
+  background: linear-gradient(135deg,#e0e0e0,#aaaaaa) !important;
+  color: #000 !important;
+  box-shadow: 0 4px 14px rgba(255,255,255,0.12);
+}
+.btn-d {
+  background: linear-gradient(135deg,#ff4455,#cc2233) !important;
+  box-shadow: 0 4px 14px rgba(255,68,85,0.22);
+}
+.btn-g {
+  background: transparent !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  color: rgba(255,255,255,0.7) !important;
+}
+.btn-g:hover {
+  border-color: rgba(255,255,255,0.5) !important;
+  color: #fff !important;
+}
+.btn-bl,.btn-pu,.btn-or,.btn-yw,.btn-pk {
+  background: linear-gradient(135deg,#c0c0c0,#888888) !important;
+  color: #000 !important;
+}
+
+/* ── MODALS ─────────────────────────────────────────────────── */
+.mo { background: rgba(0,0,0,0.92) !important; backdrop-filter: blur(12px); }
+.mb {
+  background: rgba(8,8,8,0.99) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.95),
+    0 0 0 1px rgba(255,255,255,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.mo-title {
+  background: linear-gradient(90deg,#fff,#999);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.mo-x { color: rgba(255,255,255,0.4) !important; }
+.mo-x:hover { color: #fff !important; }
+
+/* ── INPUTS ─────────────────────────────────────────────────── */
+.fi,.fs,.fta {
+  background: rgba(5,5,5,0.85) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  color: #f0f0f0 !important;
+}
+.fi::placeholder { color: rgba(255,255,255,0.25) !important; }
+.fi:focus,.fs:focus,.fta:focus {
+  border-color: rgba(255,255,255,0.4) !important;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+}
+.fs option { background: #111 !important; }
+label,.fl { color: rgba(255,255,255,0.45) !important; letter-spacing: 1px; }
+
+/* ── TABLE ──────────────────────────────────────────────────── */
+thead th {
+  background: rgba(255,255,255,0.025) !important;
+  color: rgba(255,255,255,0.4) !important;
+}
+tbody td { color: rgba(255,255,255,0.8) !important; }
+tbody tr:hover { background: rgba(255,255,255,0.03) !important; }
+tbody tr:last-child td { border-bottom: none; }
+
+/* ── BADGES ─────────────────────────────────────────────────── */
+.b-g,.b-y,.b-b,.b-p,.b-o,.b-pk,.b-a {
+  background: rgba(255,255,255,0.07) !important;
+  color: rgba(255,255,255,0.85) !important;
+}
+.b-gray {
+  background: rgba(255,255,255,0.05) !important;
+  color: rgba(255,255,255,0.45) !important;
+}
+.b-r {
+  background: rgba(255,68,85,0.12) !important;
+  color: #ff8899 !important;
+}
+
+/* ── TABS ───────────────────────────────────────────────────── */
+.tabs { border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+.tab { color: rgba(255,255,255,0.35) !important; }
+.tab.active { color: #fff !important; border-bottom-color: #fff !important; }
+.tab:hover  { color: rgba(255,255,255,0.7) !important; }
+
+/* ── CHAT ───────────────────────────────────────────────────── */
+.chat-layout,.monitor-layout {
+  background: rgba(6,6,6,0.92) !important;
+  border-color: rgba(255,255,255,0.055) !important;
+  backdrop-filter: blur(16px);
+}
+.chat-sidebar,.chat-header,.chat-input-area,
+.monitor-sidebar,.monitor-header {
+  background: rgba(6,6,6,0.95) !important;
+  border-color: rgba(255,255,255,0.05) !important;
+}
+.msg-out {
+  background: linear-gradient(135deg,#ffffff,#dddddd) !important;
+  color: #000 !important;
+  box-shadow: 0 4px 18px rgba(255,255,255,0.12);
+}
+.msg-in {
+  background: rgba(16,16,16,0.92) !important;
+  border-color: rgba(255,255,255,0.07) !important;
+  color: #eee !important;
+}
+.chat-input {
+  background: rgba(5,5,5,0.85) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #f0f0f0 !important;
+}
+.chat-input:focus { border-color: rgba(255,255,255,0.35) !important; }
+.chat-item:hover  { background: rgba(255,255,255,0.04) !important; }
+.chat-item.active { background: rgba(255,255,255,0.08) !important; border-left-color: #fff !important; }
+
+/* ── LEADERBOARD ────────────────────────────────────────────── */
+.lb-row {
+  background: rgba(10,10,10,0.85) !important;
+  border-color: rgba(255,255,255,0.05) !important;
+  backdrop-filter: blur(8px);
+  transition: all .2s;
+}
+.lb-row:hover { transform: translateX(5px); border-color: rgba(255,255,255,0.18) !important; }
+.lb-bar-fill  { background: linear-gradient(90deg,#888,#fff) !important; }
+.lb-stars     { color: #ccc !important; }
+
+/* ── STAFF & SLOT CARDS ─────────────────────────────────────── */
+.staff-card,.slot-card {
+  background: rgba(10,10,10,0.82) !important;
+  border-color: rgba(255,255,255,0.05) !important;
+  backdrop-filter: blur(8px);
+  transition: all .2s;
+}
+.staff-card:hover,.slot-card:hover {
+  border-color: rgba(255,255,255,0.16) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.7);
+}
+.slot-time { color: #fff !important; }
+
+/* ── PROGRESS BARS ──────────────────────────────────────────── */
+.pb        { background: rgba(255,255,255,0.06) !important; }
+.pb-fill   { background: linear-gradient(90deg,#666,#fff) !important; }
+
+/* ── TOASTS ─────────────────────────────────────────────────── */
+.toast {
+  background: rgba(8,8,8,0.99) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 36px rgba(0,0,0,0.8);
+  color: #eee !important;
+}
+.toast-ok   { border-left-color: #fff !important; }
+.toast-err  { border-left-color: #ff4455 !important; }
+.toast-info { border-left-color: #aaa !important; }
+.toast-warn { border-left-color: #ccc !important; }
+
+/* ── NOTIF PANEL ────────────────────────────────────────────── */
+.notif-panel {
+  background: rgba(6,6,6,0.99) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  backdrop-filter: blur(24px);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.9);
+}
+.notif-item.unread { border-left: 3px solid #ffffff; }
+.notif-header { border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+
+/* ── COLLAPSIBLE ────────────────────────────────────────────── */
+.collapsible-hd {
+  background: rgba(10,10,10,0.85) !important;
+  border-color: rgba(255,255,255,0.05) !important;
+  backdrop-filter: blur(8px);
+}
+.collapsible-hd:hover { border-color: rgba(255,255,255,0.12) !important; }
+.collapsible-body {
+  background: rgba(8,8,8,0.75) !important;
+  border-color: rgba(255,255,255,0.03) !important;
+}
+
+/* ── LOGIN ──────────────────────────────────────────────────── */
+#login-page {
+  background:
+    radial-gradient(ellipse 70% 60% at 85% 8%,  rgba(255,255,255,0.06) 0%,transparent 55%),
+    radial-gradient(ellipse 55% 70% at 10% 92%, rgba(255,255,255,0.03) 0%,transparent 55%),
+    #000000 !important;
+}
+.lc {
+  background: rgba(6,6,6,0.97) !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  backdrop-filter: blur(24px);
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.95),
+    0 0 0 1px rgba(255,255,255,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.lc h2 {
+  background: linear-gradient(90deg,#fff,#aaa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── DOTS DROPDOWN ──────────────────────────────────────────── */
+.dots-dropdown {
+  background: rgba(8,8,8,0.99) !important;
+  border-color: rgba(255,255,255,0.07) !important;
+  backdrop-filter: blur(24px);
+}
+.dots-item:hover { background: rgba(255,255,255,0.07) !important; color: #fff !important; }
+
+/* ── AC DROPDOWN ────────────────────────────────────────────── */
+.ac-dropdown {
+  background: rgba(8,8,8,0.99) !important;
+  border-color: rgba(255,255,255,0.07) !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.85);
+}
+.ac-item:hover,.ac-item.selected {
+  background: rgba(255,255,255,0.07) !important;
+  color: #fff !important;
+}
+
+/* ── REMINDER TOAST ─────────────────────────────────────────── */
+.reminder-toast {
+  background: rgba(6,6,6,0.99) !important;
+  border-color: rgba(255,255,255,0.2) !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 12px 48px rgba(255,255,255,0.08);
+}
+.reminder-toast-title { color: #ffffff !important; }
+
+/* ── MISSED BANNER ──────────────────────────────────────────── */
+.missed-reason-box {
+  background: rgba(8,8,8,0.99) !important;
+  border-color: rgba(255,68,85,0.5) !important;
+  backdrop-filter: blur(24px);
+}
+.missed-banner {
+  background: linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01)) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+}
+
+/* ── STAR RATING ────────────────────────────────────────────── */
+.star-btn.active,.mini-star-btn.active {
+  color: #ffffff !important;
+  filter: none !important;
+}
+.star-rating-widget {
+  background: rgba(8,8,8,0.8) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+/* ── SCROLLBAR ──────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg,rgba(255,255,255,0.3),rgba(255,255,255,0.1));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
+
+/* ── ROLE COLORS OVERRIDE (monochrome) ──────────────────────── */
+.r-admin         { background:rgba(255,255,255,0.08)!important; color:rgba(255,255,255,0.9)!important; }
+.r-coordinator   { background:rgba(255,255,255,0.06)!important; color:rgba(255,255,255,0.75)!important; }
+.r-coordinatorhead{background:rgba(255,255,255,0.07)!important; color:rgba(255,255,255,0.8)!important; }
+.r-trainer       { background:rgba(255,255,255,0.05)!important; color:rgba(255,255,255,0.7)!important; }
+.r-client        { background:rgba(255,255,255,0.04)!important; color:rgba(255,255,255,0.65)!important; }
+
+/* ── SCANLINE ───────────────────────────────────────────────── */
+#gym-scanline {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(255,255,255,0.007) 3px, rgba(255,255,255,0.007) 4px
+  );
+}
+
+/* ── ENERGY LINES ───────────────────────────────────────────── */
+.gym-energy-line {
+  position: fixed; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg,transparent,rgba(255,255,255,0.12),rgba(255,255,255,0.25),rgba(255,255,255,0.12),transparent);
+  pointer-events: none; z-index: 0;
+  animation: energyPulse linear infinite;
+  transform-origin: left;
+}
 <style>
 :root{
   --bg:#0b0b0b;--surface:#141414;--card:#1c1c1c;--border:#272727;--border2:#333;
@@ -4536,6 +5028,297 @@ document.addEventListener('fbReady',()=>{
   });
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&$('login-page').style.display==='flex')doLogin()});
+
+(function initGymBWTheme(){
+
+  // ── SCANLINE OVERLAY ─────────────────────────────────────
+  const sl = document.createElement('div');
+  sl.id = 'gym-scanline';
+  document.body.prepend(sl);
+
+  // ── CANVAS ───────────────────────────────────────────────
+  const canvas = document.createElement('canvas');
+  canvas.id = 'gym-canvas';
+  document.body.prepend(canvas);
+  const ctx = canvas.getContext('2d');
+
+  function resize(){
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const W = () => canvas.width;
+  const H = () => canvas.height;
+
+  // ── PARTICLES ────────────────────────────────────────────
+  const particles = Array.from({length:70}, () => ({
+    x  : Math.random() * window.innerWidth,
+    y  : Math.random() * window.innerHeight,
+    r  : Math.random() * 1.4 + 0.3,
+    vx : (Math.random()-0.5) * 0.22,
+    vy : (Math.random()-0.5) * 0.22,
+    a  : Math.random() * 0.35 + 0.08,
+  }));
+
+  // ── ENERGY SWEEP LINES ───────────────────────────────────
+  const sweepLines = Array.from({length:5}, () => ({
+    y    : Math.random() * window.innerHeight,
+    prog : Math.random(),
+    speed: 0.0003 + Math.random() * 0.0003,
+    alpha: 0.012 + Math.random() * 0.018,
+  }));
+
+  // ── HEX GRID ─────────────────────────────────────────────
+  function drawHexGrid(w, h){
+    const s = 48, hx = s*1.732, vy = s*1.5;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.022)';
+    ctx.lineWidth = 0.5;
+    for(let row=-1; row<h/vy+2; row++){
+      for(let col=-1; col<w/hx+2; col++){
+        const ox = row%2===0 ? 0 : hx/2;
+        const cx = col*hx+ox, cy = row*vy;
+        ctx.beginPath();
+        for(let i=0;i<6;i++){
+          const a=Math.PI/3*i-Math.PI/6;
+          const px=cx+s*Math.cos(a), py=cy+s*Math.sin(a);
+          i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+        }
+        ctx.closePath(); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
+
+  // ── DRAW DUMBBELL ─────────────────────────────────────────
+  function drawDumbbell(x, y, size, alpha, angle=0){
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#ffffff';
+    ctx.translate(x,y); ctx.rotate(angle);
+    // bar
+    ctx.lineWidth = size*0.055; ctx.lineCap='round';
+    ctx.beginPath(); ctx.moveTo(-size*.58,0); ctx.lineTo(size*.58,0); ctx.stroke();
+    // inner plates
+    ctx.lineWidth = size*0.16;
+    ctx.beginPath(); ctx.moveTo(-size*.42,-size*.20); ctx.lineTo(-size*.42,size*.20); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( size*.42,-size*.20); ctx.lineTo( size*.42,size*.20); ctx.stroke();
+    // outer plates
+    ctx.lineWidth = size*0.22;
+    ctx.beginPath(); ctx.moveTo(-size*.58,-size*.28); ctx.lineTo(-size*.58,size*.28); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo( size*.58,-size*.28); ctx.lineTo( size*.58,size*.28); ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── DRAW RUNNER ───────────────────────────────────────────
+  function drawRunner(x, y, size, alpha, phase=0){
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = size*0.065;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const legSwing = Math.sin(phase) * 0.25;
+    // head
+    ctx.beginPath(); ctx.arc(x, y-size*.44, size*.11, 0, Math.PI*2); ctx.stroke();
+    // body
+    ctx.beginPath(); ctx.moveTo(x, y-size*.33); ctx.lineTo(x-size*.04, y+size*.02); ctx.stroke();
+    // arms
+    ctx.beginPath(); ctx.moveTo(x, y-size*.22); ctx.lineTo(x-size*.24, y-size*.06+legSwing*size*.3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, y-size*.22); ctx.lineTo(x+size*.20, y-size*.34-legSwing*size*.2); ctx.stroke();
+    // legs
+    ctx.beginPath(); ctx.moveTo(x-size*.04,y+size*.02); ctx.lineTo(x-size*.22+legSwing*size*.3,y+size*.26); ctx.lineTo(x-size*.30,y+size*.46); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-size*.04,y+size*.02); ctx.lineTo(x+size*.18-legSwing*size*.2,y+size*.22); ctx.lineTo(x+size*.24,y+size*.46); ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── DRAW OVERHEAD PRESS ───────────────────────────────────
+  function drawLifter(x, y, size, alpha){
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = size*0.065;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    // head
+    ctx.beginPath(); ctx.arc(x, y-size*.5, size*.11,0,Math.PI*2); ctx.stroke();
+    // body
+    ctx.beginPath(); ctx.moveTo(x,y-size*.39); ctx.lineTo(x,y+size*.02); ctx.stroke();
+    // arms up
+    ctx.beginPath(); ctx.moveTo(x,y-size*.28); ctx.lineTo(x-size*.28,y-size*.52); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y-size*.28); ctx.lineTo(x+size*.28,y-size*.52); ctx.stroke();
+    // barbell
+    drawDumbbell(x, y-size*.60, size*.68, 1.0, 0);
+    // legs
+    ctx.lineWidth = size*0.065;
+    ctx.beginPath(); ctx.moveTo(x,y+size*.02); ctx.lineTo(x-size*.20,y+size*.40); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y+size*.02); ctx.lineTo(x+size*.20,y+size*.40); ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── DRAW KETTLEBELL ───────────────────────────────────────
+  function drawKettlebell(x, y, size, alpha){
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = size*0.065;
+    ctx.lineCap = 'round';
+    // ball
+    ctx.beginPath(); ctx.arc(x, y+size*.1, size*.28, 0, Math.PI*2); ctx.stroke();
+    // handle arch
+    ctx.beginPath();
+    ctx.arc(x, y-size*.08, size*.18, Math.PI, 0, false);
+    ctx.stroke();
+    // handle sides
+    ctx.lineWidth = size*0.07;
+    ctx.beginPath(); ctx.moveTo(x-size*.18, y-size*.08); ctx.lineTo(x-size*.22, y+size*.06); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+size*.18, y-size*.08); ctx.lineTo(x+size*.22, y+size*.06); ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── DRAW BARBELL ROW ──────────────────────────────────────
+  function drawBarbellRow(x, y, size, alpha){
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = size*0.065;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    // person bent forward
+    ctx.beginPath(); ctx.arc(x-size*.28, y-size*.18, size*.10, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x-size*.28,y-size*.08); ctx.lineTo(x+size*.12,y); ctx.stroke(); // torso
+    ctx.beginPath(); ctx.moveTo(x-size*.28,y-size*.08); ctx.lineTo(x-size*.22,y+size*.38); ctx.stroke(); // left leg
+    ctx.beginPath(); ctx.moveTo(x+size*.12,y); ctx.lineTo(x+size*.18,y+size*.38); ctx.stroke(); // right leg
+    // arms pulling bar
+    ctx.beginPath(); ctx.moveTo(x-size*.1,y+size*.05); ctx.lineTo(x-size*.06,y-.3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x+size*.05,y+size*.04); ctx.lineTo(x+size*.08,y+size*.28); ctx.stroke();
+    // barbell
+    drawDumbbell(x+size*.04, y+size*.30, size*.75, 1);
+    ctx.restore();
+  }
+
+  // ── DRAW JUMP ROPE ────────────────────────────────────────
+  function drawJumpRope(x, y, size, alpha, phase){
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = size*0.06;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    // person
+    ctx.beginPath(); ctx.arc(x,y-size*.48,size*.10,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y-size*.38); ctx.lineTo(x,y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y-size*.22); ctx.lineTo(x-size*.28,y-size*.14); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y-size*.22); ctx.lineTo(x+size*.28,y-size*.14); ctx.stroke();
+    // jumping legs
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x-size*.14,y+size*.30); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+size*.14,y+size*.30); ctx.stroke();
+    // rope curve
+    ctx.lineWidth = size*0.04;
+    ctx.beginPath();
+    ctx.moveTo(x-size*.28,y-size*.14);
+    ctx.quadraticCurveTo(x+Math.sin(phase)*size*.05, y+size*.50+Math.cos(phase)*size*.1, x+size*.28,y-size*.14);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── FIGURE DEFINITIONS ────────────────────────────────────
+  const FIGURES = [
+    {type:'lifter',   xr:.88, yr:.22, size:88,  aBase:.05,  phase:0,   speed:.006},
+    {type:'runner',   xr:.07, yr:.68, size:82,  aBase:.045, phase:1.2, speed:.012},
+    {type:'dumbbell', xr:.10, yr:.20, size:64,  aBase:.04,  phase:0.5, speed:.005, angle: Math.PI/12},
+    {type:'kettlebell',xr:.82,yr:.70, size:72,  aBase:.04,  phase:2.0, speed:.007},
+    {type:'lifter',   xr:.48, yr:.85, size:70,  aBase:.035, phase:1.5, speed:.006},
+    {type:'dumbbell', xr:.65, yr:.15, size:52,  aBase:.032, phase:3.0, speed:.004, angle:-Math.PI/10},
+    {type:'runner',   xr:.30, yr:.40, size:58,  aBase:.03,  phase:2.8, speed:.010},
+    {type:'barbellrow',xr:.72,yr:.48, size:68,  aBase:.033, phase:0.8, speed:.005},
+    {type:'jumprope', xr:.18, yr:.88, size:66,  aBase:.035, phase:1.0, speed:.018},
+    {type:'kettlebell',xr:.55,yr:.50, size:48,  aBase:.025, phase:3.5, speed:.006},
+    {type:'dumbbell', xr:.92, yr:.45, size:44,  aBase:.025, phase:2.2, speed:.004, angle:Math.PI/6},
+  ];
+
+  let t = 0;
+
+  function draw(){
+    const w=W(), h=H();
+    ctx.clearRect(0,0,w,h);
+
+    // ── radial glows ──
+    const makeGlow=(x,y,r,a)=>{
+      const g=ctx.createRadialGradient(x,y,0,x,y,r);
+      g.addColorStop(0,`rgba(255,255,255,${a})`);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+    };
+    makeGlow(w*.88, h*.06, w*.55, 0.05);
+    makeGlow(w*.08, h*.92, w*.45, 0.03);
+    makeGlow(w*.50, h*.50, w*.40, 0.015);
+
+    // ── hex grid ──
+    drawHexGrid(w,h);
+
+    // ── sweep lines ──
+    sweepLines.forEach(line=>{
+      line.prog += line.speed;
+      if(line.prog>1) line.prog=0;
+      const p=line.prog;
+      const g=ctx.createLinearGradient(0,0,w,0);
+      g.addColorStop(Math.max(0,p-.28),'transparent');
+      g.addColorStop(p, `rgba(255,255,255,${line.alpha})`);
+      g.addColorStop(Math.min(1,p+.28),'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,line.y,w,1.5);
+    });
+
+    // ── particles ──
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0)p.x=w; if(p.x>w)p.x=0;
+      if(p.y<0)p.y=h; if(p.y>h)p.y=0;
+      const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4);
+      g.addColorStop(0,`rgba(255,255,255,${p.a})`);
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r*4,0,Math.PI*2); ctx.fill();
+    });
+
+    // ── gym figures ──
+    t += 0.01;
+    FIGURES.forEach(f=>{
+      const floatY = Math.sin(t*f.speed*160 + f.phase) * 12;
+      const alpha  = f.aBase + Math.sin(t*80*f.speed*.6 + f.phase) * 0.012;
+      const x=f.xr*w, y=f.yr*h+floatY;
+      ctx.save();
+      if(f.type==='dumbbell')       drawDumbbell(x,y,f.size,alpha,f.angle||0);
+      else if(f.type==='runner')    drawRunner(x,y,f.size,alpha,t*f.speed*200+f.phase);
+      else if(f.type==='lifter')    drawLifter(x,y,f.size,alpha);
+      else if(f.type==='kettlebell')drawKettlebell(x,y,f.size,alpha);
+      else if(f.type==='barbellrow')drawBarbellRow(x,y,f.size,alpha);
+      else if(f.type==='jumprope')  drawJumpRope(x,y,f.size,alpha,t*f.speed*200+f.phase);
+      ctx.restore();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+
+  // ── CORNER GLOWS (DOM) ────────────────────────────────────
+  [
+    'position:fixed;top:0;right:0;width:600px;height:600px;background:radial-gradient(ellipse at top right,rgba(255,255,255,0.055) 0%,transparent 65%);pointer-events:none;z-index:0',
+    'position:fixed;bottom:0;left:0;width:500px;height:500px;background:radial-gradient(ellipse at bottom left,rgba(255,255,255,0.035) 0%,transparent 65%);pointer-events:none;z-index:0',
+  ].forEach(css=>{ const d=document.createElement('div'); d.style.cssText=css; document.body.appendChild(d); });
+
+  // ── ENERGY LINES (DOM) ────────────────────────────────────
+  [[22,8],[52,3.5],[80,6]].forEach(([pct,dur],i)=>{
+    const el=document.createElement('div');
+    el.className='gym-energy-line';
+    el.style.cssText=`top:${pct}%;animation-duration:${dur}s;animation-delay:${i*1.5}s`;
+    document.body.appendChild(el);
+  });
+
+  console.log('%c🏋️ GYM AT YOUR HOME — Black & White Theme Active','color:#fff;font-weight:bold;font-size:13px;background:#000;padding:4px 14px;border:1px solid #333;border-radius:4px');
+
+})();
+
+*/
 </script>
 </body>
 </html>
