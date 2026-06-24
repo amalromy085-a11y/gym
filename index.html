@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GYH | Operations Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+:root{
+  --bg:#f4f6f8; --surface:#ffffff; --border:#e3e6eb; --border-soft:#edf0f3;
+  --text:#171f2b; --text-dim:#5b6675; --text-mute:#97a1b0;
+  --primary:#1d4ed8; --primary-dim:rgba(29,78,216,.08); --primary-hover:#1741b0;
+  --success:#157a45; --success-dim:rgba(21,122,69,.09);
+  --danger:#c62828; --danger-dim:rgba(198,40,40,.08);
+  --warning:#a8660a; --warning-dim:rgba(168,102,10,.1);
+  --info:#0a7298; --info-dim:rgba(10,114,152,.08);
+  --purple:#6741c9; --purple-dim:rgba(103,65,201,.08);
+  --gray:#5b6675; --gray-dim:rgba(91,102,117,.08);
+  --radius:10px; --radius-sm:7px;
+  --shadow-sm:0 1px 2px rgba(20,30,50,.05);
+  --shadow-md:0 8px 24px rgba(20,30,50,.10);
+}
+body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:14px}
+.mono{font-family:'JetBrains Mono',monospace}
+.icon{display:inline-block;vertical-align:middle;flex:none}
+a{color:var(--primary);text-decoration:none}
+h1,h2,h3,h4{margin:0;font-weight:700;letter-spacing:-.2px}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#d4d8de;border-radius:6px}
+::-webkit-scrollbar-track{background:transparent}
+
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:
+  radial-gradient(circle at 15% 20%, #eef2f9 0%, var(--bg) 45%), var(--bg);padding:20px}
+.login-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px 32px;box-shadow:var(--shadow-md)}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.login-logo .mark{width:38px;height:38px;border-radius:9px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.login-logo .name{font-size:18px;font-weight:800;letter-spacing:-.3px}
+.login-sub{color:var(--text-mute);font-size:12.5px;margin-bottom:26px}
+.demo-box{background:var(--bg);border:1px solid var(--border-soft);border-radius:9px;padding:10px 12px;font-size:11.5px;color:var(--text-dim);margin-top:18px;line-height:1.55}
+.demo-box b{color:var(--text)}
+.login-err{background:var(--danger-dim);color:var(--danger);border-radius:8px;padding:9px 12px;font-size:12.5px;font-weight:600;margin-bottom:14px;display:none}
+
+#shell{display:flex;min-height:100vh}
+.sidebar{width:262px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:40;transition:transform .25s ease}
+.sb-brand{padding:18px 18px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-soft)}
+.sb-brand .mark{width:34px;height:34px;border-radius:8px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none}
+.sb-brand .nm{font-weight:800;font-size:15px;letter-spacing:-.2px}
+.sb-brand .sx{font-size:10.5px;color:var(--text-mute);font-weight:600;letter-spacing:.3px}
+.sb-nav{flex:1;overflow-y:auto;padding:12px 0 8px}
+.nav-sec{margin-bottom:6px}
+.nav-sec-label{font-size:10.5px;font-weight:700;color:var(--text-mute);text-transform:uppercase;letter-spacing:.6px;padding:12px 22px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 10px;border-radius:8px;color:var(--text-dim);font-size:13.3px;font-weight:600;cursor:pointer;user-select:none}
+.nav-item:hover{background:var(--primary-dim);color:var(--primary)}
+.nav-item.active{background:var(--primary);color:#fff}
+.nav-item.disabled{opacity:.5;cursor:not-allowed}
+.nav-item.disabled:hover{background:none;color:var(--text-dim)}
+.nav-soon{margin-left:auto;font-size:9.5px;font-weight:700;background:var(--border-soft);color:var(--text-mute);padding:2px 7px;border-radius:20px;letter-spacing:.3px}
+.sb-foot{border-top:1px solid var(--border-soft);padding:10px}
+.sb-foot .nav-item{color:var(--text-dim)}
+
+.main{flex:1;margin-left:262px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{height:62px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 22px;gap:14px;position:sticky;top:0;z-index:30}
+.tb-title{font-size:18px;font-weight:800;letter-spacing:-.3px;flex:1}
+.tb-date{font-size:12px;color:var(--text-mute);font-weight:500;margin-right:4px}
+.hamb{display:none}
+.page{padding:22px;max-width:1320px;width:100%;margin:0 auto}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(15,20,30,.4);z-index:35}
+
+@media(max-width:900px){
+ .sidebar{transform:translateX(-100%)}
+ body.sb-open .sidebar{transform:translateX(0)}
+ .main{margin-left:0}
+ body.sb-open .sb-overlay{display:block}
+ .hamb{display:flex}
+ .tb-date{display:none}
+ .fgrid{grid-template-columns:1fr!important}
+}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.card+.card{margin-top:16px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.card-head h3{font-size:14.5px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:16px}
+.stat{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--c,var(--primary));border-radius:var(--radius);padding:14px 16px}
+.stat .ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--c-dim,var(--primary-dim));color:var(--c,var(--primary));margin-bottom:10px}
+.stat .v{font-size:23px;font-weight:800;letter-spacing:-.5px;line-height:1}
+.stat .l{font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.4px;margin-top:4px;font-weight:600}
+
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.btn:hover{background:var(--border-soft)}
+.btn-p{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn-p:hover{background:var(--primary-hover)}
+.btn-d{background:#fff;border-color:var(--danger);color:var(--danger)}
+.btn-d:hover{background:var(--danger-dim)}
+.btn-g{background:var(--success);border-color:var(--success);color:#fff}
+.btn-g:hover{opacity:.9}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-icon{padding:7px;width:32px;height:32px;justify-content:center}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.bd-primary{background:var(--primary-dim);color:var(--primary)}
+.bd-success{background:var(--success-dim);color:var(--success)}
+.bd-danger{background:var(--danger-dim);color:var(--danger)}
+.bd-warning{background:var(--warning-dim);color:var(--warning)}
+.bd-info{background:var(--info-dim);color:var(--info)}
+.bd-purple{background:var(--purple-dim);color:var(--purple)}
+.bd-gray{background:var(--border-soft);color:var(--text-dim)}
+
+.input,select,textarea.ta{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13.3px;font-family:inherit;background:#fff;color:var(--text)}
+.input:focus,select:focus,textarea.ta:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-dim)}
+textarea.ta{resize:vertical;min-height:64px}
+label.fl{display:block;font-size:11.5px;font-weight:700;color:var(--text-dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
+.frow{margin-bottom:14px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.hint{font-size:11px;color:var(--text-mute);margin-top:4px}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.toolbar .input,.toolbar select{width:auto;min-width:150px}
+.search-box{position:relative;flex:1;min-width:200px;max-width:320px}
+.search-box .icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-mute)}
+.search-box input{padding-left:34px}
+
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;background:var(--border-soft);color:var(--text-dim);font-size:10.8px;text-transform:uppercase;letter-spacing:.4px;padding:10px 14px;white-space:nowrap;font-weight:700}
+td{padding:11px 14px;border-top:1px solid var(--border-soft);vertical-align:middle;white-space:nowrap}
+tr:hover td{background:#fafbfc}
+.empty-row td{text-align:center;color:var(--text-mute);padding:34px;white-space:normal}
+
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--primary-dim);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex:none}
+.row-flex{display:flex;align-items:center;gap:10px}
+.namecol .nm{font-weight:700;font-size:13.3px}
+.namecol .sub{font-size:11.3px;color:var(--text-mute)}
+
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.tab{padding:9px 14px;font-size:13px;font-weight:700;color:var(--text-mute);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--primary);border-color:var(--primary)}
+
+.section-soon{text-align:center;padding:60px 20px;color:var(--text-mute)}
+.section-soon .ic{width:54px;height:54px;border-radius:14px;background:var(--border-soft);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--text-mute)}
+.section-soon h3{color:var(--text);margin-bottom:6px}
+
+#modalRoot{display:none;position:fixed;inset:0;z-index:100}
+#modalRoot.open{display:block}
+.modal-ov{position:fixed;inset:0;background:rgba(15,20,30,.45);display:flex;align-items:center;justify-content:center;padding:18px;overflow-y:auto}
+.modal{background:#fff;border-radius:14px;width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:var(--shadow-md)}
+.modal-sm{max-width:420px}
+.modal-md{max-width:640px}
+.modal-lg{max-width:940px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:17px 22px;border-bottom:1px solid var(--border);flex:none}
+.modal-head h3{font-size:15.5px}
+.modal-body{padding:22px;overflow-y:auto}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;flex:none}
+
+#toastBox{position:fixed;bottom:18px;right:18px;z-index:200;display:flex;flex-direction:column;gap:8px;max-width:320px}
+.toast{background:#fff;border:1px solid var(--border);border-radius:9px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;font-size:12.8px;font-weight:600;box-shadow:var(--shadow-md);animation:slideIn .25s ease}
+.toast.out{opacity:0;transform:translateX(10px);transition:.25s}
+.t-success{border-left:3px solid var(--success);color:var(--success)}
+.t-error{border-left:3px solid var(--danger);color:var(--danger)}
+.t-info{border-left:3px solid var(--info);color:var(--info)}
+.t-warn{border-left:3px solid var(--warning);color:var(--warning)}
+@keyframes slideIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+
+.notif-wrap{position:relative}
+.bell-dot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--danger);border:1.5px solid #fff}
+.notif-pop{position:absolute;top:46px;right:0;width:320px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-md);z-index:60;display:none;max-height:420px;overflow-y:auto}
+.notif-pop.open{display:block}
+.notif-pop-head{padding:13px 16px;border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between;align-items:center}
+.notif-item{padding:12px 16px;border-bottom:1px solid var(--border-soft);font-size:12.6px;cursor:pointer}
+.notif-item:hover{background:var(--bg)}
+.notif-item.unread{background:var(--primary-dim)}
+.notif-item .t{font-weight:700;margin-bottom:2px}
+.notif-item .b{color:var(--text-dim)}
+.notif-item .ts{color:var(--text-mute);font-size:11px;margin-top:4px}
+
+.usermenu-wrap{position:relative}
+.usermenu{position:absolute;top:48px;right:0;width:190px;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:var(--shadow-md);z-index:60;display:none;overflow:hidden}
+.usermenu.open{display:block}
+.usermenu .it{padding:10px 14px;font-size:13px;font-weight:600;color:var(--text-dim);cursor:pointer;display:flex;align-items:center;gap:8px}
+.usermenu .it:hover{background:var(--bg)}
+
+.day-pill{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;font-size:10.5px;font-weight:700;background:var(--border-soft);color:var(--text-mute)}
+.day-pill.on{background:var(--primary);color:#fff}
+
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px}
+.kv .it .l{font-size:10.8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.3px;font-weight:700;margin-bottom:3px}
+.kv .it .v{font-size:13.6px;font-weight:600}
+
+.divider{height:1px;background:var(--border-soft);margin:16px 0}
+.muted{color:var(--text-mute)}
+body.modal-lock{overflow:hidden}
+.progress-bar{height:6px;border-radius:4px;background:var(--border-soft);overflow:hidden}
+.progress-bar .fill{height:100%}
+</style>
+</head>
+<body>
+
+<div id="toastBox"></div>
+<div id="modalRoot"></div>
+<div id="root"></div>
+
+<script>
+/* ===================================================================
+   ICONS
+=================================================================== */
+const ICN = {
+grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20v-1.4A5 5 0 0 1 8 13.6h2a5 5 0 0 1 5 5V20"/><circle cx="17.3" cy="9" r="2.4"/><path d="M16.3 13.7a4.1 4.1 0 0 1 4.3 4.1V20"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4.5 20v-1a7.5 7.5 0 0 1 15 0v1"/>',
+briefcase:'<rect x="2.5" y="7" width="19" height="13" rx="2"/><path d="M8.5 7V5.5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2V7"/><line x1="2.5" y1="13" x2="21.5" y2="13"/>',
+shield:'<path d="M12 3l7.5 3.4v5.4c0 4.5-3.2 7-7.5 8.5-4.3-1.5-7.5-4-7.5-8.5V6.4z"/>',
+activity:'<polyline points="2.5 12 7 12 9.5 18.5 14 4.5 16.5 12 21.5 12"/>',
+clock:'<circle cx="12" cy="12" r="9"/><polyline points="12 7.5 12 12 15.5 14"/>',
+calendar:'<rect x="3" y="4.5" width="18" height="16.5" rx="2"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/>',
+building:'<rect x="4" y="2.5" width="16" height="19"/><line x1="8" y1="6.5" x2="11" y2="6.5"/><line x1="13" y1="6.5" x2="16" y2="6.5"/><line x1="8" y1="10.5" x2="11" y2="10.5"/><line x1="13" y1="10.5" x2="16" y2="10.5"/><line x1="8" y1="14.5" x2="11" y2="14.5"/><line x1="13" y1="14.5" x2="16" y2="14.5"/><line x1="10" y1="21.5" x2="10" y2="18"/><line x1="14" y1="21.5" x2="14" y2="18"/>',
+list:'<line x1="9" y1="6" x2="21" y2="6"/><line x1="9" y1="12" x2="21" y2="12"/><line x1="9" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1.3"/><circle cx="4" cy="12" r="1.3"/><circle cx="4" cy="18" r="1.3"/>',
+alert:'<path d="M12 3.2L22 20H2z"/><line x1="12" y1="9.5" x2="12" y2="14.5"/><circle cx="12" cy="17.3" r=".3" fill="currentColor" stroke="none"/>',
+star:'<polygon points="12 2.5 15 9.2 22 9.8 16.8 14.6 18.3 21.5 12 17.7 5.7 21.5 7.2 14.6 2 9.8 9 9.2"/>',
+checkcircle:'<circle cx="12" cy="12" r="9"/><polyline points="8 12.3 11 15.3 16.3 9"/>',
+xcircle:'<circle cx="12" cy="12" r="9"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/>',
+chart:'<line x1="4.5" y1="20" x2="4.5" y2="10.5"/><line x1="10.5" y1="20" x2="10.5" y2="4.5"/><line x1="16.5" y1="20" x2="16.5" y2="13.5"/><line x1="20" y1="20" x2="4.5" y2="20"/>',
+message:'<path d="M4 5.5h16v10H9l-4 4v-4H4z"/>',
+mail:'<rect x="3" y="5.5" width="18" height="13" rx="2"/><polyline points="3.5 7 12 13 20.5 7"/>',
+bell:'<path d="M6.5 9.5a5.5 5.5 0 0 1 11 0v4.3l1.8 2.7H4.7l1.8-2.7z"/><path d="M10.2 19.5a1.8 1.8 0 0 0 3.6 0"/>',
+search:'<circle cx="10.5" cy="10.5" r="6.5"/><line x1="20.5" y1="20.5" x2="15.3" y2="15.3"/>',
+plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+pencil:'<path d="M3.5 17.3V20.5h3.2L18.4 8.8l-3.2-3.2z"/><line x1="13.7" y1="6.6" x2="16.9" y2="9.8"/>',
+trash:'<polyline points="3.5 6.5 5.5 6.5 20.5 6.5"/><path d="M8.5 6.5v-2a1.5 1.5 0 0 1 1.5-1.5h4a1.5 1.5 0 0 1 1.5 1.5v2"/><path d="M6.5 6.5l1 13a1.5 1.5 0 0 0 1.5 1.4h6a1.5 1.5 0 0 0 1.5-1.4l1-13"/>',
+x:'<line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>',
+chevdown:'<polyline points="6 9 12 15 18 9"/>',
+check:'<polyline points="4 12.5 9 18 20 6"/>',
+logout:'<path d="M9 4.5H5.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H9"/><polyline points="15.5 16.5 20 12 15.5 7.5"/><line x1="20" y1="12" x2="9" y2="12"/>',
+menu:'<line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/>',
+filter:'<polygon points="4 4 20 4 13.5 12 13.5 19 10.5 20.5 10.5 12"/>',
+phone:'<path d="M5 4.5h3.5l1.5 4-2 1.3a11 11 0 0 0 5.2 5.2l1.3-2 4 1.5V18a2 2 0 0 1-2 2A14.5 14.5 0 0 1 3 5.5a2 2 0 0 1 2-1z"/>',
+download:'<line x1="12" y1="3" x2="12" y2="14.5"/><polyline points="7 10.5 12 15.5 17 10.5"/><line x1="4.5" y1="20" x2="19.5" y2="20"/>',
+lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7.5a4 4 0 1 1 8 0V11"/>',
+award:'<circle cx="12" cy="8.5" r="5.5"/><polyline points="8.5 13.3 7 21.5 12 18.5 17 21.5 15.5 13.3"/>',
+refresh:'<polyline points="3 4.5 3 9 7.5 9"/><polyline points="21 19.5 21 15 16.5 15"/><path d="M3.6 13.5A9 9 0 0 0 20 16.5M20.4 10.5A9 9 0 0 0 4 7.5"/>',
+key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l8.5-8.5"/><path d="M16.5 6.5l2 2"/><path d="M14 9l2 2"/>'
+};
+function icon(name,size){ size=size||17; return '<svg class="icon" width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+(ICN[name]||'')+'</svg>'; }
+function esc(s){ return (s===undefined||s===null?'':String(s)).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+/* ===================================================================
+   STORAGE / DATA LAYER  (artifact persistent storage stands in for Firestore)
+=================================================================== */
+const STORE_KEY = 'gyh_app_data_v2';
+let DATA = null;
+
+function seq(){ DATA._seq = (DATA._seq||0)+1; return DATA._seq; }
+function nid(p){ return p+'_'+seq()+'_'+Math.random().toString(36).slice(2,6); }
+const DOW_CODES = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+function seedData(){
+  const today = new Date();
+  function dstr(off){ const d=new Date(today); d.setDate(d.getDate()+off); return d.toISOString().slice(0,10); }
+  const nowIso = new Date().toISOString();
+  const users=[
+    {id:'u_admin',name:'Alex Morgan',email:'admin@gyh.com',password:'admin123',role:'admin',gender:'F',phone:'+91 98765 10001',active:true},
+    {id:'u_head',name:'Priya Nair',email:'head@gyh.com',password:'head123',role:'coordinatorhead',gender:'F',phone:'+91 98765 10002',active:true},
+    {id:'u_coord1',name:'Rahul Menon',email:'coord1@gyh.com',password:'coord123',role:'coordinator',gender:'M',phone:'+91 98765 10003',active:true},
+    {id:'u_coord2',name:'Sneha Pillai',email:'coord2@gyh.com',password:'coord123',role:'coordinator',gender:'F',phone:'+91 98765 10004',active:true},
+    {id:'u_train1',name:'Arjun Das',email:'trainer1@gyh.com',password:'train123',role:'trainer',gender:'M',phone:'+91 98765 10005',active:true},
+    {id:'u_train2',name:'Meera Suresh',email:'trainer2@gyh.com',password:'train123',role:'trainer',gender:'F',phone:'+91 98765 10006',active:true},
+    {id:'u_train3',name:'Karthik Iyer',email:'trainer3@gyh.com',password:'train123',role:'trainer',gender:'M',phone:'+91 98765 10007',active:true}
+  ];
+  const clients=[
+    {id:'c1',name:'Divya Krishnan',phone:'+91 90000 11111',email:'divya.k@mail.com',age:29,gender:'F',plan:'Gold',city:'Trivandrum',country:'India',
+     trainerId:'u_train1',trainerName:'Arjun Das',coordinatorId:'u_coord1',coordinatorName:'Rahul Menon',goal:'Weight Loss',sessionsPerWeek:4,
+     weight:68,height:162,startDate:dstr(-40),active:true},
+    {id:'c2',name:'Sanjay Kumar',phone:'+91 90000 22222',email:'sanjay.k@mail.com',age:34,gender:'M',plan:'Silver',city:'Kochi',country:'India',
+     trainerId:'u_train2',trainerName:'Meera Suresh',coordinatorId:'u_coord2',coordinatorName:'Sneha Pillai',goal:'General Fitness',sessionsPerWeek:3,
+     weight:81,height:175,startDate:dstr(-25),active:true},
+    {id:'c3',name:'Anita Joseph',phone:'+91 90000 33333',email:'anita.j@mail.com',age:41,gender:'F',plan:'Platinum',city:'Trivandrum',country:'India',
+     trainerId:'u_train1',trainerName:'Arjun Das',coordinatorId:'u_coord1',coordinatorName:'Rahul Menon',goal:'Strength Training',sessionsPerWeek:5,
+     weight:70,height:160,startDate:dstr(-90),active:true,sessionTime:'07:00',sessionType:'Personal Training'},
+    {id:'c4',name:'Vikram Nair',phone:'+91 90000 44444',email:'vikram.n@mail.com',age:38,gender:'M',plan:'Couple',city:'Kollam',country:'India',
+     trainerId:'u_train3',trainerName:'Karthik Iyer',coordinatorId:'u_coord2',coordinatorName:'Sneha Pillai',goal:'General Fitness',sessionsPerWeek:3,
+     weight:79,height:173,startDate:dstr(-15),active:true,partnerName:'Lakshmi Nair',partnerPhone:'+91 90000 44445',partnerAge:35,partnerGender:'F'},
+    {id:'c5',name:'TechNova Pvt Ltd',phone:'+91 90000 55555',email:'hr@technova.com',plan:'Corporate Fitness',city:'Trivandrum',country:'India',
+     trainerId:'u_train2',trainerName:'Meera Suresh',coordinatorId:'u_coord1',coordinatorName:'Rahul Menon',goal:'Employee Wellness',sessionsPerWeek:2,
+     company:'TechNova Pvt Ltd',startDate:dstr(-60),active:true},
+    {id:'c6',name:'Fathima Beevi',phone:'+91 90000 66666',email:'fathima.b@mail.com',age:46,gender:'F',plan:'Platinum Plus',city:'Trivandrum',country:'India',
+     trainerId:'u_train3',trainerName:'Karthik Iyer',coordinatorId:'u_coord1',coordinatorName:'Rahul Menon',goal:'Rehab and Mobility',sessionsPerWeek:5,
+     weight:74,height:158,startDate:dstr(-120),active:true,sessionTime:'18:00',sessionType:'Personal Training'},
+    {id:'c7',name:'Ramesh Babu',phone:'+91 90000 77777',email:'ramesh.b@mail.com',age:52,gender:'M',plan:'Gold',city:'Kochi',country:'India',
+     trainerId:'u_train1',trainerName:'Arjun Das',coordinatorId:'u_coord2',coordinatorName:'Sneha Pillai',goal:'Weight Loss',sessionsPerWeek:3,
+     weight:92,height:170,startDate:dstr(-200),active:false,inactiveReason:'paused',endDate:dstr(-10)},
+    {id:'c8',name:'George Mathew',phone:'+91 90000 88888',email:'george.m@mail.com',age:30,gender:'M',plan:'Silver',city:'Trivandrum',country:'India',
+     trainerId:'u_train2',trainerName:'Meera Suresh',coordinatorId:'u_coord1',coordinatorName:'Rahul Menon',goal:'General Fitness',sessionsPerWeek:3,
+     weight:75,height:172,startDate:dstr(-180),active:false,inactiveReason:'ended',endDate:dstr(-5)}
+  ];
+  const sessions=[
+    {id:'s1',clientId:'c1',clientName:'Divya Krishnan',trainerId:'u_train1',trainerName:'Arjun Das',date:dstr(0),time:'07:00',type:'Personal Training',status:'completed',meetLink:'',notes:''},
+    {id:'s2',clientId:'c3',clientName:'Anita Joseph',trainerId:'u_train1',trainerName:'Arjun Das',date:dstr(0),time:'08:00',type:'Personal Training',status:'onair',meetLink:'',notes:''},
+    {id:'s3',clientId:'c2',clientName:'Sanjay Kumar',trainerId:'u_train2',trainerName:'Meera Suresh',date:dstr(0),time:'17:30',type:'Group Session',status:'not-started',meetLink:'',notes:''},
+    {id:'s4',clientId:'c6',clientName:'Fathima Beevi',trainerId:'u_train3',trainerName:'Karthik Iyer',date:dstr(0),time:'18:00',type:'Personal Training',status:'missed',meetLink:'',notes:'',missedReason:'Client unavailable'},
+    {id:'s5',clientId:'c4',clientName:'Vikram Nair',trainerId:'u_train3',trainerName:'Karthik Iyer',date:dstr(0),time:'19:00',type:'Couple Session',status:'not-started',meetLink:'',notes:''},
+    {id:'s6',clientId:'c1',clientName:'Divya Krishnan',trainerId:'u_train1',trainerName:'Arjun Das',date:dstr(1),time:'07:00',type:'Personal Training',status:'not-started',meetLink:'',notes:''},
+    {id:'s7',clientId:'c5',clientName:'TechNova Pvt Ltd',trainerId:'u_train2',trainerName:'Meera Suresh',date:dstr(2),time:'10:00',type:'Corporate Session',status:'not-started',meetLink:'',notes:''},
+    {id:'s8',clientId:'c3',clientName:'Anita Joseph',trainerId:'u_train1',trainerName:'Arjun Das',date:dstr(3),time:'08:00',type:'Personal Training',status:'not-started',meetLink:'',notes:''},
+    {id:'s9',clientId:'c2',clientName:'Sanjay Kumar',trainerId:'u_train2',trainerName:'Meera Suresh',date:dstr(-1),time:'17:30',type:'Group Session',status:'completed',meetLink:'',notes:''},
+    {id:'s10',clientId:'c7',clientName:'Ramesh Babu',trainerId:'u_train1',trainerName:'Arjun Das',date:dstr(-2),time:'09:00',type:'Personal Training',status:'missed',meetLink:'',notes:'',missedReason:'Trainer unavailable'},
+    {id:'s11',clientId:'c6',clientName:'Fathima Beevi',trainerId:'u_train3',trainerName:'Karthik Iyer',date:dstr(-2),time:'18:00',type:'Personal Training',status:'completed',meetLink:'',notes:''},
+    {id:'s12',clientId:'c4',clientName:'Vikram Nair',trainerId:'u_train3',trainerName:'Karthik Iyer',date:dstr(-3),time:'19:00',type:'Couple Session',status:'completed',meetLink:'',notes:''}
+  ];
+  const followups=[
+    {id:'f1',clientId:'c2',clientName:'Sanjay Kumar',type:'Renewal Reminder',remark:'Plan expires in 5 days, confirm renewal interest.',dueDate:dstr(1),priority:'High',assignedToId:'u_coord2',assignedToName:'Sneha Pillai',status:'pending',createdBy:'u_head'},
+    {id:'f2',clientId:'c7',clientName:'Ramesh Babu',type:'Win-back Call',remark:'Paused client, check on recovery and interest to restart.',dueDate:dstr(2),priority:'Medium',assignedToId:'u_coord2',assignedToName:'Sneha Pillai',status:'pending',createdBy:'u_admin'},
+    {id:'f3',clientId:'c4',clientName:'Vikram Nair',type:'Feedback Call',remark:'Check satisfaction after 2 weeks on couple plan.',dueDate:dstr(-1),priority:'Low',assignedToId:'u_coord2',assignedToName:'Sneha Pillai',status:'in-progress',createdBy:'u_coord2'},
+    {id:'f4',clientId:'c1',clientName:'Divya Krishnan',type:'Progress Review',remark:'Monthly body stats and goal check-in.',dueDate:dstr(-3),priority:'Medium',assignedToId:'u_coord1',assignedToName:'Rahul Menon',status:'done',createdBy:'u_coord1'},
+    {id:'f5',clientId:'c6',clientName:'Fathima Beevi',type:'Missed Session Follow-up',remark:'Reschedule missed session, confirm new slot.',dueDate:dstr(0),priority:'High',assignedToId:'u_coord1',assignedToName:'Rahul Menon',status:'pending',createdBy:'u_admin'}
+  ];
+  const leaves=[
+    {id:'l1',userId:'u_train2',userName:'Meera Suresh',role:'trainer',from:dstr(4),to:dstr(5),days:2,reason:'Personal',notes:'Family function',status:'pending'},
+    {id:'l2',userId:'u_coord2',userName:'Sneha Pillai',role:'coordinator',from:dstr(-10),to:dstr(-9),days:2,reason:'Medical',notes:'',status:'approved',reviewedBy:'Priya Nair',reviewNote:'Approved, get well soon.'},
+    {id:'l3',userId:'u_train1',userName:'Arjun Das',role:'trainer',from:dstr(-20),to:dstr(-20),days:1,reason:'Personal',notes:'',status:'rejected',reviewedBy:'Alex Morgan',reviewNote:'Clashes with client Platinum sessions, please re-apply for another date.'}
+  ];
+  const notifications=[
+    {id:'n1',userId:'u_admin',title:'Leave request submitted',body:'Meera Suresh requested leave for '+dstr(4)+' to '+dstr(5)+'.',type:'leave',read:false,createdAt:Date.now()-3600000},
+    {id:'n2',userId:'u_head',title:'Leave request submitted',body:'Meera Suresh requested leave for '+dstr(4)+' to '+dstr(5)+'.',type:'leave',read:false,createdAt:Date.now()-3600000},
+    {id:'n3',userId:'u_coord1',title:'Session missed',body:'Fathima Beevi\u2019s session with Karthik Iyer was marked missed.',type:'missed',read:false,createdAt:Date.now()-1800000},
+    {id:'n4',userId:'u_train1',title:'Welcome to GYH',body:'Your trainer account is active. Have a great day on the floor.',type:'system',read:true,createdAt:Date.now()-86400000}
+  ];
+  const timechart=[
+    {id:'tc1',clientId:'c3',clientName:'Anita Joseph',plan:'Platinum',trainerId:'u_train1',trainerName:'Arjun Das',sessionTime:'07:00',sessionType:'Personal Training',sessionDays:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],remarks:'Focus on lower body strength this month.',todayStatus:'completed',updatedAt:nowIso},
+    {id:'tc2',clientId:'c6',clientName:'Fathima Beevi',plan:'Platinum Plus',trainerId:'u_train3',trainerName:'Karthik Iyer',sessionTime:'18:00',sessionType:'Personal Training',sessionDays:['Mon','Wed','Fri'],remarks:'Knee rehab, low impact only.',todayStatus:'missed',updatedAt:nowIso,lastMissedReason:'Client unavailable'},
+    {id:'tc3',clientId:'c4',clientName:'Vikram Nair',plan:'Couple',trainerId:'u_train3',trainerName:'Karthik Iyer',sessionTime:'19:00',sessionType:'Couple Session',sessionDays:['Mon','Tue','Wed','Thu','Fri'],remarks:'',todayStatus:'not-started',updatedAt:nowIso},
+    {id:'tc4',clientId:'c5',clientName:'TechNova Pvt Ltd',plan:'Corporate Fitness',trainerId:'u_train2',trainerName:'Meera Suresh',sessionTime:'10:00',sessionType:'Corporate Session',sessionDays:['Tue','Thu'],remarks:'Group of 12 employees.',todayStatus:'not-started',updatedAt:nowIso}
+  ];
+  const slots=[
+    {id:'s1',displayName:'Early Bird',period:'Morning',time:'6:00 - 7:00 AM',maxCapacity:6,trainerId:'u_train1',trainerName:'Arjun Das',genderHint:'',notes:'',isCustom:false,enrolledClientIds:['c3']},
+    {id:'s2',displayName:'Morning Power',period:'Morning',time:'7:00 - 8:00 AM',maxCapacity:6,trainerId:'u_train1',trainerName:'Arjun Das',genderHint:'',notes:'',isCustom:false,enrolledClientIds:['c1']},
+    {id:'s3',displayName:'Mid Morning',period:'Morning',time:'8:00 - 9:00 AM',maxCapacity:6,trainerId:'u_train2',trainerName:'Meera Suresh',genderHint:'',notes:'',isCustom:false,enrolledClientIds:[]},
+    {id:'s4',displayName:'Late Morning',period:'Morning',time:'9:00 - 10:00 AM',maxCapacity:6,trainerId:'u_train2',trainerName:'Meera Suresh',genderHint:'Female Preferred',notes:'',isCustom:false,enrolledClientIds:[]},
+    {id:'s5',displayName:'Evening Starter',period:'Evening',time:'4:30 - 5:30 PM',maxCapacity:6,trainerId:'u_train2',trainerName:'Meera Suresh',genderHint:'',notes:'',isCustom:false,enrolledClientIds:['c2']},
+    {id:'s6',displayName:'Prime Evening',period:'Evening',time:'5:30 - 6:30 PM',maxCapacity:1,trainerId:'u_train3',trainerName:'Karthik Iyer',genderHint:'',notes:'Small group, premium slot.',isCustom:false,enrolledClientIds:['c6']},
+    {id:'s7',displayName:'Sunset Session',period:'Evening',time:'6:30 - 7:30 PM',maxCapacity:6,trainerId:'u_train3',trainerName:'Karthik Iyer',genderHint:'',notes:'',isCustom:false,enrolledClientIds:['c4']},
+    {id:'s8',displayName:'Night Wind-down',period:'Evening',time:'7:30 - 8:30 PM',maxCapacity:6,trainerId:'u_train1',trainerName:'Arjun Das',genderHint:'Male Preferred',notes:'',isCustom:false,enrolledClientIds:[]}
+  ];
+  const batches=[
+    {id:'b1',name:'TechNova Wellness Batch A',planType:'Corporate Fitness',trainerId:'u_train2',trainerName:'Meera Suresh',sessionType:'Corporate Session',company:'TechNova Pvt Ltd',capacity:15,schedule:'Tue and Thu, 10:00 AM',enrolledClientIds:['c5']}
+  ];
+  return {users,clients,sessions,followups,leaves,notifications,timechart,slots,batches,_seq:300};
+}
+
+async function loadData(){
+  try{
+    const r = await window.storage.get(STORE_KEY,true);
+    if(r && r.value){ DATA = JSON.parse(r.value); if(!DATA.timechart) DATA.timechart=[]; if(!DATA.slots) DATA.slots=[]; if(!DATA.batches) DATA.batches=[]; return; }
+  }catch(e){ /* key not found or error -> seed */ }
+  DATA = seedData();
+  await persist();
+}
+async function persist(){
+  try{ await window.storage.set(STORE_KEY, JSON.stringify(DATA), true); }
+  catch(e){ console.error('Storage save failed', e); toast('Could not save changes. Please retry.','error'); }
+}
+async function getSession(){
+  try{ const r = await window.storage.get('gyh_session_uid', false); return r?r.value:null; }catch(e){ return null; }
+}
+async function setSession(uid){ try{ await window.storage.set('gyh_session_uid', uid, false); }catch(e){} }
+async function clearSessionStore(){ try{ await window.storage.delete('gyh_session_uid', false); }catch(e){} }
+
+function doTcDailyReset(){
+  const t = todayStr();
+  let changed=false;
+  (DATA.timechart||[]).forEach(tc=>{
+    const updDate = (tc.updatedAt||'').slice(0,10);
+    if(updDate!==t){ tc.todayStatus='not-started'; tc.updatedAt=new Date().toISOString(); changed=true; }
+  });
+  return changed;
+}
+
+/* ===================================================================
+   GLOBAL STATE
+=================================================================== */
+let CU=null, CR=null, PAGE='dash';
+const FILT = {
+  clients:{q:'',plan:'',status:'active'},
+  sessions:{tab:'today',status:'',q:''},
+  users:{role:'all'},
+  trainersQ:''
+};
+let TC_TAB='all', TC_VIEW='grid', TC_Q='', TC_FORM_DAYS=[];
+
+const ROLE_LABEL = {admin:'Admin',coordinatorhead:'Coordinator Head',coordinator:'Coordinator',trainer:'Trainer'};
+const PLAN_COLOR = {'Silver':'gray','Gold':'warning','Platinum':'purple','Platinum Plus':'purple','Couple':'info','Corporate Fitness':'primary'};
+const STATUS_COLOR = {'not-started':'gray','onair':'info','completed':'success','missed':'danger'};
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function todayDowCode(){ const i=new Date().getDay(); return DOW_CODES[(i+6)%7]; }
+function isScheduledToday(days){ return !!(days && days.length && days.includes(todayDowCode())); }
+function fmtDate(s){ if(!s) return '\u2014'; const d=new Date(s+'T00:00:00'); if(isNaN(d)) return s; return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+function fmtTs(ts){ const d=new Date(ts); return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})+' \u00b7 '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
+function initials(name){ if(!name) return '?'; const p=name.trim().split(/\s+/); return ((p[0]&&p[0][0]||'')+(p[1]&&p[1][0]||'')).toUpperCase(); }
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+
+function activeUsers(role){ return DATA.users.filter(u=>u.active && (!role || u.role===role)); }
+function userById(id){ return DATA.users.find(u=>u.id===id); }
+function clientById(id){ return DATA.clients.find(c=>c.id===id); }
+
+function visibleClients(){
+  if(CR==='admin'||CR==='coordinatorhead') return DATA.clients.slice();
+  if(CR==='coordinator') return DATA.clients.filter(c=>c.coordinatorId===CU.id);
+  if(CR==='trainer') return DATA.clients.filter(c=>c.trainerId===CU.id);
+  return [];
+}
+function visibleSessions(){
+  let arr = DATA.sessions.slice();
+  if(CR==='coordinator') arr = arr.filter(s=>{ const c=clientById(s.clientId); return c && c.coordinatorId===CU.id; });
+  if(CR==='trainer') arr = arr.filter(s=>s.trainerId===CU.id);
+  return arr;
+}
+function visibleFollowups(){
+  if(CR==='admin'||CR==='coordinatorhead') return DATA.followups.slice();
+  if(CR==='coordinator') return DATA.followups.filter(f=>f.assignedToId===CU.id||f.createdBy===CU.id);
+  return [];
+}
+function visibleLeaves(){
+  if(CR==='admin'||CR==='coordinatorhead') return DATA.leaves.slice();
+  return DATA.leaves.filter(l=>l.userId===CU.id);
+}
+function visibleTimechart(){
+  let list = DATA.timechart.slice();
+  if(CR==='trainer') list = list.filter(t=>t.trainerId===CU.id);
+  if(CR==='coordinator') list = list.filter(t=>{ const c=clientById(t.clientId); return c && c.coordinatorId===CU.id; });
+  return list;
+}
+function myNotifications(){ return DATA.notifications.filter(n=>n.userId===(CU&&CU.id)).sort((a,b)=>b.createdAt-a.createdAt); }
+
+async function pushNotif(userIds, title, body, type){
+  userIds.forEach(uid=>{ if(!uid) return; DATA.notifications.push({id:nid('n'),userId:uid,title,body,type,read:false,createdAt:Date.now()}); });
+  await persist();
+}
+
+/* ===================================================================
+   TOAST / MODAL
+=================================================================== */
+function toast(msg,type){
+  type = type||'info';
+  const box=document.getElementById('toastBox');
+  const ic = type==='success'?'checkcircle':type==='error'?'xcircle':type==='warn'?'alert':'bell';
+  const el=document.createElement('div');
+  el.className='toast t-'+type;
+  el.innerHTML='<span>'+icon(ic,16)+'</span><span>'+esc(msg)+'</span>';
+  box.appendChild(el);
+  while(box.children.length>3) box.removeChild(box.firstChild);
+  setTimeout(function(){ el.classList.add('out'); setTimeout(function(){ el.remove(); },280); },4000);
+}
+
+function openModal(size,title,bodyHtml,footHtml){
+  const root=document.getElementById('modalRoot');
+  root.innerHTML =
+    '<div class="modal-ov" data-act="closeModalBg">'+
+      '<div class="modal modal-'+size+'" onclick="event.stopPropagation()">'+
+        '<div class="modal-head"><h3>'+esc(title)+'</h3><button class="btn btn-icon" data-act="closeModal">'+icon('x',16)+'</button></div>'+
+        '<div class="modal-body">'+bodyHtml+'</div>'+
+        (footHtml?'<div class="modal-foot">'+footHtml+'</div>':'')+
+      '</div>'+
+    '</div>';
+  root.classList.add('open');
+  document.body.classList.add('modal-lock');
+}
+function closeModal(){
+  document.getElementById('modalRoot').classList.remove('open');
+  document.getElementById('modalRoot').innerHTML='';
+  document.body.classList.remove('modal-lock');
+}
+function val(id){ const el=document.getElementById(id); return el? el.value : ''; }
+
+/* ===================================================================
+   AUTH
+=================================================================== */
+async function doLogin(){
+  const email = val('li_email').trim();
+  const password = val('li_password');
+  const role = val('li_role');
+  const errEl = document.getElementById('li_err');
+  errEl.style.display='none';
+  if(!email || !password || !role){ errEl.textContent='Please fill in all fields.'; errEl.style.display='block'; return; }
+  const u = DATA.users.find(x=>x.email.toLowerCase()===email.toLowerCase() && x.role===role);
+  if(!u){ errEl.textContent='No account matches that email and role combination.'; errEl.style.display='block'; return; }
+  if(!u.active){ errEl.textContent='This account has been deactivated. Contact an administrator.'; errEl.style.display='block'; return; }
+  if(u.password!==password){ errEl.textContent='Incorrect password.'; errEl.style.display='block'; return; }
+  CU=u; CR=u.role;
+  await setSession(u.id);
+  startApp();
+}
+async function doLogout(){
+  await clearSessionStore();
+  CU=null; CR=null; PAGE='dash';
+  renderLogin();
+}
+function openForgot(){
+  openModal('sm','Reset Password',
+    '<div class="frow"><label class="fl">Account Email</label><input class="input" id="fp_email" placeholder="you@gyh.com"></div>'+
+    '<p class="hint">A password reset link would be emailed to this address in production. This is a demo environment.</p>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-p" data-act="sendReset">Send Reset Link</button>');
+}
+
+/* ===================================================================
+   NAVIGATION CONFIG
+=================================================================== */
+const NAV = {
+  admin:[
+    {sec:'Overview',items:[{k:'dash',l:'Dashboard',i:'grid'}]},
+    {sec:'People',items:[{k:'clients',l:'Clients',i:'users'},{k:'users',l:'Staff Accounts',i:'user'},{k:'trainers',l:'Trainers',i:'briefcase'},{k:'coordinators',l:'Coordinators',i:'shield',soon:1}]},
+    {sec:'Operations',items:[{k:'sessions',l:'Sessions',i:'activity'},{k:'timechart',l:'Time Chart',i:'clock'},{k:'slots',l:'Time Slots',i:'calendar'},{k:'batches',l:'Corporate Fitness',i:'building'}]},
+    {sec:'CRM',items:[{k:'followups',l:'Follow-ups',i:'list'},{k:'missedreasons',l:'Missed Reasons',i:'alert',soon:1},{k:'trainerratings',l:'Trainer Ratings',i:'star',soon:1}]},
+    {sec:'Workforce',items:[{k:'leaves',l:'Leave Management',i:'clock'},{k:'coordattendance',l:'Coord. Attendance',i:'checkcircle',soon:1},{k:'trainerattendance',l:'Trainer Attendance',i:'checkcircle',soon:1}]},
+    {sec:'Insights',items:[{k:'analytics',l:'Analytics',i:'chart',soon:1},{k:'chatmonitor',l:'Chat Monitor',i:'message',soon:1}]},
+    {sec:'Communication',items:[{k:'messages',l:'Messages',i:'mail',soon:1}]}
+  ],
+  coordinatorhead:[
+    {sec:'Overview',items:[{k:'dash',l:'Dashboard',i:'grid'}]},
+    {sec:'People',items:[{k:'clients',l:'Clients',i:'users'},{k:'coordinators',l:'Coordinators',i:'shield',soon:1},{k:'trainers',l:'Trainers',i:'briefcase'}]},
+    {sec:'Operations',items:[{k:'sessions',l:'Sessions',i:'activity'},{k:'timechart',l:'Time Chart',i:'clock'},{k:'slots',l:'Time Slots',i:'calendar'},{k:'batches',l:'Corporate Fitness',i:'building'}]},
+    {sec:'CRM',items:[{k:'followups',l:'Follow-ups',i:'list'},{k:'missedreasons',l:'Missed Reasons',i:'alert',soon:1},{k:'trainerratings',l:'Trainer Ratings',i:'star',soon:1}]},
+    {sec:'Workforce',items:[{k:'leaves',l:'Leave Management',i:'clock'},{k:'coordattendance',l:'Coord. Attendance',i:'checkcircle',soon:1},{k:'trainerattendance',l:'Trainer Attendance',i:'checkcircle',soon:1}]},
+    {sec:'Communication',items:[{k:'messages',l:'Messages',i:'mail',soon:1}]}
+  ],
+  coordinator:[
+    {sec:'Overview',items:[{k:'dash',l:'Dashboard',i:'grid'}]},
+    {sec:'Clients',items:[{k:'clients',l:'My Clients',i:'users'}]},
+    {sec:'Operations',items:[{k:'sessions',l:'Sessions',i:'activity'},{k:'timechart',l:'Time Chart',i:'clock'},{k:'attendance',l:'Attendance',i:'checkcircle',soon:1},{k:'trainerratings',l:'Rate Trainers',i:'star',soon:1}]},
+    {sec:'CRM',items:[{k:'followups',l:'Follow-ups',i:'list'},{k:'missedreasons',l:'Missed Reports',i:'alert',soon:1}]},
+    {sec:'Workforce',items:[{k:'leaves',l:'My Leave Requests',i:'clock'}]},
+    {sec:'Communication',items:[{k:'messages',l:'Messages',i:'mail',soon:1}]}
+  ],
+  trainer:[
+    {sec:'Overview',items:[{k:'dash',l:'My Day',i:'grid'}]},
+    {sec:'My Work',items:[{k:'sessions',l:'My Sessions',i:'activity'},{k:'clients',l:'My Clients',i:'users'},{k:'timechart',l:'Time Chart',i:'clock'},{k:'feedback',l:'Feedback',i:'star',soon:1},{k:'certificates',l:'My Certificates',i:'award',soon:1}]},
+    {sec:'Workforce',items:[{k:'leaves',l:'My Leave Requests',i:'clock'}]},
+    {sec:'Communication',items:[{k:'messages',l:'Client Chat',i:'mail',soon:1}]}
+  ]
+};
+const PAGE_TITLE = {
+  dash:'Dashboard',clients:'Clients',users:'Staff Accounts',trainers:'Trainers',coordinators:'Coordinators',
+  sessions:'Sessions',timechart:'Time Chart',slots:'Time Slots',batches:'Corporate Fitness',followups:'Follow-ups',
+  missedreasons:'Missed Reasons',trainerratings:'Trainer Ratings',leaves:'Leave Management',
+  coordattendance:'Coordinator Attendance',trainerattendance:'Trainer Attendance',analytics:'Analytics',
+  chatmonitor:'Chat Monitor',messages:'Messages',attendance:'Attendance',feedback:'Session Feedback',certificates:'Certificates'
+};
+
+function go(page){
+  const all = NAV[CR]||[];
+  let found=null;
+  all.forEach(s=>s.items.forEach(it=>{ if(it.k===page) found=it; }));
+  if(found && found.soon){ toast(found.l+' is on our roadmap \u2014 coming in a future release.','info'); return; }
+  PAGE = page;
+  document.body.classList.remove('sb-open');
+  renderApp();
+}
+
+/* ===================================================================
+   APP SHELL
+=================================================================== */
+function startApp(){ PAGE='dash'; renderApp(); }
+
+function renderLogin(){
+  document.getElementById('root').innerHTML =
+  '<div class="login-wrap"><div class="login-card">'+
+    '<div class="login-logo"><div class="mark">GYH</div><div><div class="name">Gym At Your Home</div></div></div>'+
+    '<div class="login-sub">Operations and Staff Management Platform</div>'+
+    '<div class="login-err" id="li_err"></div>'+
+    '<div class="frow"><label class="fl">Email Address</label><input class="input" id="li_email" placeholder="you@gyh.com" autocomplete="username"></div>'+
+    '<div class="frow"><label class="fl">Password</label><input class="input" id="li_password" type="password" placeholder="********" autocomplete="current-password"></div>'+
+    '<div class="frow"><label class="fl">Role</label><select class="input" id="li_role">'+
+      '<option value="">Select your role</option>'+
+      '<option value="admin">Admin</option><option value="coordinatorhead">Coordinator Head</option>'+
+      '<option value="coordinator">Coordinator</option><option value="trainer">Trainer</option>'+
+    '</select></div>'+
+    '<button class="btn btn-p" style="width:100%;justify-content:center;padding:10px" data-act="login">Sign In</button>'+
+    '<div style="text-align:center;margin-top:12px"><a href="#" data-act="forgot" style="font-size:12.5px;font-weight:600">Forgot password?</a></div>'+
+    '<div class="demo-box"><b>Demo accounts</b> \u2014 password shown alongside each:<br>'+
+      '\u2022 admin@gyh.com / admin123 (Admin)<br>'+
+      '\u2022 head@gyh.com / head123 (Coordinator Head)<br>'+
+      '\u2022 coord1@gyh.com / coord123 (Coordinator)<br>'+
+      '\u2022 trainer1@gyh.com / train123 (Trainer)'+
+    '</div>'+
+  '</div></div>';
+}
+
+function navHtml(){
+  const groups = NAV[CR]||[];
+  return groups.map(g=>
+    '<div class="nav-sec"><div class="nav-sec-label">'+esc(g.sec)+'</div>'+
+    g.items.map(it=>
+      '<div class="nav-item '+(it.k===PAGE?'active':'')+' '+(it.soon?'disabled':'')+'" data-act="nav" data-id="'+it.k+'">'+
+        icon(it.i,17)+'<span>'+esc(it.l)+'</span>'+(it.soon?'<span class="nav-soon">Soon</span>':'')+
+      '</div>'
+    ).join('')+'</div>'
+  ).join('');
+}
+
+function renderApp(){
+  const unread = myNotifications().filter(n=>!n.read).length;
+  document.getElementById('root').innerHTML =
+  '<div class="sb-overlay" data-act="closeSidebar"></div>'+
+  '<div id="shell">'+
+    '<div class="sidebar">'+
+      '<div class="sb-brand"><div class="mark">GYH</div><div><div class="nm">Gym At Your Home</div><div class="sx">OPS PLATFORM</div></div></div>'+
+      '<div class="sb-nav">'+navHtml()+'</div>'+
+      '<div class="sb-foot">'+
+        '<div class="nav-item" data-act="changePw">'+icon('key',17)+'<span>Change Password</span></div>'+
+        '<div class="nav-item" data-act="resetDemo">'+icon('refresh',17)+'<span>Reset Demo Data</span></div>'+
+        '<div class="nav-item" data-act="logout">'+icon('logout',17)+'<span>Sign Out</span></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="main">'+
+      '<div class="topbar">'+
+        '<button class="btn btn-icon hamb" data-act="toggleSidebar">'+icon('menu',18)+'</button>'+
+        '<div class="tb-title">'+esc(PAGE_TITLE[PAGE]||'')+'</div>'+
+        '<div class="tb-date mono">'+new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})+'</div>'+
+        '<div class="notif-wrap">'+
+          '<button class="btn btn-icon" data-act="toggleNotif" style="position:relative">'+icon('bell',18)+(unread?'<span class="bell-dot"></span>':'')+'</button>'+
+          '<div class="notif-pop" id="notifPop">'+notifPopHtml()+'</div>'+
+        '</div>'+
+        '<div class="usermenu-wrap">'+
+          '<div class="btn" data-act="toggleUserMenu" style="padding:5px 10px 5px 6px">'+
+            '<span class="avatar" style="width:28px;height:28px;font-size:11px">'+initials(CU.name)+'</span>'+
+            '<span style="font-weight:700;font-size:12.5px">'+esc(CU.name.split(' ')[0])+'</span>'+icon('chevdown',14)+
+          '</div>'+
+          '<div class="usermenu" id="userMenu">'+
+            '<div class="it" data-act="changePw">'+icon('key',14)+' Change Password</div>'+
+            '<div class="it" data-act="logout">'+icon('logout',14)+' Sign Out</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="page" id="pageRoot"></div>'+
+    '</div>'+
+  '</div>';
+  renderPage();
+}
+
+function notifPopHtml(){
+  const list = myNotifications().slice(0,12);
+  return '<div class="notif-pop-head"><b style="font-size:13px">Notifications</b><a href="#" style="font-size:11.5px;font-weight:700" data-act="markAllRead">Mark all read</a></div>'+
+    (list.length? list.map(n=>
+      '<div class="notif-item '+(n.read?'':'unread')+'" data-act="readNotif" data-id="'+n.id+'">'+
+        '<div class="t">'+esc(n.title)+'</div><div class="b">'+esc(n.body)+'</div><div class="ts">'+fmtTs(n.createdAt)+'</div>'+
+      '</div>'
+    ).join('') : '<div style="padding:24px;text-align:center;color:var(--text-mute);font-size:12.5px">No notifications yet</div>');
+}
+
+function renderPage(){
+  const root = document.getElementById('pageRoot');
+  if(PAGE==='dash') root.innerHTML = pageDash();
+  else if(PAGE==='clients') root.innerHTML = pageClients();
+  else if(PAGE==='users') root.innerHTML = pageUsers();
+  else if(PAGE==='trainers') root.innerHTML = pageTrainers();
+  else if(PAGE==='sessions') root.innerHTML = pageSessions();
+  else if(PAGE==='followups') root.innerHTML = pageFollowups();
+  else if(PAGE==='leaves') root.innerHTML = pageLeaves();
+  else if(PAGE==='timechart') root.innerHTML = pageTimechart();
+  else if(PAGE==='slots') root.innerHTML = pageSlots();
+  else if(PAGE==='batches') root.innerHTML = pageBatches();
+  else root.innerHTML = pageSoon();
+}
+function pageSoon(){
+  return '<div class="card"><div class="section-soon"><div class="ic">'+icon('clock',26)+'</div><h3>'+esc(PAGE_TITLE[PAGE]||'This module')+' is coming soon</h3><p>We are actively building this out. It will follow the same design and quality as the modules already available.</p></div></div>';
+}
+function statCard(ic,color,v,label){
+  return '<div class="stat" style="--c:var(--'+color+');--c-dim:var(--'+color+'-dim)"><div class="ic">'+icon(ic,16)+'</div><div class="v">'+v+'</div><div class="l">'+esc(label)+'</div></div>';
+}
+function statusBadge(s){ const c=STATUS_COLOR[s]||'gray'; const lbl=s.replace('-',' ').replace(/\b\w/g,function(m){return m.toUpperCase();}); return '<span class="badge bd-'+c+'">'+esc(lbl)+'</span>'; }
+function planBadge(p){ const c=PLAN_COLOR[p]||'gray'; return '<span class="badge bd-'+c+'">'+esc(p)+'</span>'; }
+function priorityBadge(p){ const c=p==='High'?'danger':p==='Medium'?'warning':'gray'; return '<span class="badge bd-'+c+'">'+esc(p)+'</span>'; }
+function leaveStatusBadge(s){ const c=s==='approved'?'success':s==='rejected'?'danger':'warning'; return '<span class="badge bd-'+c+'">'+esc(s.charAt(0).toUpperCase()+s.slice(1))+'</span>'; }
+
+/* ===================================================================
+   DASHBOARD
+=================================================================== */
+function pageDash(){
+  const today = todayStr();
+  if(CR==='admin'||CR==='coordinatorhead'){
+    const clients = visibleClients();
+    const activeClients = clients.filter(c=>c.active);
+    const todaySess = DATA.sessions.filter(s=>s.date===today);
+    const missedToday = todaySess.filter(s=>s.status==='missed');
+    const trainers = activeUsers('trainer');
+    const coords = activeUsers('coordinator');
+    let html = '<div class="stat-grid">'+
+      statCard('users','primary',activeClients.length,'Active Clients')+
+      statCard('activity','info',todaySess.length,'Today\u2019s Sessions')+
+      statCard('alert','danger',missedToday.length,'Missed Today')+
+      statCard('briefcase','purple',trainers.length,'Trainers')+
+      (CR==='admin'?statCard('shield','warning',coords.length,'Coordinators'):'')+
+      statCard('list','success',visibleFollowups().filter(f=>f.status==='pending').length,'Pending Follow-ups')+
+    '</div>';
+    const pendingLeaves = DATA.leaves.filter(l=>l.status==='pending');
+    if(pendingLeaves.length){
+      html += '<div class="card" style="border-left:3px solid var(--warning)"><div class="card-head"><h3>'+icon('clock',16)+' Pending Leave Requests</h3><span class="badge bd-warning">'+pendingLeaves.length+' awaiting review</span></div>'+
+        pendingLeaves.map(function(l){ return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--border-soft)"><div><b>'+esc(l.userName)+'</b> <span class="muted">('+ROLE_LABEL[l.role]+')</span> \u2014 '+fmtDate(l.from)+' to '+fmtDate(l.to)+'</div><button class="btn btn-sm btn-p" data-act="go" data-id="leaves">Review</button></div>'; }).join('')+
+      '</div>';
+    }
+    html += '<div class="card"><div class="card-head"><h3>'+icon('activity',16)+' Today\u2019s Sessions</h3><span class="badge bd-info">'+today+'</span></div>'+sessionsTable(todaySess,true)+'</div>';
+    return html;
+  }
+  if(CR==='coordinator'){
+    const clients = visibleClients();
+    const mySess = visibleSessions().filter(s=>s.date===today);
+    const myFu = visibleFollowups();
+    let html = '<div class="stat-grid">'+
+      statCard('users','primary',clients.filter(function(c){return c.active;}).length,'My Clients')+
+      statCard('activity','info',mySess.length,'Today\u2019s Sessions')+
+      statCard('alert','danger',mySess.filter(function(s){return s.status==='missed';}).length,'Missed Today')+
+      statCard('list','warning',myFu.filter(function(f){return f.status==='pending';}).length,'Pending Follow-ups')+
+      statCard('checkcircle','success',myFu.filter(function(f){return f.status==='done';}).length,'Done Follow-ups')+
+    '</div>';
+    const pendingFu = myFu.filter(function(f){return f.status==='pending';}).slice(0,6);
+    html += '<div class="card"><div class="card-head"><h3>'+icon('list',16)+' Pending Follow-ups</h3></div>'+
+      (pendingFu.length? '<div class="table-wrap"><table><thead><tr><th>Client</th><th>Type</th><th>Due</th><th>Priority</th><th></th></tr></thead><tbody>'+
+        pendingFu.map(function(f){ return '<tr><td>'+esc(f.clientName)+'</td><td>'+esc(f.type)+'</td><td>'+fmtDate(f.dueDate)+'</td><td>'+priorityBadge(f.priority)+'</td><td><button class="btn btn-sm btn-g" data-act="markFuDone" data-id="'+f.id+'">'+icon('check',13)+' Done</button></td></tr>'; }).join('')+
+      '</tbody></table></div>' : '<p class="muted" style="text-align:center;padding:20px">All caught up \u2014 no pending follow-ups.</p>')+
+    '</div>';
+    html += '<div class="card"><div class="card-head"><h3>'+icon('activity',16)+' Today\u2019s Sessions</h3></div>'+sessionsTable(mySess,true)+'</div>';
+    return html;
+  }
+  const mySess = visibleSessions().filter(function(s){return s.date===today;});
+  const myClients = visibleClients();
+  let html = '<div class="stat-grid">'+
+    statCard('activity','info',mySess.length,'Today\u2019s Sessions')+
+    statCard('checkcircle','success',mySess.filter(function(s){return s.status==='completed';}).length,'Completed')+
+    statCard('alert','danger',mySess.filter(function(s){return s.status==='missed';}).length,'Missed Today')+
+    statCard('users','primary',myClients.filter(function(c){return c.active;}).length,'My Clients')+
+  '</div>';
+  html += '<div class="card"><div class="card-head"><h3>'+icon('calendar',16)+' Today\u2019s Schedule</h3></div>'+sessionsTable(mySess,true)+'</div>';
+  return html;
+}
+
+/* ===================================================================
+   SESSIONS
+=================================================================== */
+function sessionsTable(list, compact){
+  list = list.slice().sort(function(a,b){ return (a.date+a.time).localeCompare(b.date+b.time); });
+  if(!list.length) return '<div class="table-wrap"><table><tbody><tr class="empty-row"><td>No sessions to display.</td></tr></tbody></table></div>';
+  const canManage = CR==='admin'||CR==='coordinatorhead'||CR==='coordinator';
+  return '<div class="table-wrap"><table><thead><tr>'+
+    (compact?'':'<th>Date</th>')+'<th>Time</th><th>Client</th><th>Trainer</th><th>Type</th><th>Status</th><th>Actions</th>'+
+    '</tr></thead><tbody>'+
+    list.map(function(s){
+      let actions='';
+      if(s.status==='not-started') actions='<button class="btn btn-sm btn-p" data-act="sessStart" data-id="'+s.id+'">Start</button>';
+      else if(s.status==='onair') actions='<button class="btn btn-sm btn-g" data-act="sessDone" data-id="'+s.id+'">Done</button> <button class="btn btn-sm btn-d" data-act="sessMiss" data-id="'+s.id+'">Miss</button>';
+      if(canManage){ actions += ' <button class="btn btn-sm btn-icon" data-act="editSession" data-id="'+s.id+'">'+icon('pencil',13)+'</button>'; if(CR!=='coordinator') actions += ' <button class="btn btn-sm btn-icon" data-act="deleteSession" data-id="'+s.id+'">'+icon('trash',13)+'</button>'; }
+      return '<tr>'+(compact?'':'<td>'+fmtDate(s.date)+'</td>')+'<td class="mono">'+esc(s.time)+'</td><td><b>'+esc(s.clientName)+'</b></td><td>'+esc(s.trainerName)+'</td><td>'+esc(s.type)+'</td><td>'+statusBadge(s.status)+'</td><td><div class="btn-row">'+actions+'</div></td></tr>';
+    }).join('')+
+    '</tbody></table></div>';
+}
+
+function pageSessions(){
+  const tab = FILT.sessions.tab;
+  const today = todayStr();
+  let list = visibleSessions();
+  if(tab==='today') list = list.filter(function(s){return s.date===today;});
+  else if(tab==='upcoming') list = list.filter(function(s){return s.date>today;});
+  else if(tab==='past') list = list.filter(function(s){return s.date<today;});
+  if(FILT.sessions.status) list = list.filter(function(s){return s.status===FILT.sessions.status;});
+  if(FILT.sessions.q){ const q=FILT.sessions.q.toLowerCase(); list = list.filter(function(s){return s.clientName.toLowerCase().includes(q)||s.trainerName.toLowerCase().includes(q);}); }
+  const canAdd = CR!=='trainer';
+  return '<div class="tabs">'+
+    ['today','upcoming','past','all'].map(function(t){ return '<div class="tab '+(tab===t?'active':'')+'" data-act="sessTab" data-id="'+t+'">'+t.charAt(0).toUpperCase()+t.slice(1)+'</div>'; }).join('')+
+  '</div>'+
+  '<div class="toolbar">'+
+    '<div class="search-box">'+icon('search',15)+'<input class="input" placeholder="Search client or trainer" oninput="FILT.sessions.q=this.value;renderPage()" value="'+esc(FILT.sessions.q)+'"></div>'+
+    '<select onchange="FILT.sessions.status=this.value;renderPage()">'+
+      '<option value="">All Statuses</option>'+
+      ['not-started','onair','completed','missed'].map(function(s){ return '<option value="'+s+'" '+(FILT.sessions.status===s?'selected':'')+'>'+s.replace('-',' ')+'</option>'; }).join('')+
+    '</select>'+
+    (canAdd?'<button class="btn btn-p" data-act="newSession" style="margin-left:auto">'+icon('plus',15)+' Schedule Session</button>':'')+
+  '</div>'+
+  '<div class="card">'+sessionsTable(list,false)+'</div>';
+}
+function sessTab(id){ FILT.sessions.tab=id; renderPage(); }
+
+function sessStart(id){ const s=DATA.sessions.find(function(x){return x.id===id;}); if(!s) return; s.status='onair'; persist().then(function(){ toast('Session started.','success'); renderPage(); }); }
+function sessDone(id){ const s=DATA.sessions.find(function(x){return x.id===id;}); if(!s) return; s.status='completed'; persist().then(function(){ toast('Session marked completed.','success'); renderPage(); }); }
+function sessMiss(id){
+  openModal('sm','Log Missed Reason',
+    '<div class="frow"><label class="fl">Reason</label><select class="input" id="mr_reason">'+
+      ['Client unavailable','Trainer unavailable','Client cancelled late','Network or technical issue','Client illness','Other'].map(function(r){return '<option>'+r+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="frow"><label class="fl">Additional Notes</label><textarea class="ta" id="mr_notes" placeholder="Optional details"></textarea></div>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-d" data-act="confirmMiss" data-id="'+id+'">Confirm Missed</button>'
+  );
+}
+async function confirmMiss(id){
+  const s=DATA.sessions.find(function(x){return x.id===id;}); if(!s) return;
+  s.status='missed'; s.missedReason = val('mr_reason')+(val('mr_notes')?(' \u2014 '+val('mr_notes')):'');
+  const cl = clientById(s.clientId);
+  const targets = [].concat(activeUsers('admin').map(function(u){return u.id;}), activeUsers('coordinatorhead').map(function(u){return u.id;}));
+  if(cl && cl.coordinatorId) targets.push(cl.coordinatorId);
+  await pushNotif(targets,'Session missed', (s.clientName||'A client')+'\u2019s session with '+s.trainerName+' was marked missed. Reason: '+s.missedReason, 'missed');
+  await persist();
+  closeModal(); toast('Missed session logged and coordinators notified.','warn'); renderPage();
+}
+function deleteSession(id){
+  openModal('sm','Delete Session','<p>This will permanently remove the session record. This action cannot be undone.</p>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-d" data-act="confirmDeleteSession" data-id="'+id+'">Delete</button>');
+}
+async function confirmDeleteSession(id){ DATA.sessions = DATA.sessions.filter(function(s){return s.id!==id;}); await persist(); closeModal(); toast('Session deleted.','success'); renderPage(); }
+
+function newSession(){ sessionForm(null); }
+function editSession(id){ sessionForm(DATA.sessions.find(function(s){return s.id===id;})); }
+function sessionForm(s){
+  const clients = (CR==='coordinator'?visibleClients():DATA.clients).filter(function(c){return c.active;});
+  const trainers = activeUsers('trainer');
+  const isEdit = !!s; s = s||{};
+  openModal('md', isEdit?'Edit Session':'Schedule Session',
+    '<div class="fgrid">'+
+      '<div class="frow"><label class="fl">Client</label><select class="input" id="sf_client">'+clients.map(function(c){ return '<option value="'+c.id+'" '+(s.clientId===c.id?'selected':'')+'>'+esc(c.name)+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Trainer</label><select class="input" id="sf_trainer">'+trainers.map(function(t){ return '<option value="'+t.id+'" '+(s.trainerId===t.id?'selected':'')+'>'+esc(t.name)+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Date</label><input class="input" type="date" id="sf_date" value="'+(s.date||todayStr())+'"></div>'+
+      '<div class="frow"><label class="fl">Time</label><input class="input" type="time" id="sf_time" value="'+(s.time||'07:00')+'"></div>'+
+      '<div class="frow"><label class="fl">Session Type</label><select class="input" id="sf_type">'+
+        ['Personal Training','Group Session','Couple Session','Corporate Session'].map(function(t){ return '<option '+(s.type===t?'selected':'')+'>'+t+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Status</label><select class="input" id="sf_status">'+
+        ['not-started','onair','completed','missed'].map(function(t){ return '<option value="'+t+'" '+(s.status===t?'selected':'')+'>'+t.replace('-',' ')+'</option>'; }).join('')+'</select></div>'+
+    '</div>'+
+    '<div class="frow"><label class="fl">Meet Link (optional)</label><input class="input" id="sf_meet" value="'+esc(s.meetLink||'')+'"></div>'+
+    '<div class="frow"><label class="fl">Notes</label><textarea class="ta" id="sf_notes">'+esc(s.notes||'')+'</textarea></div>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-p" data-act="saveSession" data-id="'+(s.id||'')+'">Save Session</button>'
+  );
+}
+async function saveSession(id){
+  const clientId = val('sf_client'); const cl = clientById(clientId);
+  const trainerId = val('sf_trainer'); const tr = userById(trainerId);
+  const data = {clientId:clientId, clientName: cl?cl.name:'', trainerId:trainerId, trainerName: tr?tr.name:'', date: val('sf_date'), time: val('sf_time'),
+    type: val('sf_type'), status: val('sf_status'), meetLink: val('sf_meet'), notes: val('sf_notes')};
+  if(id){ const s=DATA.sessions.find(function(x){return x.id===id;}); Object.assign(s,data); }
+  else { data.id = nid('s'); DATA.sessions.push(data); }
+  await persist(); closeModal(); toast('Session saved.','success'); renderPage();
+}
+
+/* ===================================================================
+   CLIENTS
+=================================================================== */
+function pageClients(){
+  let list = visibleClients();
+  const f = FILT.clients;
+  if(f.status==='active') list=list.filter(function(c){return c.active;});
+  else if(f.status==='inactive') list=list.filter(function(c){return !c.active;});
+  if(f.plan) list = list.filter(function(c){return c.plan===f.plan;});
+  if(f.q){ const q=f.q.toLowerCase(); list = list.filter(function(c){return c.name.toLowerCase().includes(q)||(c.phone||'').includes(q);}); }
+  const plans = ['Silver','Gold','Platinum','Platinum Plus','Couple','Corporate Fitness'];
+  const canDelete = CR==='admin'||CR==='coordinatorhead';
+  return '<div class="toolbar">'+
+    '<div class="search-box">'+icon('search',15)+'<input class="input" placeholder="Search by name or phone" oninput="FILT.clients.q=this.value;renderPage()" value="'+esc(f.q)+'"></div>'+
+    '<select onchange="FILT.clients.plan=this.value;renderPage()"><option value="">All Plans</option>'+plans.map(function(p){ return '<option '+(f.plan===p?'selected':'')+'>'+p+'</option>'; }).join('')+'</select>'+
+    '<select onchange="FILT.clients.status=this.value;renderPage()">'+
+      '<option value="active" '+(f.status==='active'?'selected':'')+'>Active</option>'+
+      '<option value="inactive" '+(f.status==='inactive'?'selected':'')+'>Inactive</option>'+
+      '<option value="" '+(f.status===''?'selected':'')+'>All</option>'+
+    '</select>'+
+    '<button class="btn btn-p" data-act="newClient" style="margin-left:auto">'+icon('plus',15)+' Add Client</button>'+
+  '</div>'+
+  '<div class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Plan</th><th>Trainer</th><th>Coordinator</th><th>Goal</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+  (list.length? list.map(function(c){ return
+    '<tr><td><div class="row-flex"><span class="avatar">'+initials(c.name)+'</span><div class="namecol"><div class="nm">'+esc(c.name)+'</div><div class="sub">'+esc(c.city||'')+'</div></div></div></td>'+
+    '<td>'+esc(c.phone||'\u2014')+'</td><td>'+planBadge(c.plan)+'</td><td>'+esc(c.trainerName||'\u2014')+'</td>'+
+    '<td><span class="badge bd-gray">'+esc(c.coordinatorName||'\u2014')+'</span></td><td>'+esc(c.goal||'\u2014')+'</td>'+
+    '<td>'+(c.active?'<span class="badge bd-success">Active</span>':'<span class="badge bd-gray">'+(c.inactiveReason==='paused'?'Paused':'Ended')+'</span>')+'</td>'+
+    '<td><div class="btn-row"><button class="btn btn-sm" data-act="viewClient" data-id="'+c.id+'">View</button>'+
+      '<button class="btn btn-sm btn-icon" data-act="editClient" data-id="'+c.id+'">'+icon('pencil',13)+'</button>'+
+      (canDelete?'<button class="btn btn-sm btn-icon" data-act="deleteClient" data-id="'+c.id+'">'+icon('trash',13)+'</button>':'')+'</div></td></tr>'; }).join('') : '<tr class="empty-row"><td colspan="8">No clients match your filters.</td></tr>')+
+  '</tbody></table></div></div>';
+}
+
+function clientForm(c){
+  c=c||{};
+  const trainers = activeUsers('trainer');
+  const coords = [].concat(activeUsers('coordinator'), activeUsers('coordinatorhead'));
+  const isEdit = !!c.id;
+  const plans = ['Silver','Gold','Platinum','Platinum Plus','Couple','Corporate Fitness'];
+  openModal('lg', isEdit?'Edit Client':'Add Client',
+    '<div class="fgrid">'+
+      '<div class="frow"><label class="fl">Full Name / Company</label><input class="input" id="cf_name" value="'+esc(c.name||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Plan</label><select class="input" id="cf_plan" onchange="toggleClientPlanFields()">'+plans.map(function(p){ return '<option '+(c.plan===p?'selected':'')+'>'+p+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Phone</label><input class="input" id="cf_phone" value="'+esc(c.phone||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Email</label><input class="input" id="cf_email" value="'+esc(c.email||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Age</label><input class="input" type="number" id="cf_age" value="'+esc(c.age||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Gender</label><select class="input" id="cf_gender"><option value="F" '+(c.gender==='F'?'selected':'')+'>Female</option><option value="M" '+(c.gender==='M'?'selected':'')+'>Male</option></select></div>'+
+      '<div class="frow"><label class="fl">City</label><input class="input" id="cf_city" value="'+esc(c.city||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Country</label><input class="input" id="cf_country" value="'+esc(c.country||'India')+'"></div>'+
+      '<div class="frow"><label class="fl">Goal</label><input class="input" id="cf_goal" value="'+esc(c.goal||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Sessions / Week</label><input class="input" type="number" id="cf_spw" value="'+esc(c.sessionsPerWeek||3)+'"></div>'+
+      '<div class="frow"><label class="fl">Trainer</label><select class="input" id="cf_trainer">'+trainers.map(function(t){ return '<option value="'+t.id+'" '+(c.trainerId===t.id?'selected':'')+'>'+esc(t.name)+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Coordinator</label><select class="input" id="cf_coord">'+coords.map(function(t){ return '<option value="'+t.id+'" '+(c.coordinatorId===t.id?'selected':'')+'>'+esc(t.name)+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Weight (kg)</label><input class="input" type="number" id="cf_weight" value="'+esc(c.weight||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Height (cm)</label><input class="input" type="number" id="cf_height" value="'+esc(c.height||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Start Date</label><input class="input" type="date" id="cf_start" value="'+esc(c.startDate||todayStr())+'"></div>'+
+      '<div class="frow"><label class="fl">Status</label><select class="input" id="cf_active"><option value="1" '+(c.active!==false?'selected':'')+'>Active</option><option value="0" '+(c.active===false?'selected':'')+'>Inactive</option></select></div>'+
+    '</div>'+
+    '<div id="cf_platinum_block" style="display:'+(['Platinum','Platinum Plus'].indexOf(c.plan)>-1?'block':'none')+'">'+
+      '<div class="divider"></div><label class="fl">Fixed Schedule (Time Chart)</label>'+
+      '<div class="fgrid">'+
+        '<div class="frow"><label class="fl">Session Time</label><input class="input" type="time" id="cf_stime" value="'+esc(c.sessionTime||'07:00')+'"></div>'+
+        '<div class="frow"><label class="fl">Session Type</label><input class="input" id="cf_stype" value="'+esc(c.sessionType||'Personal Training')+'"></div>'+
+      '</div>'+
+      '<div class="frow"><label class="fl">Remarks</label><textarea class="ta" id="cf_remarks">'+esc(c.sessionRemarks||'')+'</textarea></div>'+
+    '</div>'+
+    '<div id="cf_couple_block" style="display:'+(c.plan==='Couple'?'block':'none')+'">'+
+      '<div class="divider"></div><label class="fl">Partner Details</label>'+
+      '<div class="fgrid">'+
+        '<div class="frow"><label class="fl">Partner Name</label><input class="input" id="cf_pname" value="'+esc(c.partnerName||'')+'"></div>'+
+        '<div class="frow"><label class="fl">Partner Phone</label><input class="input" id="cf_pphone" value="'+esc(c.partnerPhone||'')+'"></div>'+
+      '</div>'+
+    '</div>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-p" data-act="saveClient" data-id="'+(c.id||'')+'">Save Client</button>'
+  );
+}
+function toggleClientPlanFields(){
+  const plan = val('cf_plan');
+  document.getElementById('cf_platinum_block').style.display = (['Platinum','Platinum Plus'].indexOf(plan)>-1)?'block':'none';
+  document.getElementById('cf_couple_block').style.display = plan==='Couple'?'block':'none';
+}
+function newClient(){ clientForm(null); }
+function editClient(id){ clientForm(clientById(id)); }
+async function saveClient(id){
+  const trainer = userById(val('cf_trainer')); const coord = userById(val('cf_coord'));
+  const wasActive = id ? clientById(id).active : true;
+  const nowActive = val('cf_active')==='1';
+  const data = {
+    name: val('cf_name'), plan: val('cf_plan'), phone: val('cf_phone'), email: val('cf_email'),
+    age: Number(val('cf_age'))||null, gender: val('cf_gender'), city: val('cf_city'), country: val('cf_country'),
+    goal: val('cf_goal'), sessionsPerWeek: Number(val('cf_spw'))||0,
+    trainerId: trainer?trainer.id:'', trainerName: trainer?trainer.name:'',
+    coordinatorId: coord?coord.id:'', coordinatorName: coord?coord.name:'',
+    weight: Number(val('cf_weight'))||null, height: Number(val('cf_height'))||null,
+    startDate: val('cf_start'), active: nowActive
+  };
+  if(['Platinum','Platinum Plus'].indexOf(data.plan)>-1){ data.sessionTime=val('cf_stime'); data.sessionType=val('cf_stype'); data.sessionRemarks=val('cf_remarks'); }
+  if(data.plan==='Couple'){ data.partnerName=val('cf_pname'); data.partnerPhone=val('cf_pphone'); }
+  let client;
+  if(id){ client = clientById(id); Object.assign(client,data); }
+  else { data.id = nid('c'); DATA.clients.push(data); client = data; }
+  if(wasActive && !nowActive){
+    closeModal();
+    await persist();
+    promptInactiveReason(client.id);
+    return;
+  }
+  if(!wasActive && nowActive){ client.inactiveReason=''; client.endDate=''; }
+  await persist(); closeModal(); toast('Client saved.','success'); renderPage();
+}
+function promptInactiveReason(clientId){
+  openModal('sm','Why is this client becoming inactive?',
+    '<div style="display:flex;gap:12px">'+
+      '<button class="btn" style="flex:1;flex-direction:column;height:90px" data-act="setInactiveReason" data-id="'+clientId+'" data-reason="ended">'+icon('checkcircle',22)+'<div style="margin-top:6px">Programme Ended</div></button>'+
+      '<button class="btn" style="flex:1;flex-direction:column;height:90px" data-act="setInactiveReason" data-id="'+clientId+'" data-reason="paused">'+icon('clock',22)+'<div style="margin-top:6px">Paused / Dropped</div></button>'+
+    '</div>','<button class="btn" data-act="closeModal">Skip for now</button>'
+  );
+}
+async function setInactiveReason(id,el){
+  const reason = el.getAttribute('data-reason');
+  const c = clientById(id); if(c){ c.inactiveReason=reason; if(reason==='ended') c.endDate=todayStr(); }
+  await persist(); closeModal(); toast('Client marked inactive.','success'); renderPage();
+}
+function deleteClient(id){
+  openModal('sm','Delete Client','<p>This will permanently remove the client record. This action cannot be undone.</p>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-d" data-act="confirmDeleteClient" data-id="'+id+'">Delete</button>');
+}
+async function confirmDeleteClient(id){ DATA.clients=DATA.clients.filter(function(c){return c.id!==id;}); await persist(); closeModal(); toast('Client deleted.','success'); renderPage(); }
+async function reactivateClient(id){ const c=clientById(id); c.active=true; c.inactiveReason=''; c.endDate=''; await persist(); toast('Client reactivated.','success'); viewClient(id); }
+
+function viewClient(id, _el, _e, tab){
+  const c = clientById(id); if(!c) return;
+  tab = tab||'overview';
+  const sess = DATA.sessions.filter(function(s){return s.clientId===id;}).sort(function(a,b){return (b.date+b.time).localeCompare(a.date+a.time);});
+  const fus = DATA.followups.filter(function(f){return f.clientId===id;});
+  const completed = sess.filter(function(s){return s.status==='completed';}).length;
+  const missed = sess.filter(function(s){return s.status==='missed';}).length;
+  const attRate = sess.length? Math.round(completed/sess.length*100) : 0;
+  const bmi = (c.weight && c.height)? (c.weight/Math.pow(c.height/100,2)).toFixed(1) : null;
+  const tabs=['overview','sessions','followups'];
+  let body = '<div class="kv" style="margin-bottom:16px">'+
+    '<div class="it"><div class="l">Days Active</div><div class="v">'+(c.startDate?daysBetween(c.startDate,todayStr()):'\u2014')+'</div></div>'+
+    '<div class="it"><div class="l">Attendance Rate</div><div class="v">'+attRate+'%</div></div>'+
+    '<div class="it"><div class="l">Total Sessions</div><div class="v">'+sess.length+'</div></div>'+
+    '<div class="it"><div class="l">Missed Sessions</div><div class="v">'+missed+'</div></div>'+
+  '</div>';
+  if(!c.active){
+    body += '<div class="badge bd-warning" style="display:flex;gap:8px;padding:10px 14px;margin-bottom:16px;border-radius:8px">'+icon('alert',14)+' Marked '+(c.inactiveReason==='paused'?'Paused / Dropped':'Programme Ended')+
+      (c.endDate?(' on '+fmtDate(c.endDate)):'')+'<button class="btn btn-sm btn-p" style="margin-left:auto" data-act="reactivateClient" data-id="'+c.id+'">Reactivate</button></div>';
+  }
+  body += '<div class="tabs">'+tabs.map(function(t){ return '<div class="tab '+(tab===t?'active':'')+'" data-act="clientViewTab" data-id="'+id+'" data-tab="'+t+'">'+t.charAt(0).toUpperCase()+t.slice(1)+'</div>'; }).join('')+'</div>';
+  if(tab==='overview'){
+    body += '<div class="kv">'+
+      '<div class="it"><div class="l">Phone</div><div class="v">'+esc(c.phone||'\u2014')+'</div></div>'+
+      '<div class="it"><div class="l">Email</div><div class="v">'+esc(c.email||'\u2014')+'</div></div>'+
+      '<div class="it"><div class="l">Age / Gender</div><div class="v">'+esc(c.age||'\u2014')+' / '+esc(c.gender||'\u2014')+'</div></div>'+
+      '<div class="it"><div class="l">City</div><div class="v">'+esc(c.city||'\u2014')+'</div></div>'+
+      '<div class="it"><div class="l">Plan</div><div class="v">'+planBadge(c.plan)+'</div></div>'+
+      '<div class="it"><div class="l">Goal</div><div class="v">'+esc(c.goal||'\u2014')+'</div></div>'+
+      '<div class="it"><div class="l">Trainer</div><div class="v">'+esc(c.trainerName||'\u2014')+'</div></div>'+
+      '<div class="it"><div class="l">Coordinator</div><div class="v">'+esc(c.coordinatorName||'\u2014')+'</div></div>'+
+      (bmi?'<div class="it"><div class="l">BMI</div><div class="v">'+bmi+'</div></div>':'')+
+      '<div class="it"><div class="l">Start Date</div><div class="v">'+fmtDate(c.startDate)+'</div></div>'+
+    '</div>';
+    if(c.sessionTime){ body += '<div class="divider"></div><label class="fl">Fixed Schedule</label><div class="kv"><div class="it"><div class="l">Time</div><div class="v mono">'+esc(c.sessionTime)+'</div></div><div class="it"><div class="l">Type</div><div class="v">'+esc(c.sessionType||'')+'</div></div></div>'; }
+    if(c.partnerName){ body += '<div class="divider"></div><label class="fl">Partner</label><div class="kv"><div class="it"><div class="l">Name</div><div class="v">'+esc(c.partnerName)+'</div></div><div class="it"><div class="l">Phone</div><div class="v">'+esc(c.partnerPhone||'')+'</div></div></div>'; }
+  } else if(tab==='sessions'){ body += sessionsTable(sess,false); }
+  else if(tab==='followups'){
+    body += fus.length? '<div class="table-wrap"><table><thead><tr><th>Type</th><th>Remark</th><th>Due</th><th>Priority</th><th>Status</th></tr></thead><tbody>'+
+      fus.map(function(f){ return '<tr><td>'+esc(f.type)+'</td><td>'+esc(f.remark)+'</td><td>'+fmtDate(f.dueDate)+'</td><td>'+priorityBadge(f.priority)+'</td><td><span class="badge bd-'+(f.status==='done'?'success':f.status==='in-progress'?'info':'warning')+'">'+esc(f.status)+'</span></td></tr>'; }).join('')+
+    '</tbody></table></div>' : '<p class="muted" style="text-align:center;padding:20px">No follow-ups logged for this client.</p>';
+  }
+  openModal('lg', c.name, body, '<button class="btn" data-act="closeModal">Close</button><button class="btn btn-p" data-act="editClientFromView" data-id="'+id+'">Edit Client</button>');
+}
+function clientViewTab(id,el){ viewClient(id,null,null,el.getAttribute('data-tab')); }
+function editClientFromView(id){ closeModal(); setTimeout(function(){ editClient(id); },50); }
+
+/* ===================================================================
+   USERS (Staff Accounts)
+=================================================================== */
+function pageUsers(){
+  const role = FILT.users.role;
+  let list = DATA.users.slice();
+  if(role!=='all') list = list.filter(function(u){return u.role===role;});
+  const tabs = [['all','All'],['admin','Admin'],['coordinatorhead','Coordinator Head'],['coordinator','Coordinator'],['trainer','Trainer']];
+  return '<div class="tabs">'+tabs.map(function(t){ return '<div class="tab '+(role===t[0]?'active':'')+'" data-act="usersTab" data-id="'+t[0]+'">'+t[1]+'</div>'; }).join('')+'</div>'+
+  '<div class="toolbar"><button class="btn btn-p" data-act="newUser" style="margin-left:auto">'+icon('plus',15)+' Add User</button></div>'+
+  '<div class="card"><div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+  list.map(function(u){ return '<tr><td><div class="row-flex"><span class="avatar">'+initials(u.name)+'</span><b>'+esc(u.name)+(u.id===CU.id?' <span class="muted">(you)</span>':'')+'</b></div></td>'+
+    '<td>'+esc(u.email)+'</td><td><span class="badge bd-primary">'+ROLE_LABEL[u.role]+'</span></td>'+
+    '<td>'+(u.active?'<span class="badge bd-success">Active</span>':'<span class="badge bd-gray">Inactive</span>')+'</td>'+
+    '<td><div class="btn-row"><button class="btn btn-sm btn-icon" data-act="editUser" data-id="'+u.id+'">'+icon('pencil',13)+'</button>'+
+      (u.id!==CU.id?'<button class="btn btn-sm btn-icon" data-act="deleteUser" data-id="'+u.id+'">'+icon('trash',13)+'</button>':'')+'</div></td></tr>'; }).join('')+
+  '</tbody></table></div></div>';
+}
+function usersTab(id){ FILT.users.role=id; renderPage(); }
+function userForm(u){
+  u=u||{}; const isEdit=!!u.id;
+  openModal('md', isEdit?'Edit User':'Add User',
+    '<div class="fgrid">'+
+      '<div class="frow"><label class="fl">Full Name</label><input class="input" id="uf_name" value="'+esc(u.name||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Role</label><select class="input" id="uf_role"><option value="admin" '+(u.role==='admin'?'selected':'')+'>Admin</option><option value="coordinatorhead" '+(u.role==='coordinatorhead'?'selected':'')+'>Coordinator Head</option><option value="coordinator" '+(u.role==='coordinator'?'selected':'')+'>Coordinator</option><option value="trainer" '+(u.role==='trainer'?'selected':'')+'>Trainer</option></select></div>'+
+      '<div class="frow"><label class="fl">Email</label><input class="input" id="uf_email" value="'+esc(u.email||'')+'" '+(isEdit?'disabled':'')+'></div>'+
+      '<div class="frow"><label class="fl">Phone</label><input class="input" id="uf_phone" value="'+esc(u.phone||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Gender</label><select class="input" id="uf_gender"><option value="F" '+(u.gender==='F'?'selected':'')+'>Female</option><option value="M" '+(u.gender==='M'?'selected':'')+'>Male</option></select></div>'+
+      '<div class="frow"><label class="fl">Status</label><select class="input" id="uf_active"><option value="1" '+(u.active!==false?'selected':'')+'>Active</option><option value="0" '+(u.active===false?'selected':'')+'>Inactive</option></select></div>'+
+    '</div>'+
+    (isEdit?'':'<div class="frow"><label class="fl">Temporary Password</label><input class="input" id="uf_password" placeholder="Minimum 6 characters"></div>'),
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-p" data-act="saveUser" data-id="'+(u.id||'')+'">Save User</button>'
+  );
+}
+function newUser(){ userForm(null); }
+function editUser(id){ userForm(userById(id)); }
+async function saveUser(id){
+  const data = {name:val('uf_name'),role:val('uf_role'),phone:val('uf_phone'),gender:val('uf_gender'),active:val('uf_active')==='1'};
+  if(id){ Object.assign(userById(id),data); }
+  else {
+    const email = val('uf_email').trim(); const pw = val('uf_password');
+    if(!email||!pw||pw.length<6){ toast('Please provide a valid email and a password of at least 6 characters.','error'); return; }
+    if(DATA.users.find(function(u){return u.email.toLowerCase()===email.toLowerCase();})){ toast('An account with this email already exists.','error'); return; }
+    data.id=nid('u'); data.email=email; data.password=pw; DATA.users.push(data);
+  }
+  await persist(); closeModal(); toast('User saved.','success'); renderPage();
+}
+function deleteUser(id){
+  openModal('sm','Delete User','<p>This will permanently remove the staff account.</p>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-d" data-act="confirmDeleteUser" data-id="'+id+'">Delete</button>');
+}
+async function confirmDeleteUser(id){ DATA.users=DATA.users.filter(function(u){return u.id!==id;}); await persist(); closeModal(); toast('User deleted.','success'); renderPage(); }
+
+/* ===================================================================
+   TRAINERS
+=================================================================== */
+function pageTrainers(){
+  const q = (FILT.trainersQ||'').toLowerCase();
+  let list = activeUsers('trainer').concat(DATA.users.filter(function(u){return u.role==='trainer'&&!u.active;}));
+  const seen={}; list = list.filter(function(t){ if(seen[t.id]) return false; seen[t.id]=true; return true; });
+  if(q) list = list.filter(function(t){return t.name.toLowerCase().includes(q);});
+  return '<div class="toolbar"><div class="search-box">'+icon('search',15)+'<input class="input" placeholder="Search trainers" oninput="FILT.trainersQ=this.value;renderPage()" value="'+esc(FILT.trainersQ||'')+'"></div><span class="badge bd-gray" style="margin-left:auto">'+list.length+' Trainers</span></div>'+
+  '<div class="card"><div class="table-wrap"><table><thead><tr><th>Trainer</th><th>Gender</th><th>Phone</th><th>Clients</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+  list.map(function(t){ const cl = DATA.clients.filter(function(c){return c.trainerId===t.id&&c.active;});
+    return '<tr><td><div class="row-flex"><span class="avatar">'+initials(t.name)+'</span><b>'+esc(t.name)+'</b></div></td><td>'+(t.gender==='F'?'Female':'Male')+'</td><td>'+esc(t.phone||'\u2014')+'</td>'+
+    '<td><span class="badge bd-primary">'+cl.length+'</span></td><td>'+(t.active?'<span class="badge bd-success">Active</span>':'<span class="badge bd-gray">Inactive</span>')+'</td>'+
+    '<td><div class="btn-row"><button class="btn btn-sm" data-act="viewTrainer" data-id="'+t.id+'">Profile</button>'+(CR==='admin'?'<button class="btn btn-sm btn-icon" data-act="editUser" data-id="'+t.id+'">'+icon('pencil',13)+'</button>':'')+'</div></td></tr>'; }).join('')+
+  '</tbody></table></div></div>';
+}
+function viewTrainer(id){
+  const t = userById(id); if(!t) return;
+  const clients = DATA.clients.filter(function(c){return c.trainerId===id;});
+  const activeClients = clients.filter(function(c){return c.active;});
+  const sess = DATA.sessions.filter(function(s){return s.trainerId===id;});
+  const completed = sess.filter(function(s){return s.status==='completed';}).length;
+  const missed = sess.filter(function(s){return s.status==='missed';}).length;
+  let body = '<div class="kv" style="margin-bottom:18px">'+
+    '<div class="it"><div class="l">Active Clients</div><div class="v">'+activeClients.length+'</div></div>'+
+    '<div class="it"><div class="l">Total Sessions</div><div class="v">'+sess.length+'</div></div>'+
+    '<div class="it"><div class="l">Completed</div><div class="v">'+completed+'</div></div>'+
+    '<div class="it"><div class="l">Missed</div><div class="v">'+missed+'</div></div>'+
+  '</div>';
+  body += '<label class="fl">Active Clients</label>'+
+    (activeClients.length? '<div class="table-wrap"><table><thead><tr><th>Client</th><th>Plan</th><th></th></tr></thead><tbody>'+
+      activeClients.map(function(c){ return '<tr><td>'+esc(c.name)+'</td><td>'+planBadge(c.plan)+'</td><td><button class="btn btn-sm" data-act="viewClient" data-id="'+c.id+'">View</button></td></tr>'; }).join('')+
+    '</tbody></table></div>' : '<p class="muted">No active clients assigned.</p>');
+  openModal('lg', t.name+' \u2014 Trainer Profile', body, '<button class="btn" data-act="closeModal">Close</button>');
+}
+
+/* ===================================================================
+   FOLLOW-UPS
+=================================================================== */
+function pageFollowups(){
+  let list = visibleFollowups();
+  list.sort(function(a,b){
+    const order={pending:0,'in-progress':1,done:2}; if(order[a.status]!==order[b.status]) return order[a.status]-order[b.status];
+    const pr={High:0,Medium:1,Low:2}; if(pr[a.priority]!==pr[b.priority]) return pr[a.priority]-pr[b.priority];
+    return a.dueDate.localeCompare(b.dueDate);
+  });
+  const stats = {pending:list.filter(function(f){return f.status==='pending';}).length,'in-progress':list.filter(function(f){return f.status==='in-progress';}).length,done:list.filter(function(f){return f.status==='done';}).length};
+  const canDelete = CR==='admin'||CR==='coordinatorhead';
+  return '<div class="stat-grid">'+statCard('list','warning',stats.pending,'Pending')+statCard('activity','info',stats['in-progress'],'In Progress')+statCard('checkcircle','success',stats.done,'Done')+'</div>'+
+  '<div class="toolbar"><button class="btn btn-p" data-act="newFollowup" style="margin-left:auto">'+icon('plus',15)+' Add Follow-up</button></div>'+
+  '<div class="card"><div class="table-wrap"><table><thead><tr><th>Client</th><th>Type</th><th>Remark</th><th>Due</th><th>Priority</th><th>Assigned To</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+  (list.length? list.map(function(f){ return '<tr><td><b>'+esc(f.clientName)+'</b></td><td>'+esc(f.type)+'</td><td style="max-width:220px;white-space:normal">'+esc(f.remark)+'</td><td>'+fmtDate(f.dueDate)+'</td><td>'+priorityBadge(f.priority)+'</td><td>'+esc(f.assignedToName||'\u2014')+'</td>'+
+    '<td><span class="badge bd-'+(f.status==='done'?'success':f.status==='in-progress'?'info':'warning')+'">'+esc(f.status)+'</span></td>'+
+    '<td><div class="btn-row">'+
+      (f.status!=='done'?'<button class="btn btn-sm btn-g" data-act="markFuDone" data-id="'+f.id+'">'+icon('check',12)+' Done</button>':'')+
+      (f.status==='pending'?'<button class="btn btn-sm" data-act="markFuProgress" data-id="'+f.id+'">In Progress</button>':'')+
+      (canDelete?'<button class="btn btn-sm btn-icon" data-act="deleteFollowup" data-id="'+f.id+'">'+icon('trash',13)+'</button>':'')+
+    '</div></td></tr>'; }).join('') : '<tr class="empty-row"><td colspan="8">No follow-ups to show.</td></tr>')+
+  '</tbody></table></div></div>';
+}
+async function markFuDone(id){ const f=DATA.followups.find(function(x){return x.id===id;}); f.status='done'; await persist(); toast('Follow-up marked done.','success'); renderPage(); }
+async function markFuProgress(id){ const f=DATA.followups.find(function(x){return x.id===id;}); f.status='in-progress'; await persist(); toast('Follow-up in progress.','info'); renderPage(); }
+function deleteFollowup(id){
+  openModal('sm','Delete Follow-up','<p>Remove this follow-up task permanently?</p>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-d" data-act="confirmDeleteFu" data-id="'+id+'">Delete</button>');
+}
+async function confirmDeleteFu(id){ DATA.followups=DATA.followups.filter(function(f){return f.id!==id;}); await persist(); closeModal(); toast('Follow-up deleted.','success'); renderPage(); }
+function newFollowup(){
+  const clients = visibleClients().filter(function(c){return c.active;});
+  const assignees = [].concat(activeUsers('coordinator'), activeUsers('coordinatorhead'));
+  openModal('md','Add Follow-up',
+    '<div class="fgrid">'+
+      '<div class="frow"><label class="fl">Client</label><select class="input" id="ff_client">'+clients.map(function(c){ return '<option value="'+c.id+'">'+esc(c.name)+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Type</label><select class="input" id="ff_type">'+['Renewal Reminder','Win-back Call','Feedback Call','Progress Review','Missed Session Follow-up','Other'].map(function(t){ return '<option>'+t+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Priority</label><select class="input" id="ff_priority"><option>High</option><option selected>Medium</option><option>Low</option></select></div>'+
+      '<div class="frow"><label class="fl">Due Date</label><input class="input" type="date" id="ff_due" value="'+todayStr()+'"></div>'+
+      (CR!=='coordinator'? '<div class="frow"><label class="fl">Assign To</label><select class="input" id="ff_assignee">'+assignees.map(function(a){ return '<option value="'+a.id+'">'+esc(a.name)+'</option>'; }).join('')+'</select></div>' : '')+
+    '</div>'+
+    '<div class="frow"><label class="fl">Remarks</label><textarea class="ta" id="ff_remark"></textarea></div>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-p" data-act="saveFollowup">Save Follow-up</button>'
+  );
+}
+async function saveFollowup(){
+  const cl = clientById(val('ff_client'));
+  const assignee = CR==='coordinator'? CU : userById(val('ff_assignee'));
+  const data = {id:nid('f'),clientId:cl.id,clientName:cl.name,type:val('ff_type'),priority:val('ff_priority'),dueDate:val('ff_due'),
+    remark:val('ff_remark'),assignedToId:assignee?assignee.id:'',assignedToName:assignee?assignee.name:'',status:'pending',createdBy:CU.id};
+  DATA.followups.push(data);
+  if(assignee && assignee.id!==CU.id) await pushNotif([assignee.id],'New follow-up assigned','You have been assigned a '+data.type.toLowerCase()+' for '+cl.name+'.','followup');
+  await persist(); closeModal(); toast('Follow-up created.','success'); renderPage();
+}
+
+/* ===================================================================
+   LEAVE MANAGEMENT
+=================================================================== */
+function pageLeaves(){
+  const isManager = CR==='admin'||CR==='coordinatorhead';
+  const list = visibleLeaves().sort(function(a,b){return b.from.localeCompare(a.from);});
+  const stats = {pending:list.filter(function(l){return l.status==='pending';}).length,approved:list.filter(function(l){return l.status==='approved';}).length,rejected:list.filter(function(l){return l.status==='rejected';}).length};
+  let html = '<div class="stat-grid">'+statCard('clock','warning',stats.pending,'Pending')+statCard('checkcircle','success',stats.approved,'Approved')+statCard('xcircle','danger',stats.rejected,'Rejected')+'</div>';
+  if(!isManager){
+    html += '<div class="toolbar"><button class="btn btn-p" data-act="newLeave" style="margin-left:auto">'+icon('plus',15)+' Request Leave</button></div>';
+  } else {
+    const pending = list.filter(function(l){return l.status==='pending';});
+    if(pending.length){
+      html += '<div class="card" style="border:1px solid var(--warning);background:var(--warning-dim)"><div class="card-head"><h3>'+icon('clock',16)+' Pending Requests</h3></div>'+
+        pending.map(function(l){ return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid rgba(0,0,0,.05)"><div><b>'+esc(l.userName)+'</b> <span class="badge bd-gray">'+ROLE_LABEL[l.role]+'</span><br><span class="muted">'+fmtDate(l.from)+' \u2192 '+fmtDate(l.to)+' \u00b7 '+l.days+' day(s) \u00b7 '+esc(l.reason)+'</span></div>'+
+          '<div class="btn-row"><button class="btn btn-sm btn-g" data-act="reviewLeave" data-id="'+l.id+'" data-decision="approved">Approve</button><button class="btn btn-sm btn-d" data-act="reviewLeave" data-id="'+l.id+'" data-decision="rejected">Reject</button></div></div>'; }).join('')+'</div>';
+    }
+  }
+  html += '<div class="card"><div class="card-head"><h3>Leave History</h3></div><div class="table-wrap"><table><thead><tr>'+
+    (isManager?'<th>Staff</th><th>Role</th>':'')+'<th>From</th><th>To</th><th>Days</th><th>Reason</th><th>Status</th><th>Reviewed By</th>'+(!isManager?'<th>Actions</th>':'')+
+  '</tr></thead><tbody>'+
+  (list.length? list.map(function(l){ return '<tr>'+(isManager?'<td><b>'+esc(l.userName)+'</b></td><td><span class="badge bd-gray">'+ROLE_LABEL[l.role]+'</span></td>':'')+
+    '<td>'+fmtDate(l.from)+'</td><td>'+fmtDate(l.to)+'</td><td>'+l.days+'</td><td>'+esc(l.reason)+(l.notes?(' \u2014 '+esc(l.notes)):'')+'</td><td>'+leaveStatusBadge(l.status)+'</td>'+
+    '<td>'+(l.reviewedBy?('<span title="'+esc(l.reviewNote||'')+'">'+esc(l.reviewedBy)+'</span>'):'\u2014')+'</td>'+
+    (!isManager?('<td>'+(l.status==='pending'?'<button class="btn btn-sm btn-d" data-act="cancelLeave" data-id="'+l.id+'">Cancel</button>':'\u2014')+'</td>'):'')+
+  '</tr>'; }).join('') : '<tr class="empty-row"><td colspan="8">No leave records found.</td></tr>')+
+  '</tbody></table></div></div>';
+  return html;
+}
+function newLeave(){
+  openModal('md','Request Leave',
+    '<div class="fgrid">'+
+      '<div class="frow"><label class="fl">From</label><input class="input" type="date" id="lv_from" min="'+todayStr()+'" value="'+todayStr()+'"></div>'+
+      '<div class="frow"><label class="fl">To</label><input class="input" type="date" id="lv_to" min="'+todayStr()+'" value="'+todayStr()+'"></div>'+
+    '</div>'+
+    '<div class="frow"><label class="fl">Reason</label><select class="input" id="lv_reason">'+['Personal','Medical','Family Emergency','Travel','Other'].map(function(r){ return '<option>'+r+'</option>'; }).join('')+'</select></div>'+
+    '<div class="frow"><label class="fl">Notes</label><textarea class="ta" id="lv_notes" placeholder="Optional"></textarea></div>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-p" data-act="saveLeave">Submit Request</button>'
+  );
+}
+async function saveLeave(){
+  const from=val('lv_from'), to=val('lv_to');
+  if(to<from){ toast('"To" date cannot be before "From" date.','error'); return; }
+  const days = daysBetween(from,to)+1;
+  DATA.leaves.push({id:nid('l'),userId:CU.id,userName:CU.name,role:CR,from:from,to:to,days:days,reason:val('lv_reason'),notes:val('lv_notes'),status:'pending'});
+  const targets=[].concat(activeUsers('admin').map(function(u){return u.id;}),activeUsers('coordinatorhead').map(function(u){return u.id;}));
+  await pushNotif(targets,'Leave request submitted',CU.name+' requested leave from '+fmtDate(from)+' to '+fmtDate(to)+'.','leave');
+  await persist(); closeModal(); toast('Leave request submitted.','success'); renderPage();
+}
+function cancelLeave(id){ DATA.leaves=DATA.leaves.filter(function(l){return l.id!==id;}); persist().then(function(){ toast('Leave request cancelled.','info'); renderPage(); }); }
+function reviewLeave(id,el){
+  const decision = el.getAttribute('data-decision');
+  openModal('sm', decision==='approved'?'Approve Leave':'Reject Leave',
+    '<div class="frow"><label class="fl">Review Note (optional)</label><textarea class="ta" id="rv_note"></textarea></div>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn '+(decision==='approved'?'btn-g':'btn-d')+'" data-act="confirmReview" data-id="'+id+'" data-decision="'+decision+'">Confirm</button>'
+  );
+}
+async function confirmReview(id,el){
+  const decision = el.getAttribute('data-decision');
+  const l = DATA.leaves.find(function(x){return x.id===id;});
+  l.status=decision; l.reviewedBy=CU.name; l.reviewNote=val('rv_note');
+  await pushNotif([l.userId],'Leave request '+decision,'Your leave request for '+fmtDate(l.from)+' to '+fmtDate(l.to)+' was '+decision+(l.reviewNote?(': '+l.reviewNote):'.'),'leave');
+  await persist(); closeModal(); toast('Leave request '+decision+'.','success'); renderPage();
+}
+
+/* ===================================================================
+   TIME CHART
+=================================================================== */
+function tcVisible(){
+  let list = visibleTimechart();
+  if(TC_Q){ const q=TC_Q.toLowerCase(); list = list.filter(function(t){return t.clientName.toLowerCase().includes(q);}); }
+  if(TC_TAB==='today') list = list.filter(function(t){return isScheduledToday(t.sessionDays);});
+  else if(TC_TAB!=='all') list = list.filter(function(t){return t.todayStatus===TC_TAB;});
+  return list;
+}
+function tcStats(list){
+  return {
+    onair:list.filter(function(t){return t.todayStatus==='onair';}).length,
+    completed:list.filter(function(t){return t.todayStatus==='completed';}).length,
+    missed:list.filter(function(t){return t.todayStatus==='missed';}).length,
+    pending:list.filter(function(t){return t.todayStatus==='not-started';}).length,
+    total:list.length
+  };
+}
+function pageTimechart(){
+  const list = tcVisible();
+  const s = tcStats(visibleTimechart());
+  const canEdit = CR!=='trainer';
+  const canDelete = CR==='admin'||CR==='coordinatorhead';
+  let html = '<div class="stat-grid">'+
+    statCard('activity','info',s.onair,'On Air')+
+    statCard('checkcircle','success',s.completed,'Completed')+
+    statCard('alert','danger',s.missed,'Missed')+
+    statCard('clock','warning',s.pending,'Pending')+
+    statCard('list','primary',s.total,'Entries')+
+  '</div>';
+  const tabs=[['all','All'],['today','Today'],['onair','On Air'],['completed','Done'],['missed','Missed'],['not-started','Pending']];
+  html += '<div class="tabs">'+tabs.map(function(t){ return '<div class="tab '+(TC_TAB===t[0]?'active':'')+'" data-act="tcTab" data-id="'+t[0]+'">'+t[1]+'</div>'; }).join('')+'</div>';
+  html += '<div class="toolbar"><div class="search-box">'+icon('search',15)+'<input class="input" placeholder="Search client" oninput="TC_Q=this.value;renderPage()" value="'+esc(TC_Q)+'"></div>'+
+    '<div class="btn-row" style="margin-left:auto">'+
+    '<button class="btn '+(TC_VIEW==='grid'?'btn-p':'')+'" data-act="tcView" data-id="grid">Grid</button>'+
+    '<button class="btn '+(TC_VIEW==='list'?'btn-p':'')+'" data-act="tcView" data-id="list">List</button>'+
+    (canEdit?'<button class="btn btn-p" data-act="newTc">'+icon('plus',15)+' Add Entry</button>':'')+
+    '</div></div>';
+  if(!list.length){ html += '<div class="card"><div class="section-soon"><div class="ic">'+icon('clock',24)+'</div><h3>No entries found</h3><p>Try adjusting filters or add a fixed-schedule entry.</p></div></div>'; return html; }
+  if(TC_VIEW==='grid'){
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">'+list.map(function(t){ return tcCard(t,canEdit,canDelete); }).join('')+'</div>';
+  } else {
+    html += '<div class="card"><div class="table-wrap"><table><thead><tr><th>Client</th><th>Plan</th><th>Time</th><th>Trainer</th><th>Type</th><th>Days</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+      list.map(function(t){ return tcListRow(t,canEdit,canDelete); }).join('')+'</tbody></table></div></div>';
+  }
+  return html;
+}
+function tcActionsHtml(t){
+  const scheduled = isScheduledToday(t.sessionDays);
+  if(!scheduled) return '<span class="muted" style="font-size:11.5px">Not scheduled today</span>';
+  if(t.todayStatus==='not-started') return '<button class="btn btn-sm btn-p" data-act="tcStart" data-id="'+t.id+'">Start</button>';
+  if(t.todayStatus==='onair') return '<button class="btn btn-sm btn-g" data-act="tcDone" data-id="'+t.id+'">Done</button> <button class="btn btn-sm btn-d" data-act="tcMiss" data-id="'+t.id+'">Miss</button>';
+  return '<button class="btn btn-sm" data-act="tcReset" data-id="'+t.id+'">Reset</button>';
+}
+function tcCard(t,canEdit,canDelete){
+  const scheduled = isScheduledToday(t.sessionDays);
+  const c = STATUS_COLOR[t.todayStatus]||'gray';
+  return '<div class="card" style="border-top:3px solid var(--'+c+');'+(scheduled?'':'opacity:.65')+'">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'+
+      '<div class="row-flex"><span class="avatar">'+initials(t.clientName)+'</span><div class="namecol"><div class="nm">'+esc(t.clientName)+'</div>'+planBadge(t.plan)+'</div></div>'+
+      statusBadge(t.todayStatus)+
+    '</div>'+
+    '<div class="kv" style="margin-bottom:10px">'+
+      '<div class="it"><div class="l">Time</div><div class="v mono">'+esc(t.sessionTime)+'</div></div>'+
+      '<div class="it"><div class="l">Trainer</div><div class="v">'+esc(t.trainerName)+'</div></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:4px;margin-bottom:10px">'+DOW_CODES.map(function(d){ return '<span class="day-pill '+((t.sessionDays&&t.sessionDays.indexOf(d)>-1)?'on':'')+'" style="'+(d===todayDowCode()?'box-shadow:0 0 0 2px var(--primary)':'')+'">'+d[0]+'</span>'; }).join('')+'</div>'+
+    (t.remarks?'<div class="hint" style="background:var(--border-soft);padding:7px 9px;border-radius:7px;margin-bottom:10px">'+esc(t.remarks)+'</div>':'')+
+    '<div class="btn-row" style="margin-bottom:8px">'+tcActionsHtml(t)+'</div>'+
+    (canEdit?'<div class="btn-row" style="border-top:1px solid var(--border-soft);padding-top:8px"><button class="btn btn-sm btn-icon" data-act="editTc" data-id="'+t.id+'">'+icon('pencil',13)+'</button>'+(canDelete?'<button class="btn btn-sm btn-icon" data-act="deleteTc" data-id="'+t.id+'">'+icon('trash',13)+'</button>':'')+'</div>':'')+
+  '</div>';
+}
+function tcListRow(t,canEdit,canDelete){
+  let actions = tcActionsHtml(t);
+  if(canEdit) actions += ' <button class="btn btn-sm btn-icon" data-act="editTc" data-id="'+t.id+'">'+icon('pencil',13)+'</button>'+(canDelete?'<button class="btn btn-sm btn-icon" data-act="deleteTc" data-id="'+t.id+'">'+icon('trash',13)+'</button>':'');
+  return '<tr><td><b>'+esc(t.clientName)+'</b></td><td>'+planBadge(t.plan)+'</td><td class="mono">'+esc(t.sessionTime)+'</td><td>'+esc(t.trainerName)+'</td><td>'+esc(t.sessionType)+'</td>'+
+    '<td>'+((!t.sessionDays||!t.sessionDays.length)?'None':t.sessionDays.join(', '))+'</td><td>'+statusBadge(t.todayStatus)+'</td><td><div class="btn-row">'+actions+'</div></td></tr>';
+}
+function tcTab(id){ TC_TAB=id; renderPage(); }
+function tcView(id){ TC_VIEW=id; renderPage(); }
+
+function daySelectorHtml(){
+  return '<div class="frow"><label class="fl">Active Days</label>'+
+    '<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">'+DOW_CODES.map(function(d){ return '<span class="day-pill" style="width:auto;padding:0 10px;cursor:pointer" data-act="tcToggleDay" data-id="'+d+'">'+d+'</span>'; }).join('')+'</div>'+
+    '<div class="btn-row">'+
+      '<button type="button" class="btn btn-sm" data-act="tcPreset" data-id="all">All Days</button>'+
+      '<button type="button" class="btn btn-sm" data-act="tcPreset" data-id="clear">Clear</button>'+
+      '<button type="button" class="btn btn-sm" data-act="tcPreset" data-id="weekday">Mon-Fri</button>'+
+      '<button type="button" class="btn btn-sm" data-act="tcPreset" data-id="mon-sat">Mon-Sat</button>'+
+      '<button type="button" class="btn btn-sm" data-act="tcPreset" data-id="alt">Alt Days</button>'+
+    '</div><div class="hint" id="tc_days_summary"></div></div>';
+}
+function refreshDaySelectorUI(){
+  const pills = document.querySelectorAll('[data-act="tcToggleDay"]');
+  pills.forEach(function(el){ const d = el.getAttribute('data-id'); if(TC_FORM_DAYS.indexOf(d)>-1) el.classList.add('on'); else el.classList.remove('on'); });
+  const sum = document.getElementById('tc_days_summary');
+  if(sum) sum.textContent = TC_FORM_DAYS.length? ('Scheduled: '+TC_FORM_DAYS.join(', ')) : 'No days selected yet.';
+}
+function tcToggleDay(d){
+  const i = TC_FORM_DAYS.indexOf(d);
+  if(i>-1) TC_FORM_DAYS.splice(i,1); else TC_FORM_DAYS.push(d);
+  refreshDaySelectorUI();
+}
+function tcPreset(id){
+  if(id==='all') TC_FORM_DAYS=DOW_CODES.slice();
+  else if(id==='clear') TC_FORM_DAYS=[];
+  else if(id==='weekday') TC_FORM_DAYS=['Mon','Tue','Wed','Thu','Fri'];
+  else if(id==='mon-sat') TC_FORM_DAYS=['Mon','Tue','Wed','Thu','Fri','Sat'];
+  else if(id==='alt') TC_FORM_DAYS=['Mon','Wed','Fri','Sun'];
+  refreshDaySelectorUI();
+}
+function tcForm(t){
+  t=t||{}; TC_FORM_DAYS=(t.sessionDays||[]).slice();
+  const clients = visibleClients().filter(function(c){return c.active && ['Platinum','Platinum Plus','Couple','Corporate Fitness'].indexOf(c.plan)>-1;});
+  const trainers = activeUsers('trainer');
+  openModal('md', t.id?'Edit Time Chart Entry':'Add Time Chart Entry',
+    '<div class="fgrid">'+
+      '<div class="frow"><label class="fl">Client</label><select class="input" id="tf_client">'+clients.map(function(c){ return '<option value="'+c.id+'" '+(t.clientId===c.id?'selected':'')+'>'+esc(c.name)+' \u2014 '+esc(c.plan)+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Trainer</label><select class="input" id="tf_trainer">'+trainers.map(function(tr){ return '<option value="'+tr.id+'" '+(t.trainerId===tr.id?'selected':'')+'>'+esc(tr.name)+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Session Time</label><input class="input" type="time" id="tf_time" value="'+esc(t.sessionTime||'07:00')+'"></div>'+
+      '<div class="frow"><label class="fl">Session Type</label><input class="input" id="tf_type" value="'+esc(t.sessionType||'Personal Training')+'"></div>'+
+    '</div>'+
+    daySelectorHtml()+
+    '<div class="frow"><label class="fl">Remarks</label><textarea class="ta" id="tf_remarks">'+esc(t.remarks||'')+'</textarea></div>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-p" data-act="saveTc" data-id="'+(t.id||'')+'">Save Entry</button>'
+  );
+  refreshDaySelectorUI();
+}
+function newTc(){ tcForm(null); }
+function editTc(id){ tcForm(DATA.timechart.find(function(x){return x.id===id;})); }
+async function saveTc(id){
+  const cl = clientById(val('tf_client')); const tr = userById(val('tf_trainer'));
+  if(!cl || !tr){ toast('Please select both a client and a trainer.','error'); return; }
+  const data = {clientId:cl.id, clientName:cl.name, plan:cl.plan, trainerId:tr.id, trainerName:tr.name,
+    sessionTime:val('tf_time'), sessionType:val('tf_type'), sessionDays:TC_FORM_DAYS.slice(), remarks:val('tf_remarks'),
+    updatedAt:new Date().toISOString()};
+  DATA.timechart = DATA.timechart.filter(function(x){ return x.clientId!==data.clientId || x.id===id; });
+  if(id){ const ex=DATA.timechart.find(function(x){return x.id===id;}); data.todayStatus = ex?ex.todayStatus:'not-started'; Object.assign(ex,data); }
+  else { data.id=nid('tc'); data.todayStatus='not-started'; DATA.timechart.push(data); }
+  await persist(); closeModal(); toast('Time chart entry saved.','success'); renderPage();
+}
+async function tcStart(id){ const t=DATA.timechart.find(function(x){return x.id===id;}); t.todayStatus='onair'; t.updatedAt=new Date().toISOString(); await persist(); toast('Session started.','success'); renderPage(); }
+async function tcDone(id){ const t=DATA.timechart.find(function(x){return x.id===id;}); t.todayStatus='completed'; t.updatedAt=new Date().toISOString(); await persist(); toast('Marked completed.','success'); renderPage(); }
+async function tcReset(id){ const t=DATA.timechart.find(function(x){return x.id===id;}); t.todayStatus='not-started'; t.updatedAt=new Date().toISOString(); await persist(); toast('Status reset.','info'); renderPage(); }
+function tcMiss(id){
+  openModal('sm','Log Missed Reason',
+    '<div class="frow"><label class="fl">Reason</label><select class="input" id="tcmr_reason">'+
+      ['Client unavailable','Trainer unavailable','Client cancelled late','Equipment unavailable','Client illness','Other'].map(function(r){ return '<option>'+r+'</option>'; }).join('')+
+    '</select></div>'+
+    '<div class="frow"><label class="fl">Additional Notes</label><textarea class="ta" id="tcmr_notes" placeholder="Optional details"></textarea></div>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-d" data-act="confirmTcMiss" data-id="'+id+'">Confirm Missed</button>'
+  );
+}
+async function confirmTcMiss(id){
+  const t=DATA.timechart.find(function(x){return x.id===id;}); if(!t) return;
+  t.todayStatus='missed'; t.updatedAt=new Date().toISOString();
+  t.lastMissedReason = val('tcmr_reason')+(val('tcmr_notes')?(' \u2014 '+val('tcmr_notes')):'');
+  const cl = clientById(t.clientId);
+  const targets=[].concat(activeUsers('admin').map(function(u){return u.id;}),activeUsers('coordinatorhead').map(function(u){return u.id;}));
+  if(cl && cl.coordinatorId) targets.push(cl.coordinatorId);
+  await pushNotif(targets,'Fixed session missed', t.clientName+'\u2019s scheduled session with '+t.trainerName+' was marked missed. Reason: '+t.lastMissedReason,'missed');
+  await persist(); closeModal(); toast('Missed session logged.','warn'); renderPage();
+}
+function deleteTc(id){
+  openModal('sm','Delete Time Chart Entry','<p>Remove this fixed schedule entry permanently?</p>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-d" data-act="confirmDeleteTc" data-id="'+id+'">Delete</button>');
+}
+async function confirmDeleteTc(id){ DATA.timechart=DATA.timechart.filter(function(t){return t.id!==id;}); await persist(); closeModal(); toast('Entry deleted.','success'); renderPage(); }
+
+/* ===================================================================
+   TIME SLOTS
+=================================================================== */
+function pageSlots(){
+  const periods=['Morning','Afternoon','Evening','Night'];
+  const isAdmin = CR==='admin';
+  const totalEnrolled = DATA.slots.reduce(function(sum,x){return sum+x.enrolledClientIds.length;},0);
+  const fullCount = DATA.slots.filter(function(x){return x.enrolledClientIds.length>=x.maxCapacity;}).length;
+  let html='';
+  if(isAdmin){
+    html += '<div class="stat-grid">'+
+      statCard('calendar','primary',DATA.slots.length,'Total Slots')+
+      statCard('users','info',totalEnrolled,'Total Enrolled')+
+      statCard('xcircle','danger',fullCount,'Full Slots')+
+      statCard('checkcircle','success',DATA.slots.length-fullCount,'Open Slots')+
+    '</div>';
+    html += '<div class="toolbar"><button class="btn" data-act="setupDefaultSlots">'+icon('refresh',15)+' Setup Defaults</button><button class="btn btn-p" data-act="newSlot" style="margin-left:auto">'+icon('plus',15)+' Add Custom Slot</button></div>';
+  }
+  periods.forEach(function(p){
+    const list = DATA.slots.filter(function(s){return (s.period||'Morning')===p;});
+    if(!list.length) return;
+    html += '<div class="card-head" style="margin-top:18px"><h3>'+esc(p)+'</h3></div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-bottom:8px">'+list.map(function(s){ return slotCard(s,isAdmin); }).join('')+'</div>';
+  });
+  const customs = DATA.slots.filter(function(s){return s.isCustom && periods.indexOf(s.period)===-1;});
+  if(customs.length){
+    html += '<div class="card-head" style="margin-top:18px"><h3>Custom</h3></div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-bottom:8px">'+customs.map(function(s){ return slotCard(s,isAdmin); }).join('')+'</div>';
+  }
+  if(!DATA.slots.length){ html += '<div class="card"><div class="section-soon"><div class="ic">'+icon('calendar',24)+'</div><h3>No time slots configured</h3>'+(isAdmin?'<button class="btn btn-p" data-act="setupDefaultSlots" style="margin-top:10px">Setup Default Slots</button>':'')+'</div></div>'; }
+  return html;
+}
+function slotCard(s,isAdmin){
+  const full = s.enrolledClientIds.length>=s.maxCapacity;
+  const pct = Math.min(100, Math.round(s.enrolledClientIds.length/s.maxCapacity*100));
+  const enrolled = s.enrolledClientIds.map(function(id){return clientById(id);}).filter(Boolean);
+  return '<div class="card" style="border-top:3px solid '+(full?'var(--danger)':'var(--success)')+'">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'+
+      '<div><div class="mono" style="font-weight:700;font-size:15px;color:var(--primary)">'+esc(s.time)+'</div><div class="nm" style="font-size:13.5px;font-weight:700">'+esc(s.displayName)+'</div></div>'+
+      (full?'<span class="badge bd-danger">Full</span>':'<span class="badge bd-success">Open</span>')+
+    '</div>'+
+    (s.isCustom?'<span class="badge bd-purple" style="margin-bottom:8px">Custom</span>':'')+
+    '<div class="kv" style="margin:8px 0">'+
+      '<div class="it"><div class="l">Trainer</div><div class="v">'+esc(s.trainerName||'Unassigned')+'</div></div>'+
+      (s.genderHint?'<div class="it"><div class="l">Preference</div><div class="v">'+esc(s.genderHint)+'</div></div>':'')+
+    '</div>'+
+    (s.notes?'<div class="hint" style="margin-bottom:8px">'+esc(s.notes)+'</div>':'')+
+    '<div class="progress-bar" style="margin-bottom:6px"><div class="fill" style="width:'+pct+'%;background:'+(pct>80?'var(--danger)':'var(--primary)')+'"></div></div>'+
+    '<div class="hint" style="margin-bottom:10px">'+s.enrolledClientIds.length+' / '+s.maxCapacity+' enrolled</div>'+
+    (isAdmin && enrolled.length? '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">'+enrolled.map(function(c){ return '<span class="badge bd-gray">'+esc(c.name)+' <span data-act="slotRemoveClient" data-id="'+s.id+'|'+c.id+'" style="cursor:pointer;margin-left:3px">&times;</span></span>'; }).join('')+'</div>' : '')+
+    '<div class="btn-row">'+
+      (isAdmin?'<button class="btn btn-sm" data-act="manageSlot" data-id="'+s.id+'">Manage</button>':'')+
+      (!full?'<button class="btn btn-sm btn-p" data-act="slotEnroll" data-id="'+s.id+'">Enroll Client</button>':'')+
+      (s.isCustom&&isAdmin?'<button class="btn btn-sm btn-icon" data-act="deleteSlot" data-id="'+s.id+'">'+icon('trash',13)+'</button>':'')+
+    '</div>'+
+  '</div>';
+}
+async function setupDefaultSlots(){
+  const defaults=[
+    {id:'s1',displayName:'Early Bird',period:'Morning',time:'6:00 - 7:00 AM'},
+    {id:'s2',displayName:'Morning Power',period:'Morning',time:'7:00 - 8:00 AM'},
+    {id:'s3',displayName:'Mid Morning',period:'Morning',time:'8:00 - 9:00 AM'},
+    {id:'s4',displayName:'Late Morning',period:'Morning',time:'9:00 - 10:00 AM'},
+    {id:'s5',displayName:'Evening Starter',period:'Evening',time:'4:30 - 5:30 PM'},
+    {id:'s6',displayName:'Prime Evening',period:'Evening',time:'5:30 - 6:30 PM'},
+    {id:'s7',displayName:'Sunset Session',period:'Evening',time:'6:30 - 7:30 PM'},
+    {id:'s8',displayName:'Night Wind-down',period:'Evening',time:'7:30 - 8:30 PM'}
+  ];
+  let added=0;
+  defaults.forEach(function(d){ if(!DATA.slots.find(function(s){return s.id===d.id;})){ DATA.slots.push(Object.assign({maxCapacity:6,trainerId:'',trainerName:'',genderHint:'',notes:'',isCustom:false,enrolledClientIds:[]},d)); added++; } });
+  await persist(); toast(added? (added+' default slots created.') : 'Default slots already exist.','success'); renderPage();
+}
+function slotForm(s){
+  s=s||{}; const trainers=activeUsers('trainer'); const isEdit=!!s.id;
+  openModal('md', isEdit?'Manage Slot':'Add Custom Slot',
+    '<div class="fgrid">'+
+      '<div class="frow"><label class="fl">Display Name</label><input class="input" id="sl_name" value="'+esc(s.displayName||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Period</label><select class="input" id="sl_period">'+['Morning','Afternoon','Evening','Night'].map(function(p){ return '<option '+(s.period===p?'selected':'')+'>'+p+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Time Display</label><input class="input" id="sl_time" placeholder="e.g. 6:00 - 7:00 AM" value="'+esc(s.time||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Max Capacity</label><input class="input" type="number" id="sl_cap" value="'+(s.maxCapacity||6)+'"></div>'+
+      '<div class="frow"><label class="fl">Trainer</label><select class="input" id="sl_trainer"><option value="">Unassigned</option>'+trainers.map(function(t){ return '<option value="'+t.id+'" '+(s.trainerId===t.id?'selected':'')+'>'+esc(t.name)+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Gender Preference</label><select class="input" id="sl_gender"><option value="">None</option><option '+(s.genderHint==='Female Preferred'?'selected':'')+'>Female Preferred</option><option '+(s.genderHint==='Male Preferred'?'selected':'')+'>Male Preferred</option></select></div>'+
+    '</div>'+
+    '<div class="frow"><label class="fl">Notes</label><textarea class="ta" id="sl_notes">'+esc(s.notes||'')+'</textarea></div>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-p" data-act="saveSlot" data-id="'+(s.id||'')+'">Save Slot</button>'
+  );
+}
+function newSlot(){ slotForm({isCustom:true}); }
+function manageSlot(id){ slotForm(DATA.slots.find(function(x){return x.id===id;})); }
+async function saveSlot(id){
+  const tr=userById(val('sl_trainer'));
+  const data={displayName:val('sl_name'),period:val('sl_period'),time:val('sl_time'),maxCapacity:Number(val('sl_cap'))||6,
+    trainerId:tr?tr.id:'',trainerName:tr?tr.name:'',genderHint:val('sl_gender'),notes:val('sl_notes')};
+  if(id){ Object.assign(DATA.slots.find(function(x){return x.id===id;}),data); }
+  else { data.id=nid('slot'); data.isCustom=true; data.enrolledClientIds=[]; DATA.slots.push(data); }
+  await persist(); closeModal(); toast('Slot saved.','success'); renderPage();
+}
+function deleteSlot(id){
+  openModal('sm','Delete Slot','<p>Remove this custom slot permanently?</p>','<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-d" data-act="confirmDeleteSlot" data-id="'+id+'">Delete</button>');
+}
+async function confirmDeleteSlot(id){ DATA.slots=DATA.slots.filter(function(s){return s.id!==id;}); await persist(); closeModal(); toast('Slot deleted.','success'); renderPage(); }
+function slotEnroll(id){
+  const s = DATA.slots.find(function(x){return x.id===id;});
+  const eligible = DATA.clients.filter(function(c){return c.active && s.enrolledClientIds.indexOf(c.id)===-1;});
+  openModal('sm','Enroll Client \u2014 '+s.displayName,
+    eligible.length? '<div class="frow"><label class="fl">Select Client</label><select class="input" id="se_client">'+eligible.map(function(c){ return '<option value="'+c.id+'">'+esc(c.name)+'</option>'; }).join('')+'</select></div>'
+    : '<p class="muted">All active clients are already enrolled in this slot.</p>',
+    '<button class="btn" data-act="closeModal">Cancel</button>'+(eligible.length?'<button class="btn btn-p" data-act="confirmSlotEnroll" data-id="'+id+'">Enroll</button>':'')
+  );
+}
+async function confirmSlotEnroll(id){
+  const s=DATA.slots.find(function(x){return x.id===id;}); const cid=val('se_client');
+  if(s.enrolledClientIds.length>=s.maxCapacity){ toast('This slot is already full.','error'); return; }
+  if(s.enrolledClientIds.indexOf(cid)===-1) s.enrolledClientIds.push(cid);
+  await persist(); closeModal(); toast('Client enrolled.','success'); renderPage();
+}
+function slotRemoveClient(id){
+  const parts=id.split('|'); const s=DATA.slots.find(function(x){return x.id===parts[0];});
+  s.enrolledClientIds=s.enrolledClientIds.filter(function(c){return c!==parts[1];});
+  persist().then(function(){ toast('Client removed from slot.','info'); renderPage(); });
+}
+
+/* ===================================================================
+   CORPORATE FITNESS / BATCHES
+=================================================================== */
+function pageBatches(){
+  const eligible = DATA.clients.filter(function(c){return c.active && c.plan==='Corporate Fitness';});
+  const canManage = CR==='admin'||CR==='coordinatorhead';
+  let html='<div class="stat-grid">'+statCard('building','primary',eligible.length,'Eligible Clients')+statCard('list','info',DATA.batches.length,'Programs')+'</div>';
+  if(canManage) html += '<div class="toolbar"><button class="btn btn-p" data-act="newBatch" style="margin-left:auto">'+icon('plus',15)+' Create Program</button></div>';
+  if(!DATA.batches.length){ html+='<div class="card"><div class="section-soon"><div class="ic">'+icon('building',24)+'</div><h3>No corporate programs yet</h3><p>Create a program to group corporate clients under a shared schedule.</p></div></div>'; return html; }
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px">'+DATA.batches.map(function(b){ return batchCard(b,canManage); }).join('')+'</div>';
+  return html;
+}
+function batchCard(b,canManage){
+  const enrolled = b.enrolledClientIds.map(function(id){return clientById(id);}).filter(Boolean);
+  const full = enrolled.length>=b.capacity;
+  return '<div class="card">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div class="nm" style="font-weight:700;font-size:14.5px">'+esc(b.name)+'</div><div class="hint">'+esc(b.company)+'</div></div>'+(full?'<span class="badge bd-danger">Full</span>':'<span class="badge bd-success">Open</span>')+'</div>'+
+    '<div class="kv" style="margin-bottom:10px">'+
+      '<div class="it"><div class="l">Trainer</div><div class="v">'+esc(b.trainerName)+'</div></div>'+
+      '<div class="it"><div class="l">Schedule</div><div class="v">'+esc(b.schedule)+'</div></div>'+
+      '<div class="it"><div class="l">Session Type</div><div class="v">'+esc(b.sessionType)+'</div></div>'+
+      '<div class="it"><div class="l">Enrolled</div><div class="v">'+enrolled.length+' / '+b.capacity+'</div></div>'+
+    '</div>'+
+    (enrolled.length?'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">'+enrolled.map(function(c){ return '<span class="badge bd-gray">'+esc(c.name)+(canManage?(' <span data-act="batchRemoveClient" data-id="'+b.id+'|'+c.id+'" style="cursor:pointer;margin-left:3px">&times;</span>'):'')+'</span>'; }).join('')+'</div>':'<p class="muted" style="font-size:12px">No clients enrolled yet.</p>')+
+    (canManage?'<div class="btn-row">'+(!full?'<button class="btn btn-sm btn-p" data-act="batchAddClient" data-id="'+b.id+'">Add Client</button>':'')+'<button class="btn btn-sm btn-icon" data-act="editBatch" data-id="'+b.id+'">'+icon('pencil',13)+'</button><button class="btn btn-sm btn-icon" data-act="deleteBatch" data-id="'+b.id+'">'+icon('trash',13)+'</button></div>':'')+
+  '</div>';
+}
+function batchForm(b){
+  b=b||{}; const trainers=activeUsers('trainer');
+  const eligible = DATA.clients.filter(function(c){return c.active && c.plan==='Corporate Fitness';});
+  openModal('md', b.id?'Edit Program':'Create Program',
+    '<div class="fgrid">'+
+      '<div class="frow"><label class="fl">Program Name</label><input class="input" id="bf_name" value="'+esc(b.name||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Company</label><input class="input" id="bf_company" value="'+esc(b.company||'')+'"></div>'+
+      '<div class="frow"><label class="fl">Trainer</label><select class="input" id="bf_trainer">'+trainers.map(function(t){ return '<option value="'+t.id+'" '+(b.trainerId===t.id?'selected':'')+'>'+esc(t.name)+'</option>'; }).join('')+'</select></div>'+
+      '<div class="frow"><label class="fl">Session Type</label><input class="input" id="bf_type" value="'+esc(b.sessionType||'Corporate Session')+'"></div>'+
+      '<div class="frow"><label class="fl">Capacity</label><input class="input" type="number" id="bf_cap" value="'+(b.capacity||15)+'"></div>'+
+      '<div class="frow"><label class="fl">Schedule</label><input class="input" id="bf_schedule" placeholder="e.g. Tue and Thu, 10:00 AM" value="'+esc(b.schedule||'')+'"></div>'+
+    '</div>'+
+    (b.id? '' : '<div class="frow"><label class="fl">Pre-enroll Clients</label><select class="input" id="bf_clients" multiple style="height:100px">'+eligible.map(function(c){ return '<option value="'+c.id+'">'+esc(c.name)+'</option>'; }).join('')+'</select><div class="hint">Hold Ctrl or Cmd to select multiple</div></div>'),
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-p" data-act="saveBatch" data-id="'+(b.id||'')+'">Save Program</button>'
+  );
+}
+function newBatch(){ batchForm(null); }
+function editBatch(id){ batchForm(DATA.batches.find(function(x){return x.id===id;})); }
+async function saveBatch(id){
+  const tr=userById(val('bf_trainer'));
+  const data={name:val('bf_name'),company:val('bf_company'),trainerId:tr?tr.id:'',trainerName:tr?tr.name:'',
+    sessionType:val('bf_type'),capacity:Number(val('bf_cap'))||15,schedule:val('bf_schedule')};
+  if(id){ Object.assign(DATA.batches.find(function(x){return x.id===id;}),data); }
+  else {
+    data.id=nid('b'); data.planType='Corporate Fitness';
+    const sel = document.getElementById('bf_clients');
+    data.enrolledClientIds = sel? Array.prototype.slice.call(sel.selectedOptions).map(function(o){return o.value;}) : [];
+    DATA.batches.push(data);
+  }
+  await persist(); closeModal(); toast('Program saved.','success'); renderPage();
+}
+function deleteBatch(id){
+  openModal('sm','Delete Program','<p>Remove this corporate program permanently?</p>','<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-d" data-act="confirmDeleteBatch" data-id="'+id+'">Delete</button>');
+}
+async function confirmDeleteBatch(id){ DATA.batches=DATA.batches.filter(function(b){return b.id!==id;}); await persist(); closeModal(); toast('Program deleted.','success'); renderPage(); }
+function batchAddClient(id){
+  const b=DATA.batches.find(function(x){return x.id===id;});
+  const eligible = DATA.clients.filter(function(c){return c.active && c.plan==='Corporate Fitness' && b.enrolledClientIds.indexOf(c.id)===-1;});
+  openModal('sm','Add Client to Program',
+    eligible.length? '<div class="frow"><label class="fl">Select Client</label><select class="input" id="bac_client">'+eligible.map(function(c){ return '<option value="'+c.id+'">'+esc(c.name)+'</option>'; }).join('')+'</select></div>'
+    : '<p class="muted">No eligible unenrolled corporate clients available.</p>',
+    '<button class="btn" data-act="closeModal">Cancel</button>'+(eligible.length?'<button class="btn btn-p" data-act="confirmBatchAddClient" data-id="'+id+'">Add</button>':'')
+  );
+}
+async function confirmBatchAddClient(id){
+  const b=DATA.batches.find(function(x){return x.id===id;}); const cid=val('bac_client');
+  if(b.enrolledClientIds.length>=b.capacity){ toast('This program is full.','error'); return; }
+  if(b.enrolledClientIds.indexOf(cid)===-1) b.enrolledClientIds.push(cid);
+  await persist(); closeModal(); toast('Client added to program.','success'); renderPage();
+}
+function batchRemoveClient(id){
+  const parts=id.split('|'); const b=DATA.batches.find(function(x){return x.id===parts[0];});
+  b.enrolledClientIds=b.enrolledClientIds.filter(function(c){return c!==parts[1];});
+  persist().then(function(){ toast('Client removed from program.','info'); renderPage(); });
+}
+
+/* ===================================================================
+   NOTIFICATIONS / USER MENU / SIDEBAR TOGGLES
+=================================================================== */
+function toggleNotif(){ const p=document.getElementById('notifPop'); p.classList.toggle('open'); document.getElementById('userMenu').classList.remove('open'); }
+function toggleUserMenu(){ const p=document.getElementById('userMenu'); p.classList.toggle('open'); document.getElementById('notifPop').classList.remove('open'); }
+async function readNotif(id){ const n=DATA.notifications.find(function(x){return x.id===id;}); if(n){ n.read=true; await persist(); } document.getElementById('notifPop').innerHTML=notifPopHtml(); renderTopbarBell(); }
+async function markAllRead(){ myNotifications().forEach(function(n){ n.read=true; }); await persist(); document.getElementById('notifPop').innerHTML=notifPopHtml(); renderTopbarBell(); }
+function renderTopbarBell(){ const unread = myNotifications().filter(function(n){return !n.read;}).length; const btn=document.querySelector('.notif-wrap .btn'); if(btn){ btn.innerHTML = icon('bell',18)+(unread?'<span class="bell-dot"></span>':''); } }
+function toggleSidebar(){ document.body.classList.toggle('sb-open'); }
+function closeSidebar(){ document.body.classList.remove('sb-open'); }
+
+function changePw(){
+  openModal('sm','Change Password',
+    '<div class="frow"><label class="fl">Current Password</label><input class="input" type="password" id="pw_old"></div>'+
+    '<div class="frow"><label class="fl">New Password</label><input class="input" type="password" id="pw_new"></div>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-p" data-act="confirmChangePw">Update Password</button>'
+  );
+}
+async function confirmChangePw(){
+  if(val('pw_old')!==CU.password){ toast('Current password is incorrect.','error'); return; }
+  if(val('pw_new').length<6){ toast('New password must be at least 6 characters.','error'); return; }
+  CU.password = val('pw_new'); await persist(); closeModal(); toast('Password updated successfully.','success');
+}
+function sendReset(){ closeModal(); toast('If an account exists for that email, a reset link has been sent.','success'); }
+function resetDemo(){
+  openModal('sm','Reset Demo Data','<p>This restores all clients, sessions, users, and records to the original demo dataset. Your current changes will be lost.</p>',
+    '<button class="btn" data-act="closeModal">Cancel</button><button class="btn btn-d" data-act="confirmResetDemo">Reset Data</button>');
+}
+async function confirmResetDemo(){ DATA = seedData(); await persist(); closeModal(); toast('Demo data has been reset.','success'); renderApp(); }
+
+/* ===================================================================
+   ACTION DISPATCH
+=================================================================== */
+const ACTIONS = {
+  login:doLogin, forgot:openForgot, sendReset:sendReset,
+  nav:function(id){ go(id); }, go:function(id){ go(id); }, toggleSidebar:toggleSidebar, closeSidebar:closeSidebar,
+  toggleNotif:toggleNotif, toggleUserMenu:toggleUserMenu, readNotif:readNotif, markAllRead:markAllRead,
+  logout:doLogout, changePw:changePw, confirmChangePw:confirmChangePw, resetDemo:resetDemo, confirmResetDemo:confirmResetDemo,
+  closeModal:closeModal, closeModalBg:closeModal,
+  newClient:newClient, editClient:editClient, viewClient:viewClient, deleteClient:deleteClient, confirmDeleteClient:confirmDeleteClient, saveClient:saveClient, reactivateClient:reactivateClient,
+  editClientFromView:editClientFromView, clientViewTab:clientViewTab, setInactiveReason:setInactiveReason,
+  newUser:newUser, editUser:editUser, deleteUser:deleteUser, confirmDeleteUser:confirmDeleteUser, saveUser:saveUser, usersTab:usersTab,
+  viewTrainer:viewTrainer,
+  sessTab:sessTab, newSession:newSession, editSession:editSession, deleteSession:deleteSession, confirmDeleteSession:confirmDeleteSession, saveSession:saveSession,
+  sessStart:sessStart, sessDone:sessDone, sessMiss:sessMiss, confirmMiss:confirmMiss,
+  newFollowup:newFollowup, saveFollowup:saveFollowup, markFuDone:markFuDone, markFuProgress:markFuProgress, deleteFollowup:deleteFollowup, confirmDeleteFu:confirmDeleteFu,
+  newLeave:newLeave, saveLeave:saveLeave, cancelLeave:cancelLeave, reviewLeave:reviewLeave, confirmReview:confirmReview,
+  tcTab:tcTab, tcView:tcView, newTc:newTc, editTc:editTc, saveTc:saveTc, tcStart:tcStart, tcDone:tcDone, tcReset:tcReset,
+  tcMiss:tcMiss, confirmTcMiss:confirmTcMiss, deleteTc:deleteTc, confirmDeleteTc:confirmDeleteTc, tcToggleDay:tcToggleDay, tcPreset:tcPreset,
+  newSlot:newSlot, manageSlot:manageSlot, saveSlot:saveSlot, deleteSlot:deleteSlot, confirmDeleteSlot:confirmDeleteSlot,
+  setupDefaultSlots:setupDefaultSlots, slotEnroll:slotEnroll, confirmSlotEnroll:confirmSlotEnroll, slotRemoveClient:slotRemoveClient,
+  newBatch:newBatch, editBatch:editBatch, saveBatch:saveBatch, deleteBatch:deleteBatch, confirmDeleteBatch:confirmDeleteBatch,
+  batchAddClient:batchAddClient, confirmBatchAddClient:confirmBatchAddClient, batchRemoveClient:batchRemoveClient
+};
+document.addEventListener('click', function(e){
+  const t = e.target.closest('[data-act]');
+  if(!t) return;
+  const act = t.getAttribute('data-act');
+  const id = t.getAttribute('data-id');
+  if(ACTIONS[act]) ACTIONS[act](id, t, e);
+});
+document.addEventListener('keydown', function(e){ if(e.key==='Enter'){ const ae=document.activeElement; if(ae && (ae.id==='li_password'||ae.id==='li_email')) doLogin(); } });
+
+/* ===================================================================
+   BOOT
+=================================================================== */
+(async function boot(){
+  await loadData();
+  if(doTcDailyReset()) await persist();
+  const uid = await getSession();
+  if(uid){ const u = DATA.users.find(function(x){return x.id===uid && x.active;}); if(u){ CU=u; CR=u.role; startApp(); return; } }
+  renderLogin();
+})();
+</script>
+</body>
+</html>
